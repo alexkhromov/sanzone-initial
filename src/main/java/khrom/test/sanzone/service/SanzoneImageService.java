@@ -216,7 +216,7 @@ public class SanzoneImageService {
 
             //TODO issue: we need to determine how to handle and draw sanzone and border
             //TODO        when sectors coordinates are different!!!
-            boolean coordinatesMatch = false;
+            boolean coordinatesMatch = true;
 
             if ( coordinatesMatch ) {
 

@@ -213,19 +213,13 @@ public class MapUtil {
         int [] yPoints  = new int [ points.size() ];
         int nPoints = points.size();
 
-        /*for ( int i = 0; i < summary.length; i++ ) {
+        for ( int i = 0; i < points.size(); i++ ) {
 
-            for ( int j = 0; j < summary[ i ].length; j++ ) {
+            Point2D point = points.get( i );
 
-                if ( summary[ i ][ j ] >= 10 ) {
-
-                    int xPoint = centerX + ( int ) ( ( j - ( summary[ i ].length / 2 ) ) * ratioPixelToMeter );
-                    int yPoint = centerY + ( int ) ( ( i - ( summary.length / 2 ) ) * ratioPixelToMeter );
-
-                    g.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
-                }
-            }
-        }*/
+            xPoints[ i ] = centerX + ( int ) ( ( point.getY() - MAX_DISTANCE ) * ratioPixelToMeter );
+            yPoints[ i ] = centerY - ( int ) ( ( MAX_DISTANCE - point.getX() ) * ratioPixelToMeter );
+        }
 
         return new Polygon( xPoints, yPoints, nPoints );
     }
@@ -358,25 +352,6 @@ public class MapUtil {
                 }
             }
         }
-
-        //--------------------------------------------------------------------------------------------------------------
-        //START remove inner points, if we need only border points
-        if ( true ) {
-
-            List< Point2D > points = getBorderPointsForSummary( summary );
-
-            for ( int i = 0; i < summary.length; i++ ) {
-
-                for ( int j = 0; j < summary[ i ].length; j++ ) {
-
-                    if ( !points.contains( new Point2D( i, j ) ) ) {
-                        summary[ i ][ j ] = 0;
-                    }
-                }
-            }
-        }
-        //END remove inner points, we need only border points
-        //--------------------------------------------------------------------------------------------------------------
 
         return summary;
     }
