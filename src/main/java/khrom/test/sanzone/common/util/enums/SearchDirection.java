@@ -18,15 +18,15 @@ public enum SearchDirection {
 
     private int offsetX;
     private int offsetY;
-    private String algorithmDirection;
-    private String pointDirection;
+    private String nextPointDirection;
+    private String rotatePointDirection;
 
-    SearchDirection( int offsetX, int offsetY, String algorithmDirection, String pointDirection ) {
+    SearchDirection( int offsetX, int offsetY, String nextPointDirection, String rotatePointDirection ) {
 
         this.offsetX = offsetX;
         this.offsetY = offsetY;
-        this.algorithmDirection = algorithmDirection;
-        this.pointDirection = pointDirection;
+        this.nextPointDirection = nextPointDirection;
+        this.rotatePointDirection = rotatePointDirection;
     }
 
     public Point2D getNext( Point2D previous ) {
@@ -34,11 +34,11 @@ public enum SearchDirection {
         return new Point2D( previous.getX() + offsetX, previous.getY() + offsetY );
     }
 
-    public SearchDirection getAlgorithmDirection() {
-        return SearchDirection.valueOf( algorithmDirection );
+    public SearchDirection getNextPointDirection() {
+        return SearchDirection.valueOf( nextPointDirection );
     }
 
-    public SearchDirection getPointDirection() {
-        return SearchDirection.valueOf( pointDirection );
+    public SearchDirection getRotatePointDirection() {
+        return SearchDirection.valueOf( rotatePointDirection );
     }
 }

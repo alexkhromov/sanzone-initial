@@ -13,7 +13,6 @@ import java.util.List;
 
 import static java.lang.Math.*;
 import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
-import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 import static khrom.test.sanzone.common.util.enums.SearchDirection.*;
 
 /**
@@ -101,7 +100,169 @@ public class MapUtil {
         return new LatLng( toDegrees( lat ), toDegrees( lon ) );
     }
 
-    public static Polygon getPolygon( double [][] source, int centerX, int centerY, double azimuth, double ratioPixelToMeter ) {
+    public static LatLng [] getCoordinatesForSector( CreateSectorDTO sector, DistanceUnit unit ) {
+
+
+        double [][] source = calculateSanzoneForSector( sector );
+
+        LatLng [] coordinates = new LatLng[ source.length * 2 + 1 ];
+
+        double latitude = sector.getLatitude();
+        double longitude = sector.getLongitude();
+        double azimuth = sector.getAzimuth();
+
+        int offset = 2;
+        for ( int i = 0; i < source.length; i++ ) {
+
+            if ( i == 0 ) {
+
+                coordinates[ i ] = new LatLng( latitude, longitude );
+                coordinates[ coordinates.length - 1 ] = new LatLng( latitude, longitude );
+                coordinates[ source.length ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth, unit );
+
+                continue;
+            }
+
+            coordinates[ source.length - i ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth + source[ i ][ 0 ], unit );
+            coordinates[ source.length - i + offset ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth - source[ i ][ 0 ], unit );
+
+            offset += 2;
+        }
+
+        return coordinates;
+    }
+
+    public static LatLng [] getCoordinatesForSummary( List< CreateSectorDTO > sectors, DistanceUnit unit ) {
+
+        int maxDistance = 200;
+
+        double [][] summary = calculateSanzoneForSummary( sectors );
+
+        List< Point2D > points = new LinkedList<>();
+        Point2D start = null;
+
+        for ( int i = 0; i < maxDistance ; i++ ) {
+
+            if ( summary[ maxDistance ][ i ] >= 10 ) {
+
+                start = new Point2D( maxDistance, i );
+                points.add( start );
+
+                break;
+            }
+        }
+
+        SearchDirection direction = SearchDirection.NORTH_WEST;
+
+        for ( ; ; ) {
+
+            Point2D previous = points.get( points.size() - 1 );
+            Point2D next = null;
+
+            switch ( direction ) {
+
+                case NORTH:
+
+                    next = NORTH.getNext( previous );
+
+                    break;
+
+                case NORTH_EAST:
+
+                    next = NORTH_EAST.getNext( previous );
+
+                    break;
+
+                case EAST:
+
+                    next = EAST.getNext( previous );
+
+                    break;
+
+                case SOUTH_EAST:
+
+                    next = SOUTH_EAST.getNext( previous );
+
+                    break;
+
+                case SOUTH:
+
+                    next = SOUTH.getNext( previous );
+
+                    break;
+
+                case SOUTH_WEST:
+
+                    next = SOUTH_WEST.getNext( previous );
+
+                    break;
+
+                case WEST:
+
+                    next = WEST.getNext( previous );
+
+                    break;
+
+                case NORTH_WEST:
+
+                    next = NORTH_WEST.getNext( previous );
+
+                    break;
+            }
+
+            if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
+
+                points.add( next );
+                direction = direction.getNextPointDirection();
+            } else {
+
+                direction = direction.getRotatePointDirection();
+                continue;
+            }
+
+            if ( ( ( int ) start.getX() == ( int ) points.get( points.size() - 1 ).getX() ) &&
+                    ( ( int ) start.getY() == ( int ) points.get( points.size() - 1 ).getY() ) ) {
+
+                break;
+            }
+        }
+
+        List< Point2D > polarPoints = new LinkedList<>();
+
+        for ( int i = 0; i < points.size() - 1; i++ ) {
+
+            Point2D point2D = points.get( i );
+
+            double phi = atan( ( maxDistance - point2D.getX() ) / ( point2D.getY() - maxDistance ) ) * 180D / PI;
+
+            if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance  >= 0 ) ) {
+                phi = abs( phi ) + 90;
+            } else if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
+                phi = 270 - abs( phi );
+            } else if ( ( maxDistance - point2D.getX() >= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
+                phi = abs( phi ) + 270;
+            } else {
+                phi = 90 - abs( phi );
+            }
+
+            double distance = sqrt( pow( point2D.getX() - maxDistance, 2D ) + pow( maxDistance - point2D.getY(), 2D ) );
+
+            polarPoints.add( new Point2D( phi, distance ) );
+        }
+
+        LatLng [] coordinates = new LatLng[ polarPoints.size() - 1 ];
+
+        double latitude = sectors.get( 0 ).getLatitude();
+        double longitude = sectors.get( 0 ).getLongitude();
+
+        for ( int i = 0; i < coordinates.length; i++ ) {
+            coordinates[ i ] = getLatLng( latitude, longitude, polarPoints.get( i ).getY(), polarPoints.get( i ).getX(), unit );
+        }
+
+        return coordinates;
+    }
+
+    public static Polygon getPolygonForSector( double [][] source, int centerX, int centerY, double azimuth, double ratioPixelToMeter ) {
 
         int [] xPoints  = new int [ source.length * 2 ];
         int [] yPoints  = new int [ source.length * 2 ];
@@ -133,50 +294,7 @@ public class MapUtil {
         return new Polygon( xPoints, yPoints, nPoints );
     }
 
-    public static LatLng [] getCoordinates( double [][] source, CreateSectorDTO sector, DistanceUnit unit ) {
-
-        LatLng [] coordinates = new LatLng[ source.length * 2 + 1 ];
-
-        double latitude = sector.getLatitude();
-        double longitude = sector.getLongitude();
-        double azimuth = sector.getAzimuth();
-
-        int offset = 2;
-        for ( int i = 0; i < source.length; i++ ) {
-
-            if ( i == 0 ) {
-
-                coordinates[ i ] = new LatLng( latitude, longitude );
-                coordinates[ coordinates.length - 1 ] = new LatLng( latitude, longitude );
-                coordinates[ source.length ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth, unit );
-
-                continue;
-            }
-
-            coordinates[ source.length - i ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth + source[ i ][ 0 ], unit );
-            coordinates[ source.length - i + offset ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth - source[ i ][ 0 ], unit );
-
-            offset += 2;
-        }
-
-        return coordinates;
-    }
-
-    public static LatLng [] getCoordinates( List< Point2D > points, CreateSectorDTO sector, DistanceUnit unit ) {
-
-        LatLng [] coordinates = new LatLng[ points.size() - 1 ];
-
-        double latitude = sector.getLatitude();
-        double longitude = sector.getLongitude();
-
-        for ( int i = 0; i < coordinates.length; i++ ) {
-            coordinates[ i ] = getLatLng( latitude, longitude, points.get( i ).getY(), points.get( i ).getX(), unit );
-        }
-
-        return coordinates;
-    }
-
-    public static double [][] calculateSanzone( CreateSectorDTO sector ) {
+    public static double [][] calculateSanzoneForSector( CreateSectorDTO sector ) {
 
         double P = sector.getAntenna().getP();
         double G = sector.getAntenna().getG();
@@ -260,7 +378,7 @@ public class MapUtil {
         return source;
     }
 
-    public static double [][] calculateSummarySanzone( List< CreateSectorDTO > sectors ) {
+    public static double [][] calculateSanzoneForSummary( List< CreateSectorDTO > sectors ) {
 
         int maxDistance = 200;
 
@@ -309,7 +427,8 @@ public class MapUtil {
             }
         }
 
-        //--------------------------------------------------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------------------
+        //START remove inner points, we need only border
 
         List< Point2D > points = new LinkedList<>();
         Point2D start = null;
@@ -386,10 +505,10 @@ public class MapUtil {
             if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
 
                 points.add( next );
-                direction = direction.getAlgorithmDirection();
+                direction = direction.getNextPointDirection();
             } else {
 
-                direction = direction.getPointDirection();
+                direction = direction.getRotatePointDirection();
                 continue;
             }
 
@@ -410,131 +529,9 @@ public class MapUtil {
             }
         }
 
-        //--------------------------------------------------------------------------------------------------------------------------------
+        //END remove inner points, we need only border
+        //--------------------------------------------------------------------------------------------------------------
 
         return summary;
-    }
-
-    public static LatLng [] getCoordinatesForSummarySanzone( List< CreateSectorDTO > sectors ) {
-
-        int maxDistance = 200;
-
-        double [][] summary = calculateSummarySanzone( sectors );
-
-        List< Point2D > points = new LinkedList<>();
-        Point2D start = null;
-
-        for ( int i = 0; i < maxDistance ; i++ ) {
-
-            if ( summary[ maxDistance ][ i ] >= 10 ) {
-
-                start = new Point2D( maxDistance, i );
-                points.add( start );
-
-                break;
-            }
-        }
-
-        SearchDirection direction = SearchDirection.NORTH_WEST;
-
-        for ( ; ; ) {
-
-            Point2D previous = points.get( points.size() - 1 );
-            Point2D next = null;
-
-            switch ( direction ) {
-
-                case NORTH:
-
-                    next = NORTH.getNext( previous );
-
-                    break;
-
-                case NORTH_EAST:
-
-                    next = NORTH_EAST.getNext( previous );
-
-                    break;
-
-                case EAST:
-
-                    next = EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH_EAST:
-
-                    next = SOUTH_EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH:
-
-                    next = SOUTH.getNext( previous );
-
-                    break;
-
-                case SOUTH_WEST:
-
-                    next = SOUTH_WEST.getNext( previous );
-
-                    break;
-
-                case WEST:
-
-                    next = WEST.getNext( previous );
-
-                    break;
-
-                case NORTH_WEST:
-
-                    next = NORTH_WEST.getNext( previous );
-
-                    break;
-            }
-
-            if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
-
-                points.add( next );
-                direction = direction.getAlgorithmDirection();
-            } else {
-
-                direction = direction.getPointDirection();
-                continue;
-            }
-
-            if ( ( ( int ) start.getX() == ( int ) points.get( points.size() - 1 ).getX() ) &&
-                    ( ( int ) start.getY() == ( int ) points.get( points.size() - 1 ).getY() ) ) {
-
-                break;
-            }
-        }
-
-        List< Point2D > polarPoints = new LinkedList<>();
-
-        for ( int i = 0; i < points.size() - 1; i++ ) {
-
-            Point2D point2D = points.get( i );
-
-            double phi = atan( ( maxDistance - point2D.getX() ) / ( point2D.getY() - maxDistance ) ) * 180D / PI;
-
-            if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance  >= 0 ) ) {
-                phi = abs( phi ) + 90;
-            } else if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
-                phi = 270 - abs( phi );
-            } else if ( ( maxDistance - point2D.getX() >= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
-                phi = abs( phi ) + 270;
-            } else {
-                phi = 90 - abs( phi );
-            }
-
-            double distance = sqrt( pow( point2D.getX() - maxDistance, 2D ) + pow( maxDistance - point2D.getY(), 2D ) );
-
-            polarPoints.add( new Point2D( phi, distance ) );
-        }
-
-        LatLng [] coordinates = getCoordinates( polarPoints, sectors.get( 0 ), METER );
-
-        return coordinates;
     }
 }

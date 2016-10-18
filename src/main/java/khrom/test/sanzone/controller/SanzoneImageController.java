@@ -43,14 +43,4 @@ public class SanzoneImageController {
 
         return response;
     }
-
-    @RequestMapping( value = "/v1-hardcode/sector", method = POST, consumes = JSON )
-    public ResponseEntity< ? > createSanzoneImage_hardcode( @Validated @RequestBody CreateSanzoneRequest dto ) {
-
-        sanzoneImageService.createSectorSanzoneImage_hardcode( dto );
-
-        ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
-
-        return response;
-    }
 }
