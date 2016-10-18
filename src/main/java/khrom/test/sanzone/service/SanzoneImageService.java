@@ -82,7 +82,7 @@ public class SanzoneImageService {
         } catch ( IOException e ) {
         }
 
-        // TODO need to resolve situation when coordinates are different for sectors!!!
+        // TODO issue: we need to resolve situation when coordinates are different for sectors!!!
         // TODO suggestion: as a center get first sector and calculate offsets for other sectors
         // TODO             and after rotation apply them in MapUtil.calculateSummarySanzone()
         double latitude = dto.getSectors().get( 0 ).getLatitude();
@@ -214,18 +214,31 @@ public class SanzoneImageService {
             g.setColor( border );
             g.fillOval( centerX - 3, centerY - 3, 6, 6 );
 
-            double [][] summary = calculateSanzoneForSummary( sectors );
+            //TODO issue: we need to determine how to handle and draw sanzone and border
+            //TODO        when sectors coordinates are different!!!
+            boolean coordinatesMatch = false;
 
-            for ( int i = 0; i < summary.length; i++ ) {
+            if ( coordinatesMatch ) {
 
-                for ( int j = 0; j < summary[ i ].length; j++ ) {
+                Polygon polygon = getPolygonForSummary( getBorderPointsForSummary( calculateSanzoneForSummary( sectors ) ), centerX, centerY, ratioPixelToMeter );
 
-                    if ( summary[ i ][ j ] >= 10 ) {
+                g.drawPolygon( polygon );
 
-                        int xPoint = centerX + ( int ) ( ( j - ( summary[ i ].length / 2 ) ) * ratioPixelToMeter );
-                        int yPoint = centerY + ( int ) ( ( i - ( summary.length / 2 ) ) * ratioPixelToMeter );
+            } else {
 
-                        g.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
+                double [][] summary = calculateSanzoneForSummary( sectors );
+
+                for ( int i = 0; i < summary.length; i++ ) {
+
+                    for ( int j = 0; j < summary[ i ].length; j++ ) {
+
+                        if ( summary[ i ][ j ] >= 10 ) {
+
+                            int xPoint = centerX + ( int ) ( ( j - ( summary[ i ].length / 2 ) ) * ratioPixelToMeter );
+                            int yPoint = centerY + ( int ) ( ( i - ( summary.length / 2 ) ) * ratioPixelToMeter );
+
+                            g.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
+                        }
                     }
                 }
             }

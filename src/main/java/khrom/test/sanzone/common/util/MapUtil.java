@@ -20,6 +20,8 @@ import static khrom.test.sanzone.common.util.enums.SearchDirection.*;
  */
 public class MapUtil {
 
+    private static final int MAX_DISTANCE = 200;
+
     /**
      * Returns an angle of map image in degrees that falls on given image width size and given zoom.
      *
@@ -134,98 +136,9 @@ public class MapUtil {
 
     public static LatLng [] getCoordinatesForSummary( List< CreateSectorDTO > sectors, DistanceUnit unit ) {
 
-        int maxDistance = 200;
-
         double [][] summary = calculateSanzoneForSummary( sectors );
 
-        List< Point2D > points = new LinkedList<>();
-        Point2D start = null;
-
-        for ( int i = 0; i < maxDistance ; i++ ) {
-
-            if ( summary[ maxDistance ][ i ] >= 10 ) {
-
-                start = new Point2D( maxDistance, i );
-                points.add( start );
-
-                break;
-            }
-        }
-
-        SearchDirection direction = SearchDirection.NORTH_WEST;
-
-        for ( ; ; ) {
-
-            Point2D previous = points.get( points.size() - 1 );
-            Point2D next = null;
-
-            switch ( direction ) {
-
-                case NORTH:
-
-                    next = NORTH.getNext( previous );
-
-                    break;
-
-                case NORTH_EAST:
-
-                    next = NORTH_EAST.getNext( previous );
-
-                    break;
-
-                case EAST:
-
-                    next = EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH_EAST:
-
-                    next = SOUTH_EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH:
-
-                    next = SOUTH.getNext( previous );
-
-                    break;
-
-                case SOUTH_WEST:
-
-                    next = SOUTH_WEST.getNext( previous );
-
-                    break;
-
-                case WEST:
-
-                    next = WEST.getNext( previous );
-
-                    break;
-
-                case NORTH_WEST:
-
-                    next = NORTH_WEST.getNext( previous );
-
-                    break;
-            }
-
-            if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
-
-                points.add( next );
-                direction = direction.getNextPointDirection();
-            } else {
-
-                direction = direction.getRotatePointDirection();
-                continue;
-            }
-
-            if ( ( ( int ) start.getX() == ( int ) points.get( points.size() - 1 ).getX() ) &&
-                    ( ( int ) start.getY() == ( int ) points.get( points.size() - 1 ).getY() ) ) {
-
-                break;
-            }
-        }
+        List< Point2D > points = getBorderPointsForSummary( summary );
 
         List< Point2D > polarPoints = new LinkedList<>();
 
@@ -233,19 +146,19 @@ public class MapUtil {
 
             Point2D point2D = points.get( i );
 
-            double phi = atan( ( maxDistance - point2D.getX() ) / ( point2D.getY() - maxDistance ) ) * 180D / PI;
+            double phi = atan( ( MAX_DISTANCE - point2D.getX() ) / ( point2D.getY() - MAX_DISTANCE ) ) * 180D / PI;
 
-            if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance  >= 0 ) ) {
+            if ( ( MAX_DISTANCE - point2D.getX() <= 0 ) && ( point2D.getY() - MAX_DISTANCE  >= 0 ) ) {
                 phi = abs( phi ) + 90;
-            } else if ( ( maxDistance - point2D.getX() <= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
+            } else if ( ( MAX_DISTANCE - point2D.getX() <= 0 ) && ( point2D.getY() - MAX_DISTANCE <= 0 ) ) {
                 phi = 270 - abs( phi );
-            } else if ( ( maxDistance - point2D.getX() >= 0 ) && ( point2D.getY() - maxDistance <= 0 ) ) {
+            } else if ( ( MAX_DISTANCE - point2D.getX() >= 0 ) && ( point2D.getY() - MAX_DISTANCE <= 0 ) ) {
                 phi = abs( phi ) + 270;
             } else {
                 phi = 90 - abs( phi );
             }
 
-            double distance = sqrt( pow( point2D.getX() - maxDistance, 2D ) + pow( maxDistance - point2D.getY(), 2D ) );
+            double distance = sqrt( pow( point2D.getX() - MAX_DISTANCE, 2D ) + pow( MAX_DISTANCE - point2D.getY(), 2D ) );
 
             polarPoints.add( new Point2D( phi, distance ) );
         }
@@ -294,6 +207,29 @@ public class MapUtil {
         return new Polygon( xPoints, yPoints, nPoints );
     }
 
+    public static Polygon getPolygonForSummary( List< Point2D > points, int centerX, int centerY, double ratioPixelToMeter ) {
+
+        int [] xPoints  = new int [ points.size() ];
+        int [] yPoints  = new int [ points.size() ];
+        int nPoints = points.size();
+
+        /*for ( int i = 0; i < summary.length; i++ ) {
+
+            for ( int j = 0; j < summary[ i ].length; j++ ) {
+
+                if ( summary[ i ][ j ] >= 10 ) {
+
+                    int xPoint = centerX + ( int ) ( ( j - ( summary[ i ].length / 2 ) ) * ratioPixelToMeter );
+                    int yPoint = centerY + ( int ) ( ( i - ( summary.length / 2 ) ) * ratioPixelToMeter );
+
+                    g.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
+                }
+            }
+        }*/
+
+        return new Polygon( xPoints, yPoints, nPoints );
+    }
+
     public static double [][] calculateSanzoneForSector( CreateSectorDTO sector ) {
 
         double P = sector.getAntenna().getP();
@@ -305,13 +241,11 @@ public class MapUtil {
         G = pow( 10, G / 10 );
         TL = pow( 10, TL / 10 );
 
-        int maxDistance = 200;
-
-        double [][] rawData = new double[ maxDistance + 1 ][ maxDistance + 1 ];
+        double [][] rawData = new double[ MAX_DISTANCE + 1 ][ MAX_DISTANCE + 1 ];
 
         for ( int i = 1; i < rawData.length; i++ ) {
 
-            for ( int j = 0, offsetY = maxDistance / 2; j < rawData.length; j++, offsetY-- ) {
+            for ( int j = 0, offsetY = MAX_DISTANCE / 2; j < rawData.length; j++, offsetY-- ) {
 
                 double phi = atan( ( ( double ) offsetY ) / ( ( double ) i ) ) * 180D / PI;
                 rawData[ j ][ i ] = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) i ), 2D ) + pow( ( ( double ) offsetY ), 2D ) );
@@ -331,15 +265,15 @@ public class MapUtil {
 
         List< Point2D > points = new ArrayList<>();
 
-        for ( int i = 1; i < maxDistance; i++ ) {
+        for ( int i = 1; i < MAX_DISTANCE; i++ ) {
 
             Point2D p = null;
 
-            for ( int j = 0; j <= maxDistance / 2; j++ ) {
+            for ( int j = 0; j <= MAX_DISTANCE / 2; j++ ) {
 
                 if ( rawData[ j ][ i ] > 10 ) {
 
-                    p = new Point2D( i, ( maxDistance / 2 ) - j );
+                    p = new Point2D( i, ( MAX_DISTANCE / 2 ) - j );
                     points.add( p );
                     break;
                 }
@@ -380,9 +314,7 @@ public class MapUtil {
 
     public static double [][] calculateSanzoneForSummary( List< CreateSectorDTO > sectors ) {
 
-        int maxDistance = 200;
-
-        double [][] summary = new double[ ( maxDistance * 2 ) + 1 ][ ( maxDistance * 2 ) + 1 ];
+        double [][] summary = new double[ ( MAX_DISTANCE * 2 ) + 1 ][ ( MAX_DISTANCE * 2 ) + 1 ];
 
         for ( CreateSectorDTO sector: sectors ) {
 
@@ -395,25 +327,25 @@ public class MapUtil {
             G = pow( 10, G / 10 );
             TL = pow( 10, TL / 10 );
 
-            double [][] sectorSanzone = new double[ maxDistance + 1 ][ maxDistance + 1 ];
+            double [][] sectorSanzone = new double[ MAX_DISTANCE + 1 ][ MAX_DISTANCE + 1 ];
 
             for ( int i = 1; i < sectorSanzone.length; i++ ) {
 
-                for ( int j = 0, offsetY = maxDistance / 2; j < sectorSanzone.length; j++, offsetY-- ) {
+                for ( int j = 0, offsetY = MAX_DISTANCE / 2; j < sectorSanzone.length; j++, offsetY-- ) {
 
                     double phi = atan( ( ( double ) offsetY ) / ( ( double ) i ) ) * 180D / PI;
                     sectorSanzone[ j ][ i ] = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) i ), 2D ) + pow( ( ( double ) offsetY ), 2D ) );
                 }
             }
 
-            boolean [][] isSet = new boolean[ ( maxDistance * 2 ) + 1 ][ ( maxDistance * 2 ) + 1 ];
+            boolean [][] isSet = new boolean[ ( MAX_DISTANCE * 2 ) + 1 ][ ( MAX_DISTANCE * 2 ) + 1 ];
 
-            for ( int i = 0, offsetY = maxDistance / 2; i < sectorSanzone.length; i++, offsetY-- ) {
+            for ( int i = 0, offsetY = MAX_DISTANCE / 2; i < sectorSanzone.length; i++, offsetY-- ) {
 
                 for ( int j = 1; j < sectorSanzone[ i ].length; j++ ) {
 
-                    int X = maxDistance - ( int ) ( ( ( double ) j ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + ( ( double ) offsetY ) * cos( toRadians( 90D - sector.getAzimuth() ) ) );
-                    int Y = maxDistance + ( int ) ( ( ( double ) j ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - ( ( double ) offsetY ) * sin( toRadians( 90D - sector.getAzimuth() ) ) );
+                    int X = MAX_DISTANCE - ( int ) ( ( ( double ) j ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + ( ( double ) offsetY ) * cos( toRadians( 90D - sector.getAzimuth() ) ) );
+                    int Y = MAX_DISTANCE + ( int ) ( ( ( double ) j ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - ( ( double ) offsetY ) * sin( toRadians( 90D - sector.getAzimuth() ) ) );
 
                     if ( X >= 0 && summary.length > X && Y >= 0 && summary[ X ].length > Y ) {
 
@@ -428,16 +360,37 @@ public class MapUtil {
         }
 
         //--------------------------------------------------------------------------------------------------------------
-        //START remove inner points, we need only border
+        //START remove inner points, if we need only border points
+        if ( true ) {
+
+            List< Point2D > points = getBorderPointsForSummary( summary );
+
+            for ( int i = 0; i < summary.length; i++ ) {
+
+                for ( int j = 0; j < summary[ i ].length; j++ ) {
+
+                    if ( !points.contains( new Point2D( i, j ) ) ) {
+                        summary[ i ][ j ] = 0;
+                    }
+                }
+            }
+        }
+        //END remove inner points, we need only border points
+        //--------------------------------------------------------------------------------------------------------------
+
+        return summary;
+    }
+
+    public static List< Point2D > getBorderPointsForSummary( double [][] summary ) {
 
         List< Point2D > points = new LinkedList<>();
         Point2D start = null;
 
-        for ( int i = 0; i < maxDistance ; i++ ) {
+        for ( int i = 0; i < MAX_DISTANCE ; i++ ) {
 
-            if ( summary[ maxDistance ][ i ] >= 10 ) {
+            if ( summary[ MAX_DISTANCE ][ i ] >= 10 ) {
 
-                start = new Point2D( maxDistance, i );
+                start = new Point2D( MAX_DISTANCE, i );
                 points.add( start );
 
                 break;
@@ -519,19 +472,6 @@ public class MapUtil {
             }
         }
 
-        for ( int i = 0; i < summary.length; i++ ) {
-
-            for ( int j = 0; j < summary[ i ].length; j++ ) {
-
-                if ( !points.contains( new Point2D( i, j ) ) ) {
-                    summary[ i ][ j ] = 0;
-                }
-            }
-        }
-
-        //END remove inner points, we need only border
-        //--------------------------------------------------------------------------------------------------------------
-
-        return summary;
+        return points;
     }
 }
