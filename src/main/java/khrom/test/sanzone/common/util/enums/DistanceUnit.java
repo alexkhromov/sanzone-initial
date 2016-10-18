@@ -8,7 +8,7 @@ public enum DistanceUnit {
     METER( 1000D ),
     KILOMETER( 1D );
 
-    double ratio;
+    private double ratio;
 
     DistanceUnit( double ratio ) {
         this.ratio = ratio;
