@@ -102,31 +102,28 @@ public class MapUtil {
         return new LatLng( toDegrees( lat ), toDegrees( lon ) );
     }
 
-    public static LatLng [] getCoordinatesForSector( CreateSectorDTO sector, DistanceUnit unit ) {
+    public static LatLng [] getCoordinatesForSector( double [][] sanzone, CreateSectorDTO sector, DistanceUnit unit ) {
 
-
-        double [][] source = calculateSanzoneForSector( sector );
-
-        LatLng [] coordinates = new LatLng[ source.length * 2 + 1 ];
+        LatLng [] coordinates = new LatLng[ sanzone.length * 2 + 1 ];
 
         double latitude = sector.getLatitude();
         double longitude = sector.getLongitude();
         double azimuth = sector.getAzimuth();
 
         int offset = 2;
-        for ( int i = 0; i < source.length; i++ ) {
+        for ( int i = 0; i < sanzone.length; i++ ) {
 
             if ( i == 0 ) {
 
                 coordinates[ i ] = new LatLng( latitude, longitude );
                 coordinates[ coordinates.length - 1 ] = new LatLng( latitude, longitude );
-                coordinates[ source.length ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth, unit );
+                coordinates[ sanzone.length ] = getLatLng( latitude, longitude, sanzone[ i ][ 1 ], azimuth, unit );
 
                 continue;
             }
 
-            coordinates[ source.length - i ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth + source[ i ][ 0 ], unit );
-            coordinates[ source.length - i + offset ] = getLatLng( latitude, longitude, source[ i ][ 1 ], azimuth - source[ i ][ 0 ], unit );
+            coordinates[ sanzone.length - i ] = getLatLng( latitude, longitude, sanzone[ i ][ 1 ], azimuth + sanzone[ i ][ 0 ], unit );
+            coordinates[ sanzone.length - i + offset ] = getLatLng( latitude, longitude, sanzone[ i ][ 1 ], azimuth - sanzone[ i ][ 0 ], unit );
 
             offset += 2;
         }
@@ -134,11 +131,9 @@ public class MapUtil {
         return coordinates;
     }
 
-    public static LatLng [] getCoordinatesForSummary( List< CreateSectorDTO > sectors, DistanceUnit unit ) {
+    public static LatLng [] getCoordinatesForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, DistanceUnit unit ) {
 
-        double [][] summary = calculateSanzoneForSummary( sectors );
-
-        List< Point2D > points = getBorderPointsForSummary( summary );
+        List< Point2D > points = getBorderPointsForSummary( sanzone );
 
         List< Point2D > polarPoints = new LinkedList<>();
 
@@ -175,31 +170,31 @@ public class MapUtil {
         return coordinates;
     }
 
-    public static Polygon getPolygonForSector( double [][] source, int centerX, int centerY, double azimuth, double ratioPixelToMeter ) {
+    public static Polygon getPolygonForSector( double [][] sanzone, int centerX, int centerY, double azimuth, double ratioPixelToMeter ) {
 
-        int [] xPoints  = new int [ source.length * 2 ];
-        int [] yPoints  = new int [ source.length * 2 ];
-        int nPoints = source.length * 2;
+        int [] xPoints  = new int [ sanzone.length * 2 ];
+        int [] yPoints  = new int [ sanzone.length * 2 ];
+        int nPoints = sanzone.length * 2;
 
         int offset = 2;
-        for ( int i = 0; i < source.length; i++ ) {
+        for ( int i = 0; i < sanzone.length; i++ ) {
 
             if ( i == 0 ) {
 
                 xPoints[ i ] = centerX;
                 yPoints[ i ] = centerY;
 
-                xPoints[ source.length ] = centerX + ( int ) ( source[ i ][ 1 ] * cos( toRadians( 90D - azimuth - source[ i ][ 0 ] ) ) * ratioPixelToMeter );
-                yPoints[ source.length ] = centerY - ( int ) ( source[ i ][ 1 ] * sin( toRadians( 90D - azimuth - source[ i ][ 0 ] ) ) * ratioPixelToMeter );
+                xPoints[ sanzone.length ] = centerX + ( int ) ( sanzone[ i ][ 1 ] * cos( toRadians( 90D - azimuth - sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
+                yPoints[ sanzone.length ] = centerY - ( int ) ( sanzone[ i ][ 1 ] * sin( toRadians( 90D - azimuth - sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
 
                 continue;
             }
 
-            xPoints[ source.length - i ] = centerX + ( int ) ( source[ i ][ 1 ] * cos( toRadians( 90D - azimuth - source[ i ][ 0 ] ) ) * ratioPixelToMeter );
-            yPoints[ source.length - i ] = centerY - ( int ) ( source[ i ][ 1 ] * sin( toRadians( 90D - azimuth - source[ i ][ 0 ] ) ) * ratioPixelToMeter );
+            xPoints[ sanzone.length - i ] = centerX + ( int ) ( sanzone[ i ][ 1 ] * cos( toRadians( 90D - azimuth - sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
+            yPoints[ sanzone.length - i ] = centerY - ( int ) ( sanzone[ i ][ 1 ] * sin( toRadians( 90D - azimuth - sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
 
-            xPoints[ source.length - i + offset ] = centerX + ( int ) ( source[ i ][ 1 ] * cos( toRadians( 90D - azimuth + source[ i ][ 0 ] ) ) * ratioPixelToMeter );
-            yPoints[ source.length - i + offset ] = centerY - ( int ) ( source[ i ][ 1 ] * sin( toRadians( 90D - azimuth + source[ i ][ 0 ] ) ) * ratioPixelToMeter );
+            xPoints[ sanzone.length - i + offset ] = centerX + ( int ) ( sanzone[ i ][ 1 ] * cos( toRadians( 90D - azimuth + sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
+            yPoints[ sanzone.length - i + offset ] = centerY - ( int ) ( sanzone[ i ][ 1 ] * sin( toRadians( 90D - azimuth + sanzone[ i ][ 0 ] ) ) * ratioPixelToMeter );
 
             offset += 2;
         }
@@ -294,16 +289,16 @@ public class MapUtil {
             polarPoints.add( new Point2D( phi, distance ) );
         }
 
-        double [][] source = new double[ polarPoints.size() ][];
+        double [][] sanzone = new double[ polarPoints.size() ][];
 
-        for ( int i = 0; i < source.length; i++ ) {
+        for ( int i = 0; i < sanzone.length; i++ ) {
 
             Point2D polarPoint = polarPoints.get( i );
 
-            source[ i ] = new double[] { polarPoint.getX(), polarPoint.getY() };
+            sanzone[ i ] = new double[] { polarPoint.getX(), polarPoint.getY() };
         }
 
-        return source;
+        return sanzone;
     }
 
     public static double [][] calculateSanzoneForSummary( List< CreateSectorDTO > sectors ) {
