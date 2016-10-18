@@ -21,6 +21,7 @@ import static khrom.test.sanzone.common.util.enums.SearchDirection.*;
 public class MapUtil {
 
     private static final int MAX_DISTANCE = 200;
+    private static final int POINT_STEP = 5;
 
     /**
      * Returns an angle of map image in degrees that falls on given image width size and given zoom.
@@ -137,7 +138,7 @@ public class MapUtil {
 
         List< Point2D > polarPoints = new LinkedList<>();
 
-        for ( int i = 0; i < points.size() - 1; i++ ) {
+        for ( int i = 0; i < points.size() - 1; i = i + POINT_STEP ) {
 
             Point2D point2D = points.get( i );
 
@@ -204,13 +205,13 @@ public class MapUtil {
 
     public static Polygon getPolygonForSummary( List< Point2D > points, int centerX, int centerY, double ratioPixelToMeter ) {
 
-        int [] xPoints  = new int [ points.size() ];
-        int [] yPoints  = new int [ points.size() ];
-        int nPoints = points.size();
+        int [] xPoints  = new int [ points.size() / POINT_STEP ];
+        int [] yPoints  = new int [ points.size() / POINT_STEP ];
+        int nPoints = points.size() / POINT_STEP;
 
-        for ( int i = 0; i < points.size(); i++ ) {
+        for ( int i = 0; i < points.size() / POINT_STEP; i++ ) {
 
-            Point2D point = points.get( i );
+            Point2D point = points.get( i * POINT_STEP );
 
             xPoints[ i ] = centerX + ( int ) ( ( point.getY() - MAX_DISTANCE ) * ratioPixelToMeter );
             yPoints[ i ] = centerY - ( int ) ( ( MAX_DISTANCE - point.getX() ) * ratioPixelToMeter );
