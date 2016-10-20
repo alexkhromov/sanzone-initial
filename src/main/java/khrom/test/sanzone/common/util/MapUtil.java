@@ -13,7 +13,6 @@ import java.util.List;
 
 import static java.lang.Math.*;
 import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
-import static khrom.test.sanzone.common.util.enums.SearchDirection.*;
 
 /**
  * Created by DEV on 9/16/2016.
@@ -373,58 +372,7 @@ public class MapUtil {
         for ( ; ; ) {
 
             Point2D previous = points.get( points.size() - 1 );
-            Point2D next = null;
-
-            switch ( direction ) {
-
-                case NORTH:
-
-                    next = NORTH.getNext( previous );
-
-                    break;
-
-                case NORTH_EAST:
-
-                    next = NORTH_EAST.getNext( previous );
-
-                    break;
-
-                case EAST:
-
-                    next = EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH_EAST:
-
-                    next = SOUTH_EAST.getNext( previous );
-
-                    break;
-
-                case SOUTH:
-
-                    next = SOUTH.getNext( previous );
-
-                    break;
-
-                case SOUTH_WEST:
-
-                    next = SOUTH_WEST.getNext( previous );
-
-                    break;
-
-                case WEST:
-
-                    next = WEST.getNext( previous );
-
-                    break;
-
-                case NORTH_WEST:
-
-                    next = NORTH_WEST.getNext( previous );
-
-                    break;
-            }
+            Point2D next = direction.getNext( previous );
 
             if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
 
