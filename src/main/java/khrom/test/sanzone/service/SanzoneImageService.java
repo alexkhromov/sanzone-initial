@@ -248,6 +248,8 @@ public class SanzoneImageService {
                 }
             }
 
+            g.dispose();
+
             Path path = Files.createFile( Paths.get( fileName ) );
 
             ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), path.toFile() );
@@ -335,9 +337,31 @@ public class SanzoneImageService {
 
             g2.dispose();
 
-            Path path2 = Files.createFile( Paths.get( "C:\\sanzone\\" + session + "\\test.jpg" ) );
+            Image scaledSanzone = combined.getScaledInstance( 400, 400, Image.SCALE_SMOOTH );
+            BufferedImage result = new BufferedImage( 400, 400, BufferedImage.TYPE_INT_RGB );
 
-            ImageIO.write( combined, googleStaticMapConfig.getFormat(), path2.toFile() );
+            g2 = result.createGraphics();
+
+            g2.drawImage( scaledSanzone, 0, 0, null );
+            g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+            g2.setColor( border2 );
+            g2.drawRect( 0, 0 , result.getWidth() - 1, result.getHeight() - 1 );
+
+            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+
+                g2.drawLine( i, 0, i, result.getHeight() - 1 );
+                g2.drawLine( 0, i, result.getWidth() - 1, i );
+            }
+
+            g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+            g2.setColor( inside );
+            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+
+            g2.dispose();
+
+            Path path2 = Files.createFile( Paths.get( "/sanzone/" + session + "/test.jpg" ) );
+
+            ImageIO.write( result, googleStaticMapConfig.getFormat(), path2.toFile() );
 
         } catch ( IOException e ) {
         }
