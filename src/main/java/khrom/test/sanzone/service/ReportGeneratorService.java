@@ -23,7 +23,6 @@ import static java.lang.String.format;
 public class ReportGeneratorService {
 
     private static final String PATH_TO_SANZONE_FILE_PATTERN = "/sanzone/%s/%s_sanzone.%s";
-    private static final String PATH_TO_TEST = "/sanzone/%s/test.%s";
     private static final String PATH_TO_SANZONE_PDF_REPORT_PATTERN = "/sanzone/%s/%s_sanzone.pdf";
     private static final String PATH_TO_SANZONE_HTML_REPORT_PATTERN = "/sanzone/%s/%s_sanzone.html";
 
@@ -41,7 +40,7 @@ public class ReportGeneratorService {
         Map< String, Object > parameters = new HashMap<>();
         parameters.put( "sectorsDataSource", collectionDataSource );
         //parameters.put( "summarySanzone", format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
-        parameters.put( "summarySanzone", format( PATH_TO_TEST, session, googleStaticMapConfig.getFormat() ) );
+        parameters.put( "summarySanzone", format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
         JasperReport jasperReport = JasperCompileManager.compileReport( initialTemplate.getInputStream() );
         JasperPrint jasperPrint = JasperFillManager.fillReport( jasperReport, parameters, new JREmptyDataSource() );

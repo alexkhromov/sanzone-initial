@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import static java.awt.Image.SCALE_SMOOTH;
+import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.format;
 import static khrom.test.sanzone.common.util.ImageUtil.getImageType;
 import static khrom.test.sanzone.common.util.MapUtil.*;
@@ -74,7 +76,7 @@ public class SanzoneImageService {
         plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
     }
 
-    public void createSummarySanzoneImage( CreateSanzoneRequest dto ) {
+    public void createSummarySanzoneImage( CreateSanzoneRequest dto, Boolean filter ) throws IOException {
 
         String session = UUID.randomUUID().toString();
 
@@ -99,13 +101,13 @@ public class SanzoneImageService {
 
         double [][] sanzone = calculateSanzoneForSummary( dto.getSectors() );
 
-        getGoogleStaticMapWithPolylineForSummary( sanzone, dto.getSectors(), session );
+        Path map = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+        Path destination = Files.createFile( Paths.get( format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
 
-        getGoogleStaticMap( latitude, longitude, session );
-
+        getGoogleStaticMapWithPolylineForSummary( sanzone, dto.getSectors(), map.toFile() );
         // This call is optional. It is draw sanzone border using "image pixels" approach.
         // It is also insure that plot from "coordinates approach" draw same image as "image pixels"
-        plotSanzoneByPixelsDataForSummary( sanzone, ratioPixelToMeter, format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session);
+        plotSanzoneByPixelsDataForSummary( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile(), filter );
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -116,7 +118,40 @@ public class SanzoneImageService {
         }
     }
 
-    private void getGoogleStaticMap( Double latitude, Double longitude, String session ) {
+    public void createSummarySanzoneImageWithColorProcessing( CreateSanzoneRequest dto ) throws IOException {
+
+        String session = UUID.randomUUID().toString();
+
+        try {
+
+            Files.createDirectories( Paths.get( format( PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN, session ) ) );
+
+        } catch ( IOException e ) {
+        }
+
+        double latitude = dto.getSectors().get( 0 ).getLatitude();
+        double longitude = dto.getSectors().get( 0 ).getLongitude();
+
+        double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
+
+        double [][] sanzone = calculateSanzoneForSummary( dto.getSectors() );
+
+        Path map = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+        Path destination = Files.createFile( Paths.get( format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+
+        getGoogleStaticMap( latitude, longitude, map.toFile() );
+        plotSanzoneByPixelsDataForSummaryWithColorProcessing( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile() );
+
+        try {
+            reportGeneratorService.generateReport( session, dto.getSectors() );
+        } catch (JRException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void getGoogleStaticMap( Double latitude, Double longitude, File map ) {
 
         try {
 
@@ -124,9 +159,7 @@ public class SanzoneImageService {
 
             BufferedImage image = ImageIO.read( url );
 
-            Path path = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
-
-            ImageIO.write( image, googleStaticMapConfig.getFormat(), path.toFile() );
+            ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
 
         } catch ( IOException e ) {
         }
@@ -151,7 +184,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void getGoogleStaticMapWithPolylineForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, String session ) {
+    private void getGoogleStaticMapWithPolylineForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, File map ) {
 
         try {
 
@@ -162,9 +195,7 @@ public class SanzoneImageService {
 
             BufferedImage image = ImageIO.read( url );
 
-            Path path = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
-
-            ImageIO.write( image, googleStaticMapConfig.getFormat(), path.toFile() );
+            ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
 
         } catch ( IOException e ) {
         }
@@ -201,25 +232,23 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotSanzoneByPixelsDataForSummary( double [][] sanzone, double ratioPixelToMeter, String fileName, String session ) {
+    private void plotSanzoneByPixelsDataForSummary( double [][] sanzone, double ratioPixelToMeter, File map, File destination, Boolean filter ) {
 
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
 
-        File file = new File( format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
-
         try {
 
-            BufferedImage googleMap = ImageIO.read( file );
+            BufferedImage googleMap = ImageIO.read( map );
 
             BufferedImage sanzoneImg = new BufferedImage( googleMap.getWidth(), googleMap.getHeight(), getImageType( googleMap ) );
-            Graphics2D g = sanzoneImg.createGraphics();
+            Graphics2D g2 = sanzoneImg.createGraphics();
 
             Color border = new Color( 255, 0, 0, 127 );
 
-            g.drawImage( googleMap, null, 0, 0 );
-            g.setColor( border );
-            g.fillOval( centerX - 3, centerY - 3, 6, 6 );
+            g2.drawImage( googleMap, null, 0, 0 );
+            g2.setColor( border );
+            g2.fillOval( centerX - 3, centerY - 3, 6, 6 );
 
             //TODO issue: we need to determine how to handle and draw sanzone and border
             //TODO        when sectors coordinates are different!!!
@@ -229,7 +258,7 @@ public class SanzoneImageService {
 
                 Polygon polygon = getPolygonForSummary( getBorderPointsForSummary( sanzone ), centerX, centerY, ratioPixelToMeter );
 
-                g.drawPolygon( polygon );
+                g2.drawPolygon( polygon );
 
             } else {
 
@@ -242,79 +271,84 @@ public class SanzoneImageService {
                             int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
                             int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );
 
-                            g.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
+                            g2.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
                         }
                     }
                 }
             }
 
-            g.dispose();
+            g2.dispose();
 
-            Path path = Files.createFile( Paths.get( fileName ) );
+            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), destination );
 
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), path.toFile() );
+            } catch ( IOException e ) {
+        }
+    }
 
-            boolean fillSanzone = false;
+    private void plotSanzoneByPixelsDataForSummaryWithColorProcessing( double [][] sanzone, double ratioPixelToMeter, File map, File destination ) {
+
+        boolean fillSanzone = false;
+
+        Color inside = new Color( 255, 0, 0, 255 );
+        Color outside = new Color( 255, 255, 255, 255 );
+        Color border2 = new Color( 0, 0, 0, 255 );
+
+        try {
 
             // STEP # 1 prepare sanzone image
-            Color inside = new Color( 255, 0, 0, 255 );
-            Color outside = new Color( 255, 255, 255, 255 );
-            Color border2 = new Color( 0, 0, 0, 255 );
+            int widthOffset = ( googleStaticMapConfig.getImageWidth() - sanzone[ 0 ].length ) / 2;
+            int heightOffset = ( googleStaticMapConfig.getImageHeight() - sanzone.length ) / 2;
 
-            int heightOffset = ( googleMap.getHeight() - sanzone.length ) / 2;
-            int widthOffset = ( googleMap.getWidth() - sanzone[ 0 ].length ) / 2;
+            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_INT_RGB );
 
-            BufferedImage sanzoneImg2 = new BufferedImage( googleMap.getWidth(), googleMap.getHeight(), BufferedImage.TYPE_INT_RGB );
+            for ( int i = 0; i < googleStaticMapConfig.getImageHeight(); i++ ) {
 
-            for ( int i = 0; i < googleMap.getHeight(); i++ ) {
-
-                for ( int j = 0; j < googleMap.getWidth(); j++ ) {
+                for ( int j = 0; j < googleStaticMapConfig.getImageWidth(); j++ ) {
 
                     if ( i <= heightOffset || i > sanzone.length - 1 + heightOffset ||
                             j <= widthOffset || j > sanzone[ i - heightOffset ].length - 1 + widthOffset ) {
 
-                        sanzoneImg2.setRGB( j, i, outside.getRGB() );
+                        sanzoneImg.setRGB( j, i, outside.getRGB() );
 
                         continue;
                     }
 
                     if ( sanzone[ i - heightOffset ][ j - widthOffset ] >= 10 ) {
-                        sanzoneImg2.setRGB( j, i, inside.getRGB() );
+                        sanzoneImg.setRGB( j, i, inside.getRGB() );
                     } else {
-                        sanzoneImg2.setRGB( j, i, outside.getRGB() );
+                        sanzoneImg.setRGB( j, i, outside.getRGB() );
                     }
                 }
             }
 
-            ColorProcessor processor = new ColorProcessor( sanzoneImg2 );
+            ColorProcessor processor = new ColorProcessor( sanzoneImg );
             processor.blurGaussian( 3.0 );
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
 
-            Graphics2D g2 = sanzoneImg2.createGraphics();
+            Graphics2D g2 = sanzoneImg.createGraphics();
 
             g2.drawImage( processor.createImage(), null, null );
-
             g2.dispose();
 
             // STEP # 2 prepare map image
-            BufferedImage map = ImageIO.read( new File( format( PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+            BufferedImage mapImage = ImageIO.read( map );
 
-            // STEP # 3 combine map and sanzone
-            BufferedImage combined = new BufferedImage( googleMap.getWidth(), googleMap.getHeight(), BufferedImage.TYPE_INT_RGB );
+            // STEP # 3 combine sanzone and map
+            BufferedImage combined = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_INT_RGB );
 
             g2 = combined.createGraphics();
 
-            g2.drawImage( map, null, null );
+            g2.drawImage( mapImage, null, null );
 
             int transparentColor = outside.getRGB() | 0xFF000000;
 
-            for ( int i = 0; i < sanzoneImg2.getHeight(); i++ ) {
+            for ( int i = 0; i < sanzoneImg.getHeight(); i++ ) {
 
-                for ( int j = 0; j < sanzoneImg2.getWidth(); j++ ) {
+                for ( int j = 0; j < sanzoneImg.getWidth(); j++ ) {
 
-                    if ( ( sanzoneImg2.getRGB( j, i ) | 0xFF000000 ) != transparentColor ) {
+                    if ( ( sanzoneImg.getRGB( j, i ) | 0xFF000000 ) != transparentColor ) {
 
-                        Color color = new Color( sanzoneImg2.getRGB( j, i ) );
+                        Color color = new Color( sanzoneImg.getRGB( j, i ) );
 
                         if ( color.getGreen() < 150 && color.getBlue() < 150 ) {
 
@@ -327,7 +361,7 @@ public class SanzoneImageService {
                             } else if ( fillSanzone ){
 
                                 g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
-                                g2.setColor( new Color( sanzoneImg2.getRGB( j, i ) ) );
+                                g2.setColor( new Color( sanzoneImg.getRGB( j, i ) ) );
                                 g2.fillRect( j, i, 1, 1 );
                             }
                         }
@@ -337,8 +371,8 @@ public class SanzoneImageService {
 
             g2.dispose();
 
-            Image scaledSanzone = combined.getScaledInstance( 400, 400, Image.SCALE_SMOOTH );
-            BufferedImage result = new BufferedImage( 400, 400, BufferedImage.TYPE_INT_RGB );
+            Image scaledSanzone = combined.getScaledInstance( 400, 400, SCALE_SMOOTH );
+            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
 
             g2 = result.createGraphics();
 
@@ -356,12 +390,9 @@ public class SanzoneImageService {
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
             g2.setColor( inside );
             g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
-
             g2.dispose();
 
-            Path path2 = Files.createFile( Paths.get( "/sanzone/" + session + "/test.jpg" ) );
-
-            ImageIO.write( result, googleStaticMapConfig.getFormat(), path2.toFile() );
+            ImageIO.write( result, googleStaticMapConfig.getFormat(), destination );
 
         } catch ( IOException e ) {
         }

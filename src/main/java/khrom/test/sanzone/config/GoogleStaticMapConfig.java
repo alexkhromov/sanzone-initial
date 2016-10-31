@@ -95,6 +95,26 @@ public class GoogleStaticMapConfig {
     }
 
     /**
+     * Returns a map image width.
+     *
+     * @return a map image width
+     */
+    public int getImageWidth() {
+
+        return sizeX * scale;
+    }
+
+    /**
+     * Returns a map image height.
+     *
+     * @return a map image height
+     */
+    public int getImageHeight() {
+
+        return sizeY * scale;
+    }
+
+    /**
      * Returns an angle of map image in degrees that falls on default image width size and default zoom.
      *
      * @return an angle of map image in degrees for default image width size and default zoom
