@@ -51,6 +51,13 @@
             <version>6.3.1</version>
         </dependency>
 
+        <!-- Image processing dependency -->
+        <dependency>
+            <groupId>gov.nih.imagej</groupId>
+            <artifactId>imagej</artifactId>
+            <version>1.47</version>
+        </dependency>
+
         <!-- Common dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>

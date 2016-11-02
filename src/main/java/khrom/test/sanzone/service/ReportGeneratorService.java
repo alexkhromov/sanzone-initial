@@ -39,6 +39,7 @@ public class ReportGeneratorService {
 
         Map< String, Object > parameters = new HashMap<>();
         parameters.put( "sectorsDataSource", collectionDataSource );
+        //parameters.put( "summarySanzone", format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
         parameters.put( "summarySanzone", format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
         JasperReport jasperReport = JasperCompileManager.compileReport( initialTemplate.getInputStream() );

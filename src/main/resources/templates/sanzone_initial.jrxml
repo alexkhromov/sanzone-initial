@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with Jaspersoft Studio version 6.2.0.final using JasperReports Library version 6.2.0  -->
-<!-- 2016-10-06T19:01:59 -->
-<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sanzone_initial" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cb9a4da6-4895-4c6d-8eba-42b7d0da62b9">
+<!-- 2016-10-25T13:53:28 -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="sanzone_initial" pageWidth="595" pageHeight="842" columnWidth="539" leftMargin="28" rightMargin="28" topMargin="56" bottomMargin="56" uuid="cb9a4da6-4895-4c6d-8eba-42b7d0da62b9">
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-	<property name="com.jaspersoft.studio.unit." value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
-	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit." value="cm"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="cm"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="cm"/>
 	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
 		<box>
 			<pen lineWidth="0.5" lineColor="#000000"/>
@@ -56,16 +56,16 @@
 		<![CDATA[]]>
 	</queryString>
 	<title>
-		<band height="60" splitType="Stretch">
+		<band height="76" splitType="Stretch">
 			<staticText>
-				<reportElement x="201" y="15" width="153" height="30" uuid="ce7aaa34-451d-421f-be7c-038ca1ebb301"/>
+				<reportElement x="193" y="23" width="153" height="30" uuid="ce7aaa34-451d-421f-be7c-038ca1ebb301"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 					<font fontName="Arial" size="14" isBold="true"/>
 				</textElement>
 				<text><![CDATA[Sanzone initial report]]></text>
 			</staticText>
 			<textField evaluationTime="Band">
-				<reportElement x="455" y="15" width="100" height="30" forecolor="#D6D6D6" uuid="b42717ef-d657-41d0-9eaf-9aeebbb915bd"/>
+				<reportElement x="439" y="23" width="100" height="30" forecolor="#D6D6D6" uuid="b42717ef-d657-41d0-9eaf-9aeebbb915bd"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle" markup="none">
 					<font fontName="SansSerif" size="10"/>
 				</textElement>
@@ -74,48 +74,50 @@
 		</band>
 	</title>
 	<detail>
-		<band height="180" splitType="Stretch">
+		<band height="283" splitType="Stretch">
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
+			<property name="com.jaspersoft.studio.unit.height" value="cm"/>
 			<componentElement>
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="555" height="180" uuid="d7c69b47-c433-4b15-a84a-d6a07d872c33">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="539" height="283" uuid="d7c69b47-c433-4b15-a84a-d6a07d872c33">
 					<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
 					<property name="com.jaspersoft.studio.components.autoresize.next" value="true"/>
-					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
 					<property name="net.sf.jasperreports.export.headertoolbar.table.name" value=""/>
+					<property name="com.jaspersoft.studio.unit.height" value="cm"/>
+					<property name="com.jaspersoft.studio.components.autoresize.proportional" value="true"/>
 				</reportElement>
 				<jr:table xmlns:jr="http://jasperreports.sourceforge.net/jasperreports/components" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports/components http://jasperreports.sourceforge.net/xsd/components.xsd">
 					<datasetRun subDataset="SectorsDataset" uuid="1332d1f9-39c1-4ac1-8236-fb2682c3882c">
 						<dataSourceExpression><![CDATA[$P{sectorsDataSource}]]></dataSourceExpression>
 					</datasetRun>
-					<jr:column width="87" uuid="ffdbc9b9-be57-4f74-be0b-8e0a3f9bce0f">
+					<jr:column width="85" uuid="ffdbc9b9-be57-4f74-be0b-8e0a3f9bce0f">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column1"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="87" height="30" uuid="79b7c794-7241-4297-9a53-3e667937c087"/>
+								<reportElement x="0" y="0" width="85" height="30" uuid="79b7c794-7241-4297-9a53-3e667937c087"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Latitude]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="87" height="30" uuid="3365f44b-71f6-4ea1-b634-18ab203af58b"/>
+								<reportElement x="0" y="0" width="85" height="30" uuid="3365f44b-71f6-4ea1-b634-18ab203af58b"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{latitude}]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="78" uuid="7b61141f-2bb4-42a3-b310-bf8c5753a05d">
+					<jr:column width="77" uuid="7b61141f-2bb4-42a3-b310-bf8c5753a05d">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column2"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="78" height="30" uuid="12928a2b-631b-4ea4-815f-050ec1a6410c"/>
+								<reportElement x="0" y="0" width="77" height="30" uuid="12928a2b-631b-4ea4-815f-050ec1a6410c"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Longitude]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="78" height="30" uuid="b2d1034f-5a57-4186-b83a-5fe9bd3c99e4"/>
+								<reportElement x="0" y="0" width="77" height="30" uuid="b2d1034f-5a57-4186-b83a-5fe9bd3c99e4"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{longitude}]]></textFieldExpression>
 							</textField>
@@ -155,69 +157,69 @@
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="48" uuid="39d32dac-43a2-4f6b-be8c-11e3d092b8da">
+					<jr:column width="46" uuid="39d32dac-43a2-4f6b-be8c-11e3d092b8da">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column5"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="48" height="30" uuid="428cb097-2636-4d9a-8a61-0e4604233395"/>
+								<reportElement x="0" y="0" width="46" height="30" uuid="428cb097-2636-4d9a-8a61-0e4604233395"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Gain]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="48" height="30" uuid="e68fe79c-4374-456d-8704-c00a792e52ad"/>
+								<reportElement x="0" y="0" width="46" height="30" uuid="e68fe79c-4374-456d-8704-c00a792e52ad"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{antenna}.getGain()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="0b27bcce-e4ee-4f81-a2e8-14e7e39c1262">
+					<jr:column width="57" uuid="0b27bcce-e4ee-4f81-a2e8-14e7e39c1262">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column6"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="fa84d0ff-ef2c-4c9c-98bd-2e94b4448455"/>
+								<reportElement x="0" y="0" width="57" height="30" uuid="fa84d0ff-ef2c-4c9c-98bd-2e94b4448455"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Tract lost]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="60" height="30" uuid="b19112c1-c5ca-49bc-bfb2-b663e7b72b09"/>
+								<reportElement x="0" y="0" width="57" height="30" uuid="b19112c1-c5ca-49bc-bfb2-b663e7b72b09"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{antenna}.getTractLost()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="60" uuid="5b38b472-d582-487f-945b-54d21f9649a8">
+					<jr:column width="57" uuid="5b38b472-d582-487f-945b-54d21f9649a8">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column7"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="60" height="30" uuid="64174fa6-81f0-42ca-9a93-3fd512aa6d53"/>
+								<reportElement x="0" y="0" width="57" height="30" uuid="64174fa6-81f0-42ca-9a93-3fd512aa6d53"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Earth factor]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="60" height="30" uuid="1c957bf6-fa21-48cf-a3a2-ebec9c9ade50"/>
+								<reportElement x="0" y="0" width="57" height="30" uuid="1c957bf6-fa21-48cf-a3a2-ebec9c9ade50"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{antenna}.getEarthFactor()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>
-					<jr:column width="114" uuid="56ca1417-d18d-41f7-85bf-1ad9ebbb26f9">
+					<jr:column width="109" uuid="56ca1417-d18d-41f7-85bf-1ad9ebbb26f9">
 						<property name="com.jaspersoft.studio.components.table.model.column.name" value="Column8"/>
 						<jr:columnHeader style="Table_CH" height="30" rowSpan="1">
 							<staticText>
-								<reportElement x="0" y="0" width="114" height="30" uuid="9fe51d60-2f83-4c32-a1de-0d4993e3de31"/>
+								<reportElement x="0" y="0" width="109" height="30" uuid="9fe51d60-2f83-4c32-a1de-0d4993e3de31"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<text><![CDATA[Diagram width at half power level]]></text>
 							</staticText>
 						</jr:columnHeader>
 						<jr:detailCell style="Table_TD" height="30">
 							<textField>
-								<reportElement x="0" y="0" width="114" height="30" uuid="99d3bfb6-6248-4103-a0ff-7b5fa68629d7"/>
+								<reportElement x="0" y="0" width="109" height="30" uuid="99d3bfb6-6248-4103-a0ff-7b5fa68629d7"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
 								<textFieldExpression><![CDATA[$F{antenna}.getDiagramWidthHalfPower()]]></textFieldExpression>
 							</textField>
@@ -226,13 +228,11 @@
 				</jr:table>
 			</componentElement>
 		</band>
-		<band height="562" splitType="Stretch">
+		<band height="283" splitType="Stretch">
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.VerticalRowLayout"/>
-			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-			<image scaleImage="RealSize" hAlign="Center" vAlign="Middle">
-				<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="555" height="562" uuid="30413a39-cad2-47dc-ba18-d0b0d849b52a">
-					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
-				</reportElement>
+			<property name="com.jaspersoft.studio.unit.height" value="cm"/>
+			<image scaleImage="RetainShape" hAlign="Center" vAlign="Middle">
+				<reportElement positionType="Float" stretchType="RelativeToTallestObject" mode="Transparent" x="0" y="0" width="539" height="283" uuid="30413a39-cad2-47dc-ba18-d0b0d849b52a"/>
 				<imageExpression><![CDATA[$P{summarySanzone}]]></imageExpression>
 			</image>
 		</band>
