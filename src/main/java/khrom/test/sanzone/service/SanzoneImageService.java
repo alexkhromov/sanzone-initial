@@ -22,6 +22,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import static java.awt.BasicStroke.CAP_BUTT;
+import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.format;
@@ -237,6 +239,9 @@ public class SanzoneImageService {
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
 
+        Color inside = new Color( 255, 0, 0, 255 );
+        Color border = new Color( 0, 0, 0, 255 );
+
         try {
 
             BufferedImage googleMap = ImageIO.read( map );
@@ -244,11 +249,8 @@ public class SanzoneImageService {
             BufferedImage sanzoneImg = new BufferedImage( googleMap.getWidth(), googleMap.getHeight(), getImageType( googleMap ) );
             Graphics2D g2 = sanzoneImg.createGraphics();
 
-            Color border = new Color( 255, 0, 0, 127 );
-
             g2.drawImage( googleMap, null, 0, 0 );
             g2.setColor( border );
-            g2.fillOval( centerX - 3, centerY - 3, 6, 6 );
 
             //TODO issue: we need to determine how to handle and draw sanzone and border
             //TODO        when sectors coordinates are different!!!
@@ -258,6 +260,7 @@ public class SanzoneImageService {
 
                 Polygon polygon = getPolygonForSummary( getBorderPointsForSummary( sanzone ), centerX, centerY, ratioPixelToMeter );
 
+                g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
                 g2.drawPolygon( polygon );
 
             } else {
@@ -279,7 +282,27 @@ public class SanzoneImageService {
 
             g2.dispose();
 
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), destination );
+            Image scaledSanzone = sanzoneImg.getScaledInstance( 400, 400, SCALE_SMOOTH );
+            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
+
+            g2 = result.createGraphics();
+
+            g2.drawImage( scaledSanzone, 0, 0, null );
+            g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+            g2.setColor( border);
+            g2.drawRect( 0, 0 , result.getWidth() - 1, result.getHeight() - 1 );
+
+            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+
+                g2.drawLine( i, 0, i, result.getHeight() - 1 );
+                g2.drawLine( 0, i, result.getWidth() - 1, i );
+            }
+
+            g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+            g2.setColor( inside );
+            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+
+            ImageIO.write( result, googleStaticMapConfig.getFormat(), destination );
 
             } catch ( IOException e ) {
         }
@@ -291,7 +314,7 @@ public class SanzoneImageService {
 
         Color inside = new Color( 255, 0, 0, 255 );
         Color outside = new Color( 255, 255, 255, 255 );
-        Color border2 = new Color( 0, 0, 0, 255 );
+        Color border = new Color( 0, 0, 0, 255 );
 
         try {
 
@@ -355,7 +378,7 @@ public class SanzoneImageService {
                             if( color.getGreen() > 110 && color.getBlue() > 110 ) {
 
                                 g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
-                                g2.setColor( border2 );
+                                g2.setColor( border );
                                 g2.fillOval( j - 1, i - 1, 3, 3 );
 
                             } else if ( fillSanzone ){
@@ -378,7 +401,7 @@ public class SanzoneImageService {
 
             g2.drawImage( scaledSanzone, 0, 0, null );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
-            g2.setColor( border2 );
+            g2.setColor( border );
             g2.drawRect( 0, 0 , result.getWidth() - 1, result.getHeight() - 1 );
 
             for ( int i = 40; i < result.getWidth(); i += 40 ) {

@@ -20,7 +20,7 @@ import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
 public class MapUtil {
 
     private static final int MAX_DISTANCE = 200;
-    private static final int POINT_STEP = 5;
+    private static final int POINT_STEP = 1;
 
     /**
      * Returns an angle of map image in degrees that falls on given image width size and given zoom.
