@@ -7,24 +7,30 @@ import khrom.test.sanzone.config.GoogleStaticMapConfig;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 import net.sf.jasperreports.engine.JRException;
+import org.opencv.core.*;
+import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
+import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 import static java.lang.String.format;
 import static khrom.test.sanzone.common.util.ImageUtil.getImageType;
@@ -47,6 +53,7 @@ public class SanzoneImageService {
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN = "/sanzone/%s/%s_google_map_polyline.%s";
     private static final String PATH_TO_SANZONE_FILE_PATTERN = "/sanzone/%s/%s_sanzone.%s";
+    private static final String PATH_TO_TEST_FILE_PATTERN = "/sanzone/%s/%s_test.%s";
 
     @Autowired
     private GoogleStaticMapConfig googleStaticMapConfig;
@@ -78,7 +85,7 @@ public class SanzoneImageService {
         plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
     }
 
-    public void createSummarySanzoneImage( CreateSanzoneRequest dto, Boolean filter ) throws IOException {
+    public void createSummarySanzoneImage( CreateSanzoneRequest dto ) throws IOException {
 
         String session = UUID.randomUUID().toString();
 
@@ -109,7 +116,7 @@ public class SanzoneImageService {
         getGoogleStaticMapWithPolylineForSummary( sanzone, dto.getSectors(), map.toFile() );
         // This call is optional. It is draw sanzone border using "image pixels" approach.
         // It is also insure that plot from "coordinates approach" draw same image as "image pixels"
-        plotSanzoneByPixelsDataForSummary( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile(), filter );
+        plotSanzoneByPixelsDataForSummary( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile() );
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -143,6 +150,35 @@ public class SanzoneImageService {
 
         getGoogleStaticMap( latitude, longitude, map.toFile() );
         plotSanzoneByPixelsDataForSummaryWithColorProcessing( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile() );
+
+        try {
+            reportGeneratorService.generateReport( session, dto.getSectors() );
+        } catch (JRException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createSummarySanzoneImageWithOpenCV( CreateSanzoneRequest dto ) throws IOException {
+
+        String session = UUID.randomUUID().toString();
+
+        try {
+
+            Files.createDirectories( Paths.get( format( PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN, session ) ) );
+
+        } catch ( IOException e ) {
+        }
+
+        double latitude = dto.getSectors().get( 0 ).getLatitude();
+        double longitude = dto.getSectors().get( 0 ).getLongitude();
+
+        double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
+
+        double [][] sanzone = calculateSanzoneForSummary( dto.getSectors() );
+
+        plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzone, dto.getSectors(), ratioPixelToMeter, format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -234,7 +270,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotSanzoneByPixelsDataForSummary( double [][] sanzone, double ratioPixelToMeter, File map, File destination, Boolean filter ) {
+    private void plotSanzoneByPixelsDataForSummary( double [][] sanzone, double ratioPixelToMeter, File map, File destination ) {
 
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
@@ -416,6 +452,112 @@ public class SanzoneImageService {
             g2.dispose();
 
             ImageIO.write( result, googleStaticMapConfig.getFormat(), destination );
+
+        } catch ( IOException e ) {
+        }
+    }
+
+    private void plotSanzoneByPixelsDataForSummaryWithOpenCV( double [][] sanzone, List< CreateSectorDTO > sectors, double ratioPixelToMeter, String destFileName ) {
+
+        int centerX = googleStaticMapConfig.getWidthCenter();
+        int centerY = googleStaticMapConfig.getHeightCenter();
+
+        Color inside = new Color( 255, 0, 0, 255 );
+        Color border = new Color( 0, 0, 0, 255 );
+
+        try {
+
+            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
+            Graphics2D g2 = sanzoneImg.createGraphics();
+
+            g2.setColor( Color.WHITE );
+
+            for ( int i = 0; i < sanzone.length; i++ ) {
+
+                for ( int j = 0; j < sanzone[ i ].length; j++ ) {
+
+                    if ( sanzone[ i ][ j ] >= 10 ) {
+
+                        int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
+                        int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );
+
+                        g2.fillOval( xPoint - 1, yPoint - 1, 3, 3 );
+                    }
+                }
+            }
+
+            System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+
+            Mat sanzoneMatSrc = new Mat( sanzoneImg.getHeight(), sanzoneImg.getWidth(), CvType.CV_8UC1 );
+            sanzoneMatSrc.put( 0, 0, ( ( DataBufferByte ) sanzoneImg.getRaster().getDataBuffer() ).getData() );
+
+            Imgproc.threshold( sanzoneMatSrc, sanzoneMatSrc, 128.0, 128.0, Imgproc.THRESH_BINARY );
+
+            Mat sanzoneMatDst = sanzoneMatSrc.clone();
+            sanzoneMatDst.release();
+
+            Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+
+            List< MatOfPoint > contours = new ArrayList<>();
+
+            Imgproc.findContours( sanzoneMatDst, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
+
+            LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
+
+            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
+                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
+
+            BufferedImage googleMap = ImageIO.read(url );
+
+            g2.dispose();
+            g2 = googleMap.createGraphics();
+
+            g2.setColor( Color.BLACK );
+            g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
+
+            for ( MatOfPoint point: contours ) {
+
+                Polygon polygon = new Polygon();
+
+                if ( Imgproc.contourArea( point ) < 32 ) {
+                    continue;
+                }
+
+                MatOfPoint source = new MatOfPoint();
+                source.fromList( point.toList() );
+                MatOfPoint approximated = new MatOfPoint();
+                Imgproc.blur( source, approximated, new Size( 1, 13 ), new Point( -1, -1 ) );
+
+                approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
+
+                g2.drawPolygon( polygon );
+            }
+
+            Image scaledSanzone = googleMap.getScaledInstance( 400, 400, SCALE_SMOOTH );
+
+            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
+
+            g2.dispose();
+            g2 = result.createGraphics();
+
+            g2.drawImage( scaledSanzone, 0, 0, null );
+            g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+            g2.setColor( border );
+            g2.drawRect( 0, 0, result.getWidth() - 1, result.getHeight() - 1 );
+
+            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+
+                g2.drawLine( i, 0, i, result.getHeight() - 1 );
+                g2.drawLine( 0, i, result.getWidth() - 1, i );
+            }
+
+            g2.setComposite(AlphaComposite.SrcOver.derive(1.0f) );
+            g2.setColor( inside );
+            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+
+            Path path = Files.createFile( Paths.get( destFileName ) );
+
+            ImageIO.write( result, googleStaticMapConfig.getFormat(), path.toFile() );
 
         } catch ( IOException e ) {
         }
