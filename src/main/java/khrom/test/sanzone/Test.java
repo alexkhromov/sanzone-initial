@@ -29,15 +29,15 @@ public class Test {
         try{
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
-            Mat sanzoneMatSrc = Imgcodecs.imread( "C:\\sanzone\\3f12df6d-416c-4c84-b0ee-3bba24b915b7\\3f12df6d-416c-4c84-b0ee-3bba24b915b7_test.jpg",  Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE );
+            Mat sanzoneMatSrc = Imgcodecs.imread( "C:\\sanzone\\3895c5f9-d062-4eba-b790-f2fb8db2d4d2\\3895c5f9-d062-4eba-b790-f2fb8db2d4d2_test.jpg",  Imgcodecs.CV_LOAD_IMAGE_GRAYSCALE );
 
             Imgproc.threshold( sanzoneMatSrc, sanzoneMatSrc, 100.0, 255.0, Imgproc.THRESH_BINARY );
 
             Mat sanzoneMatDst = sanzoneMatSrc.clone();
-            sanzoneMatDst.release();
+            //sanzoneMatDst.release();
 
-            Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
-            Imgcodecs.imwrite( "dilation.jpg", sanzoneMatDst );
+            //Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+            //Imgcodecs.imwrite( "dilation.jpg", sanzoneMatDst );
 
             List< MatOfPoint > contours = new ArrayList<>();
 
@@ -63,10 +63,15 @@ public class Test {
 
                 System.out.println( Imgproc.contourArea( point ) );
 
-                MatOfPoint source = new MatOfPoint();
+                /*MatOfPoint source = new MatOfPoint();
                 source.fromList( point.toList() );
                 MatOfPoint approximated = new MatOfPoint();
-                Imgproc.blur( source, approximated, new Size( 1, 43 ), new Point( -1, -1 ) );
+                Imgproc.blur( source, approximated, new Size( 3, 3 ), new Point( -1, -1 ) );*/
+
+                MatOfPoint2f source = new MatOfPoint2f();
+                point.convertTo( source, CvType.CV_32F );
+                MatOfPoint2f approximated = new MatOfPoint2f();
+                Imgproc.GaussianBlur( source, approximated, new Size( 11, 11 ), 0, 0 );
 
                 approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
 

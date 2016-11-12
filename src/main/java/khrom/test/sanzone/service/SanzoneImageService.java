@@ -469,8 +469,6 @@ public class SanzoneImageService {
 
         try {
 
-            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
-
             int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
 
             for ( int i = 0; i < sanzone.length; i++ ) {
@@ -479,27 +477,28 @@ public class SanzoneImageService {
 
                     if ( sanzone[ i ][ j ] >= 10 ) {
 
-                        int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
-                        int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );
+                        /*int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
+                        int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );*/
                         //TODO-improvement_#1: calculate sanzone image pixels ( comment block above and uncomment this if needed )
-                        /*int xPoint = centerX + ( j - ( sanzone[ i ].length / 2 ) );
-                        int yPoint = centerY + ( i - ( sanzone.length / 2 ) );*/
+                        int xPoint = centerX + ( j - ( sanzone[ i ].length / 2 ) );
+                        int yPoint = centerY + ( i - ( sanzone.length / 2 ) );
 
                         pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
                     }
                 }
             }
 
+            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
             sanzoneImg.setRGB( 0, 0, googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), pixels, 0, googleStaticMapConfig.getImageWidth() );
 
             //TODO-improvement_#1: scale whole image with imageJ processor and define what is the best ( uncomment block below if needed )
-            /*ColorProcessor processor = new ColorProcessor( sanzoneImg );
+            ColorProcessor processor = new ColorProcessor( sanzoneImg );
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
             Graphics2D g2 = sanzoneImg.createGraphics();
-            g2.drawImage( processor.createImage(), null, null );*/
+            g2.drawImage( processor.createImage(), null, null );
 
+            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
             Path testPath = Files.createFile( Paths.get( testFileName ) );
-
             ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
@@ -510,9 +509,14 @@ public class SanzoneImageService {
             Imgproc.threshold( sanzoneMatSrc, sanzoneMatSrc, 250.0, 255.0, Imgproc.THRESH_BINARY );
 
             Mat sanzoneMatDst = sanzoneMatSrc.clone();
-            sanzoneMatDst.release();
+            //TODO-improvement_#1: need to optimize Mat objects when only blurring is used
+            //sanzoneMatDst.release();
 
-            Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+            //Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+            //TODO-improvement_#1: we need erode scaled image because sanzone is white area ( comment dilation above and uncomment eroding below if needed )
+            //TODO-improvement_#1: OR probably we need just skip eroding for scaled image and just find contours and blur them
+            //TODO-improvement_#1: so in this case comment both: dilation and eroding; also need to optimize Mat objects probably we need just sanzoneMatSrc
+            //Imgproc.erode( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
 
             List< MatOfPoint > contours = new ArrayList<>();
 
@@ -525,10 +529,10 @@ public class SanzoneImageService {
 
             BufferedImage googleMap = ImageIO.read( url );
 
-            Graphics2D g2 = googleMap.createGraphics();
+            //Graphics2D g2 = googleMap.createGraphics();
             //TODO-improvement_#1: create graphics from proper buffered image ( comment g2 above and uncomment block below if needed )
-            /*g2.dispose();
-            g2 = googleMap.createGraphics();*/
+            g2.dispose();
+            g2 = googleMap.createGraphics();
 
             g2.setColor( Color.BLACK );
             g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
@@ -540,13 +544,21 @@ public class SanzoneImageService {
                 if ( Imgproc.contourArea( point ) < 32 ) {
                     continue;
                 }
-
                 System.out.println( Imgproc.contourArea( point ) );
 
-                MatOfPoint source = new MatOfPoint();
+                /*MatOfPoint source = new MatOfPoint();
                 source.fromList( point.toList() );
-                MatOfPoint approximated = new MatOfPoint();
-                Imgproc.blur( source, approximated, new Size( 1, 43 ), new Point( -1, -1 ) );
+                MatOfPoint approximated = new MatOfPoint();*/
+                //TODO-improvement_#1: for blur function use above source and for GaussianBlur use below source
+                MatOfPoint2f source = new MatOfPoint2f();
+                point.convertTo( source, CvType.CV_32F );
+                MatOfPoint2f approximated = new MatOfPoint2f();
+
+                //Imgproc.blur( source, approximated, new Size( 1, 43 ), new Point( -1, -1 ) );
+                //TODO-improvement_#1: for blurring scaled image we need to modify size value ( comment blurring above and uncomment blurring below if needed )
+                //TODO-improvement_#1: also for blurring we can use two functions blur or GaussianBlur ( just use proper source )
+                //Imgproc.blur( source, approximated, new Size( 3, 3 ), new Point( -1, -1 ) );
+                Imgproc.GaussianBlur( source, approximated, new Size( 3, 3 ), 0, 0 );
 
                 approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
 

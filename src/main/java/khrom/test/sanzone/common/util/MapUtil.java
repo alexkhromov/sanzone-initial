@@ -354,7 +354,7 @@ public class MapUtil {
 
     public static double [][] calculateSanzoneForSummaryV2( List< CreateSectorDTO > sectors ) {
 
-        int precision = 2;
+        int precision = 4;
         double [][] summary = new double[ ( MAX_DISTANCE * 2 ) + 1 ][ ( MAX_DISTANCE * 2 ) + 1 ];
 
         for ( CreateSectorDTO sector: sectors ) {
@@ -387,12 +387,11 @@ public class MapUtil {
 
                 for ( int j = 1; j < sectorSanzone[ i ].length; j++ ) {
 
-                    int X = MAX_DISTANCE - ( int ) ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) );
-                    int Y = MAX_DISTANCE + ( int ) ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) );
+                    //int X = MAX_DISTANCE - ( int ) ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) );
+                    //int Y = MAX_DISTANCE + ( int ) ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) );
                     //TODO-improvement_#2: is rounding is better than casting ( comment block above and uncomment block below if needed ) ?
-                    //int X = ( int ) round( MAX_DISTANCE - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
-                    //int Y = ( int ) round( MAX_DISTANCE + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
-
+                    int X = ( int ) round( MAX_DISTANCE - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
+                    int Y = ( int ) round( MAX_DISTANCE + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
 
                     if ( X >= 0 && summary.length > X && Y >= 0 && summary[ X ].length > Y ) {
 
