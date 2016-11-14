@@ -6,7 +6,6 @@ import khrom.test.sanzone.service.SanzoneImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,11 +36,10 @@ public class SanzoneImageController {
         return response;
     }
 
-    @RequestMapping( value = "/v1/summary/{filter}", method = POST, consumes = JSON )
-    public ResponseEntity< ? > createSummarySanzoneImage( @PathVariable( value = "filter" ) Boolean filter,
-                                                          @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
+    @RequestMapping( value = "/v1/summary/pixels", method = POST, consumes = JSON )
+    public ResponseEntity< ? > createSummarySanzoneImage( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
 
-        sanzoneImageService.createSummarySanzoneImage( dto, filter );
+        sanzoneImageService.createSummarySanzoneImage( dto );
 
         ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
 
@@ -51,7 +49,17 @@ public class SanzoneImageController {
     @RequestMapping( value = "/v1/summary/blurGaussian", method = POST, consumes = JSON )
     public ResponseEntity< ? > createSummarySanzoneImageWithColorProcessing( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
 
-        sanzoneImageService.createSummarySanzoneImageWithColorProcessing(dto);
+        sanzoneImageService.createSummarySanzoneImageWithColorProcessing( dto );
+
+        ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
+
+        return response;
+    }
+
+    @RequestMapping( value = "/v1/summary/opencv", method = POST, consumes = JSON )
+    public ResponseEntity< ? > createSummarySanzoneImageWithOpenCV( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
+
+        sanzoneImageService.createSummarySanzoneImageWithOpenCV( dto );
 
         ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
 

@@ -58,6 +58,18 @@
             <version>1.47</version>
         </dependency>
 
+        <!--<dependency>
+            <groupId>nu.pattern</groupId>
+            <artifactId>opencv</artifactId>
+            <version>2.4.9-7</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>org.pattern.opencv</groupId>
+            <artifactId>opencv</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+
         <!-- Common dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -71,6 +83,7 @@
             <version>3.2.2</version>
         </dependency>
 
+        <!-- Google Maps API dependency -->
         <dependency>
             <groupId>com.google.maps</groupId>
             <artifactId>google-maps-services</artifactId>
