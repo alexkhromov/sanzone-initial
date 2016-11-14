@@ -464,9 +464,6 @@ public class SanzoneImageService {
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
 
-        Color inside = new Color( 255, 0, 0, 255 );
-        Color border = new Color( 0, 0, 0, 255 );
-
         try {
 
             int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
@@ -522,10 +519,7 @@ public class SanzoneImageService {
 
             Imgproc.findContours( sanzoneMatDst, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
 
-            LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
-
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
-                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
+            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude() ) ) );
 
             BufferedImage googleMap = ImageIO.read( url );
 
@@ -534,17 +528,16 @@ public class SanzoneImageService {
             g2.dispose();
             g2 = googleMap.createGraphics();
 
-            g2.setColor( Color.BLACK );
             g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
 
             for ( MatOfPoint point: contours ) {
 
                 Polygon polygon = new Polygon();
 
-                if ( Imgproc.contourArea( point ) < 32 ) {
+                /*if ( Imgproc.contourArea( point ) < 32 ) {
                     continue;
                 }
-                System.out.println( Imgproc.contourArea( point ) );
+                System.out.println( Imgproc.contourArea( point ) );*/
 
                 /*MatOfPoint source = new MatOfPoint();
                 source.fromList( point.toList() );
@@ -562,6 +555,12 @@ public class SanzoneImageService {
 
                 approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
 
+                g2.setColor( Color.RED );
+                g2.setComposite( AlphaComposite.SrcOver.derive( 0.2f ) );
+                g2.fillPolygon( polygon );
+
+                g2.setColor( Color.BLACK );
+                g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
                 g2.drawPolygon( polygon );
             }
 
@@ -574,7 +573,7 @@ public class SanzoneImageService {
 
             g2.drawImage( scaledSanzone, 0, 0, null );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
-            g2.setColor( border );
+            g2.setColor( Color.BLACK );
             g2.drawRect( 0, 0, result.getWidth() - 1, result.getHeight() - 1 );
 
             for ( int i = 40; i < result.getWidth(); i += 40 ) {
@@ -584,7 +583,7 @@ public class SanzoneImageService {
             }
 
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
-            g2.setColor( inside );
+            g2.setColor( Color.RED );
             g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
 
             Path path = Files.createFile( Paths.get( destFileName ) );

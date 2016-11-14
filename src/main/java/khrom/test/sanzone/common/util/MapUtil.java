@@ -14,6 +14,7 @@ import static java.lang.Math.*;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toMap;
 import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
+import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 
 /**
  * Created by DEV on 9/16/2016.
@@ -357,7 +358,21 @@ public class MapUtil {
         int precision = 4;
         double [][] summary = new double[ ( MAX_DISTANCE * 2 ) + 1 ][ ( MAX_DISTANCE * 2 ) + 1 ];
 
+        double latitude = sectors.get( 0 ).getLatitude();
+        double longitude = sectors.get( 0 ).getLongitude();
+
         for ( CreateSectorDTO sector: sectors ) {
+
+            double offsetLat = 0;
+            double offsetLon = 0;
+
+            if ( Double.compare( sector.getLatitude(), latitude ) != 0 ) {
+                offsetLat = distance( latitude, longitude, 0, sector.getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sector.getLatitude() );
+            }
+
+            if ( Double.compare( sector.getLongitude(), longitude ) != 0 ) {
+                offsetLon = distance( latitude, longitude, 0, latitude, sector.getLongitude(), 0, METER ) * Double.compare( sector.getLongitude(), longitude );
+            }
 
             double P = sector.getAntenna().getP();
             double G = sector.getAntenna().getG();
@@ -387,11 +402,11 @@ public class MapUtil {
 
                 for ( int j = 1; j < sectorSanzone[ i ].length; j++ ) {
 
-                    //int X = MAX_DISTANCE - ( int ) ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) );
-                    //int Y = MAX_DISTANCE + ( int ) ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) );
+                    //int X = MAX_DISTANCE + offsetLon - ( int ) ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) );
+                    //int Y = MAX_DISTANCE + offsetLat + ( int ) ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) );
                     //TODO-improvement_#2: is rounding is better than casting ( comment block above and uncomment block below if needed ) ?
-                    int X = ( int ) round( MAX_DISTANCE - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
-                    int Y = ( int ) round( MAX_DISTANCE + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
+                    int X = ( int ) round( MAX_DISTANCE + offsetLat - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
+                    int Y = ( int ) round( MAX_DISTANCE + offsetLon + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
 
                     if ( X >= 0 && summary.length > X && Y >= 0 && summary[ X ].length > Y ) {
 
