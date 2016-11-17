@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -603,22 +604,9 @@ public class SanzoneImageService {
             // @formatter:off
             String pathParameters  = matOfPoint2fs
                                         .stream()
-                                        .map( p2f -> {
-
-                                            List< Point > scaledPoints = new ArrayList<>();
-
-                                            p2f.toList().stream().forEach( point -> {
-
-                                                Point scaledPoint = new Point();
-
-                                                scaledPoint.y = ( point.x - centerX ) / ratioPixelToMeter;
-                                                scaledPoint.x = ( centerY - point.y ) / ratioPixelToMeter;
-
-                                                scaledPoints.add( scaledPoint );
-                                            } );
-
-                                            return scaledPoints;
-                                        } )
+                                        .map( p2f -> p2f.toList().stream()
+                                                                 .map( point -> new Point( ( centerY - point.y ) / ratioPixelToMeter, ( point.x - centerX ) / ratioPixelToMeter ) )
+                                                                 .collect( Collectors.toList() ) )
                                         .map( list -> getCoordinatesForSummary( list, sectors, METER ) )
                                         .map( PolylineEncoding::encode )
                                         .collect( Collector.of( () -> new StringJoiner( "&" ),
