@@ -21,7 +21,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
  */
 public class MapUtil {
 
-    public static final int MAX_DISTANCE = 200;
+    private static final int MAX_DISTANCE = 200;
     private static final int POINT_STEP = 1;
 
     /**
