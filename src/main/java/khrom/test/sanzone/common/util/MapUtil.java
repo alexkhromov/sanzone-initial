@@ -172,6 +172,43 @@ public class MapUtil {
         return coordinates;
     }
 
+    public static LatLng [] getCoordinatesForSummary( List< org.opencv.core.Point > points, List< CreateSectorDTO > sectors, DistanceUnit unit ) {
+
+        List< Point2D > polarPoints = new LinkedList<>();
+
+        for ( int i = 0; i < points.size(); i++ ) {
+
+            org.opencv.core.Point point = points.get( i );
+
+            double phi = atan( point.x / point.y ) * 180D / PI;
+
+            if ( point.x <= 0 && point.y >= 0 ) {
+                phi = abs( phi ) + 90;
+            } else if ( point.x <= 0 && point.y <= 0 ) {
+                phi = 270 - abs( phi );
+            } else if ( point.x >= 0 && point.y  <= 0 ) {
+                phi = abs( phi ) + 270;
+            } else {
+                phi = 90 - abs( phi );
+            }
+
+            double distance = sqrt( pow( point.x, 2D ) + pow( point.y, 2D ) );
+
+            polarPoints.add( new Point2D( phi, distance ) );
+        }
+
+        LatLng [] coordinates = new LatLng[ polarPoints.size() ];
+
+        double latitude = sectors.get( 0 ).getLatitude();
+        double longitude = sectors.get( 0 ).getLongitude();
+
+        for ( int i = 0; i < coordinates.length; i++ ) {
+            coordinates[ i ] = getLatLng( latitude, longitude, polarPoints.get( i ).getY(), polarPoints.get( i ).getX(), unit );
+        }
+
+        return coordinates;
+    }
+
     public static Polygon getPolygonForSector( double [][] sanzone, int centerX, int centerY, double azimuth, double ratioPixelToMeter ) {
 
         int [] xPoints  = new int [ sanzone.length * 2 ];

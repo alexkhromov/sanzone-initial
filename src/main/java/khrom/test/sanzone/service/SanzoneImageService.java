@@ -25,7 +25,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -47,7 +50,9 @@ public class SanzoneImageService {
 
     private static final String GOOGLE_STATIC_MAPS_API_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&key=%s";
     private static final String GOOGLE_STATIC_MAPS_API_WITH_MARKERS_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=&markers=%s&key=%s";
-    private static final String GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&path=fillcolor:0xAA000033|color:0xFFFFFF00|enc:%s&key=%s";
+
+    private static final String POLYLINE_PATH_PARAMETER = "path=fillcolor:0xAA000033|color:0xFFFFFF00|enc:%s";
+    private static final String GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&%s&key=%s";
 
     private static final String PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN = "/sanzone/%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
@@ -180,7 +185,8 @@ public class SanzoneImageService {
 
         plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzone, dto.getSectors(), ratioPixelToMeter,
                                                      format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                                                     format( PATH_TO_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+                                                     format( PATH_TO_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
+                                                     format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -231,7 +237,7 @@ public class SanzoneImageService {
             LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
 
             URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
-                    googleStaticMapConfig.getObjectsForPolylinePattern(sectors.get(0).getLatitude(), sectors.get(0).getLongitude(), PolylineEncoding.encode(coordinates)) ) );
+                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
 
             BufferedImage image = ImageIO.read( url );
 
@@ -459,7 +465,8 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotSanzoneByPixelsDataForSummaryWithOpenCV( double [][] sanzone, List< CreateSectorDTO > sectors, double ratioPixelToMeter, String destFileName, String testFileName ) {
+    private void plotSanzoneByPixelsDataForSummaryWithOpenCV( double [][] sanzone, List< CreateSectorDTO > sectors, double ratioPixelToMeter,
+                                                                                        String destFileName, String testFileName, String mapFileName ) {
 
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
@@ -519,6 +526,8 @@ public class SanzoneImageService {
 
             Imgproc.findContours( sanzoneMatDst, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
 
+            List< MatOfPoint2f > matOfPoint2fs = new ArrayList<>();
+
             URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude() ) ) );
 
             BufferedImage googleMap = ImageIO.read( url );
@@ -555,6 +564,8 @@ public class SanzoneImageService {
 
                 approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
 
+                matOfPoint2fs.add( approximated );
+
                 g2.setColor( Color.RED );
                 g2.setComposite( AlphaComposite.SrcOver.derive( 0.2f ) );
                 g2.fillPolygon( polygon );
@@ -589,6 +600,29 @@ public class SanzoneImageService {
             Path path = Files.createFile( Paths.get( destFileName ) );
 
             ImageIO.write( result, googleStaticMapConfig.getFormat(), path.toFile() );
+
+            // @formatter:off
+            String pathParameters  = matOfPoint2fs
+                                        .stream()
+                                        .map( p2f -> p2f.toList().stream()
+                                                                 .map( point -> new Point( ( centerY - point.y ) / ratioPixelToMeter, ( point.x - centerX ) / ratioPixelToMeter ) )
+                                                                 .collect( Collectors.toList() ) )
+                                        .map( list -> getCoordinatesForSummary( list, sectors, METER ) )
+                                        .map( PolylineEncoding::encode )
+                                        .collect( Collector.of( () -> new StringJoiner( "&" ),
+                                                                ( j, p ) -> j.add( format( POLYLINE_PATH_PARAMETER, p ) ),
+                                                                ( j1, j2 ) -> j1.merge( j2 ),
+                                                                StringJoiner::toString  ) );
+            // @formatter:on
+
+            URL polyApi = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
+                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), pathParameters ) ) );
+
+            BufferedImage image = ImageIO.read( polyApi );
+
+            Path map = Files.createFile( Paths.get( mapFileName ) );
+
+            ImageIO.write( image, googleStaticMapConfig.getFormat(), map.toFile() );
 
         } catch ( IOException e ) {
         }
