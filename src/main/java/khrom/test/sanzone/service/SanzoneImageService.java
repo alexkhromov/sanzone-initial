@@ -181,7 +181,7 @@ public class SanzoneImageService {
 
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        double [][] sanzone = calculateSanzoneForSummaryV2( dto.getSectors() );
+        List< java.awt.Point > sanzone = calculateSanzoneForSummaryV2( dto.getSectors() );
 
         plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzone, dto.getSectors(), ratioPixelToMeter,
                                                      format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
@@ -465,7 +465,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotSanzoneByPixelsDataForSummaryWithOpenCV( double [][] sanzone, List< CreateSectorDTO > sectors, double ratioPixelToMeter,
+    private void plotSanzoneByPixelsDataForSummaryWithOpenCV( List< java.awt.Point > sanzone, List< CreateSectorDTO > sectors, double ratioPixelToMeter,
                                                                                         String destFileName, String testFileName, String mapFileName ) {
 
         int centerX = googleStaticMapConfig.getWidthCenter();
@@ -475,21 +475,15 @@ public class SanzoneImageService {
 
             int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
 
-            for ( int i = 0; i < sanzone.length; i++ ) {
+            for ( java.awt.Point point : sanzone ) {
 
-                for ( int j = 0; j < sanzone[ i ].length; j++ ) {
+                /*int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
+                int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );*/
+                //TODO-improvement_#1: calculate sanzone image pixels ( comment block above and uncomment this if needed )
+                int xPoint = centerX + point.x;
+                int yPoint = centerY + point.y;
 
-                    if ( sanzone[ i ][ j ] >= 10 ) {
-
-                        /*int xPoint = centerX + ( int ) ( ( j - ( sanzone[ i ].length / 2 ) ) * ratioPixelToMeter );
-                        int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );*/
-                        //TODO-improvement_#1: calculate sanzone image pixels ( comment block above and uncomment this if needed )
-                        int xPoint = centerX + ( j - ( sanzone[ i ].length / 2 ) );
-                        int yPoint = centerY + ( i - ( sanzone.length / 2 ) );
-
-                        pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
-                    }
-                }
+                pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
             }
 
             BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );

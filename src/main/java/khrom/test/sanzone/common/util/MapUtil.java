@@ -21,7 +21,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
  */
 public class MapUtil {
 
-    private static final int MAX_DISTANCE = 200;
+    public static final int MAX_DISTANCE = 200;
     private static final int POINT_STEP = 1;
 
     /**
@@ -390,84 +390,88 @@ public class MapUtil {
         return summary;
     }
 
-    public static double [][] calculateSanzoneForSummaryV2( List< CreateSectorDTO > sectors ) {
+    public static List< Point > calculateSanzoneForSummaryV2( List< CreateSectorDTO > sectors ) {
 
-        int precision = 4;
-        double [][] summary = new double[ ( MAX_DISTANCE * 2 ) + 1 ][ ( MAX_DISTANCE * 2 ) + 1 ];
+        Map< Point, Map< Integer, List< Double > > > summary = new HashMap<>();
+
+        double offsetLat, offsetLon, P, G, TL, EF, Q05, value;
 
         double latitude = sectors.get( 0 ).getLatitude();
         double longitude = sectors.get( 0 ).getLongitude();
+        double offsetY = MAX_DISTANCE / 2.0D;
 
-        for ( CreateSectorDTO sector: sectors ) {
+        int precision = 4;
+        for ( int i = 0; i < MAX_DISTANCE * precision + 1; i++, offsetY -= 1.0D / precision ) {
 
-            double offsetLat = 0;
-            double offsetLon = 0;
+            for ( int j = 1; j < MAX_DISTANCE * precision + 1; j++ ) {
 
-            if ( Double.compare( sector.getLatitude(), latitude ) != 0 ) {
-                offsetLat = distance( latitude, longitude, 0, sector.getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sector.getLatitude() );
-            }
+                double phi = atan( offsetY / ( ( double ) j / precision ) ) * 180D / PI;
 
-            if ( Double.compare( sector.getLongitude(), longitude ) != 0 ) {
-                offsetLon = distance( latitude, longitude, 0, latitude, sector.getLongitude(), 0, METER ) * Double.compare( sector.getLongitude(), longitude );
-            }
+                for ( int s = 0, sectorN = 1; s < sectors.size(); s++, sectorN++ ) {
 
-            double P = sector.getAntenna().getP();
-            double G = sector.getAntenna().getG();
-            double TL = sector.getAntenna().getTL();
-            double EF = sector.getAntenna().getEF();
-            double Q05 = sector.getAntenna().getQ05();
+                    CreateSectorDTO sector = sectors.get( s );
 
-            G = pow( 10, G / 10 );
-            TL = pow( 10, TL / 10 );
+                    offsetLat = 0;
+                    offsetLon = 0;
 
-            double [][] sectorSanzone = new double[ MAX_DISTANCE * precision + 1 ][ MAX_DISTANCE * precision + 1 ];
+                    if ( Double.compare( sector.getLatitude(), latitude ) != 0 ) {
+                        offsetLat = distance( latitude, longitude, 0, sector.getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sector.getLatitude() );
+                    }
 
-            for ( int i = 1; i < sectorSanzone.length; i++ ) {
+                    if ( Double.compare( sector.getLongitude(), longitude ) != 0 ) {
+                        offsetLon = distance( latitude, longitude, 0, latitude, sector.getLongitude(), 0, METER ) * Double.compare( sector.getLongitude(), longitude );
+                    }
 
-                double offsetY = MAX_DISTANCE / 2.0D;
-                for ( int j = 0; j < sectorSanzone.length; j++, offsetY -= 1.0D / precision  ) {
+                    P = sector.getAntenna().getP();
+                    G = sector.getAntenna().getG();
+                    TL = sector.getAntenna().getTL();
+                    EF = sector.getAntenna().getEF();
+                    Q05 = sector.getAntenna().getQ05();
 
-                    double phi = atan( offsetY / ( ( double ) i / precision ) ) * 180D / PI;
-                    sectorSanzone[ j ][ i ] = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) i / precision ), 2D ) + pow( offsetY, 2D ) );
-                }
-            }
+                    G = pow( 10, G / 10 );
+                    TL = pow( 10, TL / 10 );
 
-            Map< Point, List< Double > > sectorResult = new HashMap<>();
+                    value = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) j / precision ), 2D ) + pow( offsetY, 2D ) );
 
-            double offsetY = MAX_DISTANCE / 2.0D;
-            for ( int i = 0; i < sectorSanzone.length; i++, offsetY -= 1.0D / precision ) {
+                    int X = ( int ) round( offsetLon + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
+                    int Y = ( int ) round( offsetLat - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
 
-                for ( int j = 1; j < sectorSanzone[ i ].length; j++ ) {
+                    Point point = new Point( X, Y );
 
-                    //int X = MAX_DISTANCE + offsetLon - ( int ) ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) );
-                    //int Y = MAX_DISTANCE + offsetLat + ( int ) ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) );
-                    //TODO-improvement_#2: is rounding is better than casting ( comment block above and uncomment block below if needed ) ?
-                    int X = ( int ) round( MAX_DISTANCE + offsetLat - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
-                    int Y = ( int ) round( MAX_DISTANCE + offsetLon + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
+                    if ( summary.containsKey( point ) ) {
 
-                    if ( X >= 0 && summary.length > X && Y >= 0 && summary[ X ].length > Y ) {
-
-                        Point point = new Point( X, Y );
-
-                        if ( sectorResult.containsKey( point ) ) {
-                            sectorResult.get( point ).add( sectorSanzone[ i ][ j ] );
+                        if ( summary.get( point ).containsKey( sectorN ) ) {
+                            summary.get( point ).get( sectorN ).add( value );
                         } else {
-                            sectorResult.put( point, new ArrayList( asList( sectorSanzone[ i ][ j ] ) ) );
+                            summary.get( point ).put( sectorN, new ArrayList<>( asList( value ) ) );
                         }
+
+                    } else {
+
+                        Map< Integer, List< Double > > newPoint = new HashMap<>();
+                        newPoint.put( sectorN, new ArrayList<>( asList( value ) ) );
+                        summary.put( point, newPoint );
                     }
                 }
             }
-
-            // @formatter:off
-            sectorResult.entrySet().stream().collect( toMap( Map.Entry::getKey, e -> e.getValue().stream().mapToDouble( a -> a ).average().getAsDouble() ) )
-                        .entrySet().stream().forEach( entry -> {
-                            Point key = entry.getKey();
-                            summary[ key.x ][ key.y ] += entry.getValue();
-                        } );
-            // @formatter:on
         }
 
-        return summary;
+        // @formatter:off
+        Map< Point, Double > points = summary.entrySet()
+                .stream()
+                .collect( toMap( Map.Entry::getKey, point -> point.getValue().entrySet()
+                                 .stream()
+                                 .collect( toMap( Map.Entry::getKey, secAv -> secAv.getValue()
+                                                  .stream().mapToDouble( av -> av ).average().getAsDouble() ) ) ) )
+                .entrySet()
+                .stream()
+                .collect( toMap( Map.Entry::getKey, secSum -> secSum.getValue().values()
+                          .stream().mapToDouble( sum -> sum ).sum() ) );
+        // @formatter:on
+
+        points.entrySet().removeIf( entry -> entry.getValue() < 10 );
+
+        return new ArrayList<>( points.keySet() );
     }
 
     public static List< Point2D > getBorderPointsForSummary( double [][] summary ) {
