@@ -7,12 +7,11 @@ import khrom.test.sanzone.common.util.enums.SearchDirection;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
 import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static java.lang.Math.*;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toMap;
 import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
 import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 
@@ -392,20 +391,18 @@ public class MapUtil {
 
     public static List< Point > calculateSanzoneForSummaryV2( List< CreateSectorDTO > sectors ) {
 
-        Map< Point, Map< Integer, List< Double > > > summary = new HashMap<>();
+        List< Point > summary = new ArrayList<>();
 
-        double offsetLat, offsetLon, P, G, TL, EF, Q05, value;
+        double offsetLat, offsetLon, P, G, TL, EF, Q05;
 
         double latitude = sectors.get( 0 ).getLatitude();
         double longitude = sectors.get( 0 ).getLongitude();
-        double offsetY = MAX_DISTANCE / 2.0D;
 
-        int precision = 4;
-        for ( int i = 0; i < MAX_DISTANCE * precision + 1; i++, offsetY -= 1.0D / precision ) {
+        for ( int i = 0, y = MAX_DISTANCE; i < 2 * MAX_DISTANCE + 1; i++, y-- ) {
 
-            for ( int j = 1; j < MAX_DISTANCE * precision + 1; j++ ) {
+            for ( int j = 0, x = -MAX_DISTANCE; j < 2 * MAX_DISTANCE + 1; j++, x++ ) {
 
-                double phi = atan( offsetY / ( ( double ) j / precision ) ) * 180D / PI;
+                double intensity = 0;
 
                 for ( int s = 0, sectorN = 1; s < sectors.size(); s++, sectorN++ ) {
 
@@ -422,6 +419,23 @@ public class MapUtil {
                         offsetLon = distance( latitude, longitude, 0, latitude, sector.getLongitude(), 0, METER ) * Double.compare( sector.getLongitude(), longitude );
                     }
 
+                    double polarAngle = atan2( y + offsetLat, x - offsetLon ) * 360 / ( 2 * PI );
+                    polarAngle += polarAngle < 0 ? 360 : 0;
+
+                    double azimuthToPolarAngle = 90 - sector.getAzimuth() + ( 90 - sector.getAzimuth() <= 0 ? 360 : 0 );
+
+                    if ( azimuthToPolarAngle - 90 + ( azimuthToPolarAngle - 90 < 0 ? 360 : 0 ) > polarAngle && ( azimuthToPolarAngle + 90 ) % 360 < polarAngle ) {
+                        continue;
+                    }
+
+                    double phi = polarAngle - azimuthToPolarAngle;
+
+                    if ( phi > 90  ) {
+                        phi -= 360;
+                    } else if ( phi < -90 ) {
+                        phi += 360;
+                    }
+
                     P = sector.getAntenna().getP();
                     G = sector.getAntenna().getG();
                     TL = sector.getAntenna().getTL();
@@ -431,47 +445,16 @@ public class MapUtil {
                     G = pow( 10, G / 10 );
                     TL = pow( 10, TL / 10 );
 
-                    value = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) j / precision ), 2D ) + pow( offsetY, 2D ) );
+                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( x - offsetLon, 2D ) + pow( y + offsetLat, 2D ) );
+                }
 
-                    int X = ( int ) round( offsetLon + ( ( ( double ) j / precision ) * cos( toRadians( 90D - sector.getAzimuth() ) ) - offsetY * sin( toRadians( 90D - sector.getAzimuth() ) ) ) );
-                    int Y = ( int ) round( offsetLat - ( ( ( double ) j / precision ) * sin( toRadians( 90D - sector.getAzimuth() ) ) + offsetY * cos( toRadians( 90D - sector.getAzimuth() ) ) ) );
-
-                    Point point = new Point( X, Y );
-
-                    if ( summary.containsKey( point ) ) {
-
-                        if ( summary.get( point ).containsKey( sectorN ) ) {
-                            summary.get( point ).get( sectorN ).add( value );
-                        } else {
-                            summary.get( point ).put( sectorN, new ArrayList<>( asList( value ) ) );
-                        }
-
-                    } else {
-
-                        Map< Integer, List< Double > > newPoint = new HashMap<>();
-                        newPoint.put( sectorN, new ArrayList<>( asList( value ) ) );
-                        summary.put( point, newPoint );
-                    }
+                if ( intensity >= 10 ) {
+                    summary.add( new Point( x, y ) );
                 }
             }
         }
 
-        // @formatter:off
-        Map< Point, Double > points = summary.entrySet()
-                .stream()
-                .collect( toMap( Map.Entry::getKey, point -> point.getValue().entrySet()
-                                 .stream()
-                                 .collect( toMap( Map.Entry::getKey, secAv -> secAv.getValue()
-                                                  .stream().mapToDouble( av -> av ).average().getAsDouble() ) ) ) )
-                .entrySet()
-                .stream()
-                .collect( toMap( Map.Entry::getKey, secSum -> secSum.getValue().values()
-                          .stream().mapToDouble( sum -> sum ).sum() ) );
-        // @formatter:on
-
-        points.entrySet().removeIf( entry -> entry.getValue() < 10 );
-
-        return new ArrayList<>( points.keySet() );
+        return summary;
     }
 
     public static List< Point2D > getBorderPointsForSummary( double [][] summary ) {

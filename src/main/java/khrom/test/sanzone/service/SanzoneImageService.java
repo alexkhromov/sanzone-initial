@@ -481,7 +481,7 @@ public class SanzoneImageService {
                 int yPoint = centerY + ( int ) ( ( i - ( sanzone.length / 2 ) ) * ratioPixelToMeter );*/
                 //TODO-improvement_#1: calculate sanzone image pixels ( comment block above and uncomment this if needed )
                 int xPoint = centerX + point.x;
-                int yPoint = centerY + point.y;
+                int yPoint = centerY - point.y;
 
                 pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
             }
