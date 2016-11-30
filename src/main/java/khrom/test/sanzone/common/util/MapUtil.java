@@ -393,10 +393,28 @@ public class MapUtil {
 
         List< Point > summary = new ArrayList<>();
 
-        double offsetLat, offsetLon, P, G, TL, EF, Q05;
+        double P, G, TL, EF, Q05;
 
         double latitude = sectors.get( 0 ).getLatitude();
         double longitude = sectors.get( 0 ).getLongitude();
+
+        double [][] offsets = new double[ sectors.size() ][ 3 ];
+
+        for ( int i = 0; i < offsets.length; i++ ) {
+
+            // offsetLat
+            if ( Double.compare( sectors.get( i ).getLatitude(), latitude ) != 0 ) {
+                offsets[ i ][ 0 ] = distance( latitude, longitude, 0, sectors.get( i ).getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sectors.get( i ).getLatitude() );
+            }
+
+            // offsetLon
+            if ( Double.compare( sectors.get( i ).getLongitude(), longitude ) != 0 ) {
+                offsets[ i ][ 1 ] = distance( latitude, longitude, 0, latitude, sectors.get( i ).getLongitude(), 0, METER ) * Double.compare( sectors.get( i ).getLongitude(), longitude );
+            }
+
+            // azimuthToPolarAngle
+            offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
+        }
 
         for ( int i = 0, y = MAX_DISTANCE; i < 2 * MAX_DISTANCE + 1; i++, y-- ) {
 
@@ -408,27 +426,14 @@ public class MapUtil {
 
                     CreateSectorDTO sector = sectors.get( s );
 
-                    offsetLat = 0;
-                    offsetLon = 0;
-
-                    if ( Double.compare( sector.getLatitude(), latitude ) != 0 ) {
-                        offsetLat = distance( latitude, longitude, 0, sector.getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sector.getLatitude() );
-                    }
-
-                    if ( Double.compare( sector.getLongitude(), longitude ) != 0 ) {
-                        offsetLon = distance( latitude, longitude, 0, latitude, sector.getLongitude(), 0, METER ) * Double.compare( sector.getLongitude(), longitude );
-                    }
-
-                    double polarAngle = atan2( y + offsetLat, x - offsetLon ) * 360 / ( 2 * PI );
+                    double polarAngle = atan2( y + offsets[ s ][ 0 ], x - offsets[ s ][ 1 ] ) * 360 / ( 2 * PI );
                     polarAngle += polarAngle < 0 ? 360 : 0;
 
-                    double azimuthToPolarAngle = 90 - sector.getAzimuth() + ( 90 - sector.getAzimuth() <= 0 ? 360 : 0 );
-
-                    if ( azimuthToPolarAngle - 90 + ( azimuthToPolarAngle - 90 < 0 ? 360 : 0 ) > polarAngle && ( azimuthToPolarAngle + 90 ) % 360 < polarAngle ) {
+                    if ( offsets[ s ][ 2 ] - 90 + ( offsets[ s ][ 2 ] - 90 < 0 ? 360 : 0 ) > polarAngle && ( offsets[ s ][ 2 ] + 90 ) % 360 < polarAngle ) {
                         continue;
                     }
 
-                    double phi = polarAngle - azimuthToPolarAngle;
+                    double phi = polarAngle - offsets[ s ][ 2 ];
 
                     if ( phi > 90  ) {
                         phi -= 360;
@@ -445,7 +450,7 @@ public class MapUtil {
                     G = pow( 10, G / 10 );
                     TL = pow( 10, TL / 10 );
 
-                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( x - offsetLon, 2D ) + pow( y + offsetLat, 2D ) );
+                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( x - offsets[ s ][  1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ) );
                 }
 
                 if ( intensity >= 10 ) {
