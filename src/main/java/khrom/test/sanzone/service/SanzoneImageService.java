@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.io.File;
@@ -25,10 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
@@ -181,7 +179,7 @@ public class SanzoneImageService {
 
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        List< java.awt.Point > sanzone = calculateSanzoneForSummaryV2( dto.getSectors() );
+        List< java.awt.Point > sanzone = calculateSanzoneForSummaryV3( dto );
 
         plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzone, dto.getSectors(), ratioPixelToMeter,
                                                      format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
@@ -517,8 +515,9 @@ public class SanzoneImageService {
             //Imgproc.erode( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
 
             List< MatOfPoint > contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
 
-            Imgproc.findContours( sanzoneMatDst, contours, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
+            Imgproc.findContours( sanzoneMatDst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
 
             List< MatOfPoint2f > matOfPoint2fs = new ArrayList<>();
 
@@ -533,14 +532,7 @@ public class SanzoneImageService {
 
             g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
 
-            for ( MatOfPoint point: contours ) {
-
-                Polygon polygon = new Polygon();
-
-                /*if ( Imgproc.contourArea( point ) < 32 ) {
-                    continue;
-                }
-                System.out.println( Imgproc.contourArea( point ) );*/
+            for ( MatOfPoint point : contours ) {
 
                 /*MatOfPoint source = new MatOfPoint();
                 source.fromList( point.toList() );
@@ -556,13 +548,41 @@ public class SanzoneImageService {
                 //Imgproc.blur( source, approximated, new Size( 3, 3 ), new Point( -1, -1 ) );
                 Imgproc.GaussianBlur( source, approximated, new Size( 3, 3 ), 0, 0 );
 
+                matOfPoint2fs.add( approximated );
+            }
+
+            for ( int i = 0; i < contours.size(); i++ ) {
+
+                Polygon polygon = new Polygon();
+
+                MatOfPoint2f approximated = matOfPoint2fs.get( i );
+
                 approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
 
                 matOfPoint2fs.add( approximated );
 
-                g2.setColor( Color.RED );
-                g2.setComposite( AlphaComposite.SrcOver.derive( 0.2f ) );
-                g2.fillPolygon( polygon );
+                double [] contourHierarchy = hierarchy.get( 0, i );
+
+                if ( contourHierarchy != null && ( int ) contourHierarchy[ 3 ] == -1 ) {
+
+                    g2.setColor( Color.RED );
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 0.2f ) );
+
+                    int child;
+                    if ( ( child = ( int ) contourHierarchy[ 2 ] ) != -1 ) {
+
+                        Area parent = new Area( polygon );
+                        Polygon childArea = new Polygon();
+                        MatOfPoint2f approximatedChild = matOfPoint2fs.get( child );
+                        approximatedChild.toList().stream().forEach( p -> childArea.addPoint( ( int ) p.x, ( int ) p.y ) );
+                        parent.subtract( new Area( childArea ) );
+
+                        g2.fill( parent );
+
+                    } else {
+                        g2.fillPolygon( polygon );
+                    }
+                }
 
                 g2.setColor( Color.BLACK );
                 g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
@@ -596,7 +616,7 @@ public class SanzoneImageService {
             ImageIO.write( result, googleStaticMapConfig.getFormat(), path.toFile() );
 
             // @formatter:off
-            String pathParameters  = matOfPoint2fs
+            /*String pathParameters  = matOfPoint2fs
                                         .stream()
                                         .map( p2f -> p2f.toList().stream()
                                                                  .map( point -> new Point( ( centerY - point.y ) / ratioPixelToMeter, ( point.x - centerX ) / ratioPixelToMeter ) )
@@ -606,17 +626,17 @@ public class SanzoneImageService {
                                         .collect( Collector.of( () -> new StringJoiner( "&" ),
                                                                 ( j, p ) -> j.add( format( POLYLINE_PATH_PARAMETER, p ) ),
                                                                 ( j1, j2 ) -> j1.merge( j2 ),
-                                                                StringJoiner::toString  ) );
+                                                                StringJoiner::toString  ) );*/
             // @formatter:on
 
-            URL polyApi = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
+            /*URL polyApi = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
                     googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), pathParameters ) ) );
 
             BufferedImage image = ImageIO.read( polyApi );
 
             Path map = Files.createFile( Paths.get( mapFileName ) );
 
-            ImageIO.write( image, googleStaticMapConfig.getFormat(), map.toFile() );
+            ImageIO.write( image, googleStaticMapConfig.getFormat(), map.toFile() );*/
 
         } catch ( IOException e ) {
         }

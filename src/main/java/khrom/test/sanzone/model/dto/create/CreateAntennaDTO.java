@@ -22,7 +22,10 @@ public class CreateAntennaDTO {
     private Double earthFactor;
 
     @NotNull( message = FIELD_MISSING )
-    private Double diagramWidthHalfPower;
+    private Double diagramWidthHalfPowerH;
+
+    @NotNull( message = FIELD_MISSING )
+    private Double diagramWidthHalfPowerV;
 
     public Double getPower() {
         return power;
@@ -56,12 +59,20 @@ public class CreateAntennaDTO {
         this.earthFactor = earthFactor;
     }
 
-    public Double getDiagramWidthHalfPower() {
-        return diagramWidthHalfPower;
+    public Double getDiagramWidthHalfPowerH() {
+        return diagramWidthHalfPowerH;
     }
 
-    public void setDiagramWidthHalfPower(Double diagramWidthHalfPower) {
-        this.diagramWidthHalfPower = diagramWidthHalfPower;
+    public void setDiagramWidthHalfPowerH(Double diagramWidthHalfPowerH) {
+        this.diagramWidthHalfPowerH = diagramWidthHalfPowerH;
+    }
+
+    public Double getDiagramWidthHalfPowerV() {
+        return diagramWidthHalfPowerV;
+    }
+
+    public void setDiagramWidthHalfPowerV(Double diagramWidthHalfPowerV) {
+        this.diagramWidthHalfPowerV = diagramWidthHalfPowerV;
     }
 
     public Double getP() {
@@ -80,7 +91,11 @@ public class CreateAntennaDTO {
         return earthFactor;
     }
 
-    public Double getQ05() {
-        return diagramWidthHalfPower;
+    public Double getQ05H() {
+        return diagramWidthHalfPowerH;
+    }
+
+    public Double getQ05V() {
+        return diagramWidthHalfPowerV;
     }
 }
