@@ -22,7 +22,7 @@ import static java.lang.String.format;
 @Service
 public class ReportGeneratorService {
 
-    private static final String PATH_TO_SANZONE_FILE_PATTERN = "/sanzone/%s/%s_sanzone.%s";
+    private static final String PATH_TO_SANZONE_FILE_PATTERN = "/sanzone/%s/%s_sanzone_H.%s";
     private static final String PATH_TO_SANZONE_PDF_REPORT_PATTERN = "/sanzone/%s/%s_sanzone.pdf";
     private static final String PATH_TO_SANZONE_HTML_REPORT_PATTERN = "/sanzone/%s/%s_sanzone.html";
 

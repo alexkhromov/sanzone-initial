@@ -24,15 +24,15 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.lang.Math.round;
 import static java.lang.String.format;
 import static khrom.test.sanzone.common.util.ImageUtil.getImageType;
 import static khrom.test.sanzone.common.util.MapUtil.*;
@@ -46,7 +46,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 @Service
 public class SanzoneImageService {
 
-    private static final String GOOGLE_STATIC_MAPS_API_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&key=%s";
+    private static final String GOOGLE_STATIC_MAPS_API_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&style=feature:poi|element:labels|visibility:off&style=feature:transit.station|element:labels|visibility:off&key=%s";
     private static final String GOOGLE_STATIC_MAPS_API_WITH_MARKERS_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=&markers=%s&key=%s";
 
     private static final String POLYLINE_PATH_PARAMETER = "path=fillcolor:0xAA000033|color:0xFFFFFF00|enc:%s";
@@ -55,8 +55,10 @@ public class SanzoneImageService {
     private static final String PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN = "/sanzone/%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN = "/sanzone/%s/%s_google_map_polyline.%s";
-    private static final String PATH_TO_SANZONE_FILE_PATTERN = "/sanzone/%s/%s_sanzone.%s";
-    private static final String PATH_TO_TEST_FILE_PATTERN = "/sanzone/%s/%s_test.%s";
+    private static final String PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_H.%s";
+    private static final String PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_V.%s";
+    private static final String PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_H.%s";
+    private static final String PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_V.%s";
 
     @Autowired
     private GoogleStaticMapConfig googleStaticMapConfig;
@@ -85,7 +87,7 @@ public class SanzoneImageService {
 
         // This call is optional. It is draw sanzone border using "image pixels" approach.
         // It is also insure that plot from "coordinates approach" draw same image as "image pixels"
-        plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
+        plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
     }
 
     public void createSummarySanzoneImage( CreateSanzoneRequest dto ) throws IOException {
@@ -114,7 +116,7 @@ public class SanzoneImageService {
         double [][] sanzone = calculateSanzoneForSummary( dto.getSectors() );
 
         Path map = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
-        Path destination = Files.createFile( Paths.get( format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+        Path destination = Files.createFile( Paths.get( format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
 
         getGoogleStaticMapWithPolylineForSummary( sanzone, dto.getSectors(), map.toFile() );
         // This call is optional. It is draw sanzone border using "image pixels" approach.
@@ -149,7 +151,7 @@ public class SanzoneImageService {
         double [][] sanzone = calculateSanzoneForSummary( dto.getSectors() );
 
         Path map = Files.createFile( Paths.get( format( PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
-        Path destination = Files.createFile( Paths.get( format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
+        Path destination = Files.createFile( Paths.get( format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) ) );
 
         getGoogleStaticMap(latitude, longitude, map.toFile());
         plotSanzoneByPixelsDataForSummaryWithColorProcessing( sanzone, ratioPixelToMeter, map.toFile(), destination.toFile() );
@@ -179,12 +181,20 @@ public class SanzoneImageService {
 
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        List< java.awt.Point > sanzone = calculateSanzoneForSummaryV3( dto );
+        //TODO get this from request parameter or dto field
+        int sectorN = 1;
 
-        plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzone, dto.getSectors(), ratioPixelToMeter,
-                                                     format( PATH_TO_SANZONE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                                                     format( PATH_TO_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
+        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sectorN );
+        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV_V3( dto, 1 );
+
+        plotSanzoneByPixelsDataForSummaryWithOpenCV( sanzoneH, dto.getSectors(), ratioPixelToMeter,
+                                                     format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
+                                                     format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                                                      format( PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+
+        plotVerticalDiagram( sanzoneV, dto.getSectors(), sectorN, ratioPixelToMeter,
+                             format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
+                             format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -637,6 +647,165 @@ public class SanzoneImageService {
             Path map = Files.createFile( Paths.get( mapFileName ) );
 
             ImageIO.write( image, googleStaticMapConfig.getFormat(), map.toFile() );*/
+
+        } catch ( IOException e ) {
+        }
+    }
+
+    private void plotVerticalDiagram( Map< Double, Set< Integer > > sanzoneV, List< CreateSectorDTO > sectors,
+                                      int sectorN, double ratioPixelToMeter, String destFileName, String testFileName ) {
+
+        int centerX = googleStaticMapConfig.getWidthCenter();
+        int centerY = googleStaticMapConfig.getHeightCenter();
+
+        try {
+
+            int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
+
+            for ( Map.Entry< Double, Set< Integer > > entry: sanzoneV.entrySet() ) {
+
+                int yPoint = centerY + ( int ) round( ( ( sectors.get( sectorN ).getHeight() - entry.getKey() ) * POINT_STEP ) );
+
+                for ( Integer distance: entry.getValue() ) {
+
+                    int xPoint = centerX + distance;
+
+                    pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
+                }
+            }
+
+            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
+            Graphics2D g2 = sanzoneImg.createGraphics();
+            g2.translate( -200, 200 );
+            sanzoneImg.setRGB( 0, 0, googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), pixels, 0, googleStaticMapConfig.getImageWidth() );
+
+            //TODO-improvement_#1: scale whole image with imageJ processor and define what is the best ( uncomment block below if needed )
+            ColorProcessor processor = new ColorProcessor( sanzoneImg );
+            processor.scale( ratioPixelToMeter * 2, ratioPixelToMeter * 2 / POINT_STEP );
+            g2.drawImage( processor.createImage(), null, null );
+            g2.translate( 50, 50 );
+
+            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
+            Path testPath = Files.createFile( Paths.get( testFileName ) );
+            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
+
+            System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+
+            Mat sanzoneMatSrc = new Mat( sanzoneImg.getHeight(), sanzoneImg.getWidth(), CvType.CV_8UC1 );
+            sanzoneMatSrc.put( 0, 0, ( ( DataBufferByte ) sanzoneImg.getRaster().getDataBuffer() ).getData() );
+
+            Imgproc.threshold( sanzoneMatSrc, sanzoneMatSrc, 250.0, 255.0, Imgproc.THRESH_BINARY );
+
+            Mat sanzoneMatDst = sanzoneMatSrc.clone();
+            //TODO-improvement_#1: need to optimize Mat objects when only blurring is used
+            //sanzoneMatDst.release();
+
+            //Imgproc.dilate( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+            //TODO-improvement_#1: we need erode scaled image because sanzone is white area ( comment dilation above and uncomment eroding below if needed )
+            //TODO-improvement_#1: OR probably we need just skip eroding for scaled image and just find contours and blur them
+            //TODO-improvement_#1: so in this case comment both: dilation and eroding; also need to optimize Mat objects probably we need just sanzoneMatSrc
+            //Imgproc.erode( sanzoneMatSrc, sanzoneMatDst, Imgproc.getStructuringElement( Imgproc.MORPH_ELLIPSE, new Size( 3, 3 ) ) );
+
+            List< MatOfPoint > contours = new ArrayList<>();
+            Mat hierarchy = new Mat();
+
+            Imgproc.findContours( sanzoneMatDst, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE, new Point( 0, 0 ) );
+
+            List< MatOfPoint2f > matOfPoint2fs = new ArrayList<>();
+
+            BufferedImage diagram = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_INT_RGB );
+
+            //Graphics2D g2 = googleMap.createGraphics();
+            //TODO-improvement_#1: create graphics from proper buffered image ( comment g2 above and uncomment block below if needed )
+            g2.dispose();
+            g2 = diagram.createGraphics();
+
+            g2.setColor( Color.WHITE );
+            g2.fillRect ( 0, 0, diagram.getWidth(), diagram.getHeight() );
+            g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
+
+            for ( MatOfPoint point : contours ) {
+
+                /*MatOfPoint source = new MatOfPoint();
+                source.fromList( point.toList() );
+                MatOfPoint approximated = new MatOfPoint();*/
+                //TODO-improvement_#1: for blur function use above source and for GaussianBlur use below source
+                MatOfPoint2f source = new MatOfPoint2f();
+                point.convertTo( source, CvType.CV_32F );
+                MatOfPoint2f approximated = new MatOfPoint2f();
+
+                //Imgproc.blur( source, approximated, new Size( 1, 43 ), new Point( -1, -1 ) );
+                //TODO-improvement_#1: for blurring scaled image we need to modify size value ( comment blurring above and uncomment blurring below if needed )
+                //TODO-improvement_#1: also for blurring we can use two functions blur or GaussianBlur ( just use proper source )
+                //Imgproc.blur( source, approximated, new Size( 3, 3 ), new Point( -1, -1 ) );
+                Imgproc.GaussianBlur( source, approximated, new Size( 3, 3 ), 0, 0 );
+
+                matOfPoint2fs.add( approximated );
+            }
+
+            for ( int i = 0; i < contours.size(); i++ ) {
+
+                Polygon polygon = new Polygon();
+
+                MatOfPoint2f approximated = matOfPoint2fs.get( i );
+
+                approximated.toList().stream().forEach( p -> polygon.addPoint( ( int ) p.x, ( int ) p.y ) );
+
+                matOfPoint2fs.add( approximated );
+
+                double [] contourHierarchy = hierarchy.get( 0, i );
+
+                if ( contourHierarchy != null && ( int ) contourHierarchy[ 3 ] == -1 ) {
+
+                    g2.setColor( Color.RED );
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 0.2f ) );
+
+                    int child;
+                    if ( ( child = ( int ) contourHierarchy[ 2 ] ) != -1 ) {
+
+                        Area parent = new Area( polygon );
+                        Polygon childArea = new Polygon();
+                        MatOfPoint2f approximatedChild = matOfPoint2fs.get( child );
+                        approximatedChild.toList().stream().forEach( p -> childArea.addPoint( ( int ) p.x, ( int ) p.y ) );
+                        parent.subtract( new Area( childArea ) );
+
+                        g2.fill( parent );
+
+                    } else {
+                        g2.fillPolygon( polygon );
+                    }
+                }
+
+                g2.setColor( Color.BLACK );
+                g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+                g2.drawPolygon( polygon );
+            }
+
+            Image scaledSanzone = diagram.getScaledInstance( 400, 400, SCALE_SMOOTH );
+
+            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
+
+            g2.dispose();
+            g2 = result.createGraphics();
+
+            g2.drawImage( scaledSanzone, 0, 0, null );
+            g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+            g2.setColor( Color.BLACK );
+            g2.drawRect( 0, 0, result.getWidth() - 1, result.getHeight() - 1 );
+
+            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+
+                g2.drawLine( i, 0, i, result.getHeight() - 1 );
+                g2.drawLine( 0, i, result.getWidth() - 1, i );
+            }
+
+            g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+            g2.setColor( Color.RED );
+            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+
+            Path path = Files.createFile( Paths.get( destFileName ) );
+
+            ImageIO.write( result, googleStaticMapConfig.getFormat(), path.toFile() );
 
         } catch ( IOException e ) {
         }

@@ -10,8 +10,10 @@ import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
+import static java.util.Arrays.asList;
 import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
 import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 
@@ -21,7 +23,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 public class MapUtil {
 
     public static final int MAX_DISTANCE = 200;
-    private static final int POINT_STEP = 1;
+    public static final int POINT_STEP = 5;
 
     /**
      * Returns an angle of map image in degrees that falls on given image width size and given zoom.
@@ -462,14 +464,14 @@ public class MapUtil {
         return summary;
     }
 
-    public static List< Point > calculateSanzoneForSummaryV3( CreateSanzoneRequest dto ) {
+    public static List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, int sectorN ) {
 
         List< Point > summary = new ArrayList<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
-        double latitude = dto.getSectors().get( 0 ).getLatitude();
-        double longitude = dto.getSectors().get( 0 ).getLongitude();
+        double latitude = dto.getSectors().get( sectorN ).getLatitude();
+        double longitude = dto.getSectors().get( sectorN ).getLongitude();
 
         List< CreateSectorDTO > sectors = dto.getSectors();
 
@@ -497,7 +499,7 @@ public class MapUtil {
 
                 double intensity = 0;
 
-                for ( int s = 0, sectorN = 1; s < sectors.size(); s++, sectorN++ ) {
+                for ( int s = 0; s < sectors.size(); s++ ) {
 
                     CreateSectorDTO sector = sectors.get( s );
 
@@ -527,14 +529,279 @@ public class MapUtil {
                     G = pow( 10, G / 10 );
                     TL = pow( 10, TL / 10 );
 
-                    double teta = atan( ( H - dto.getHeight() ) / pow( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
+                    double teta = atan( ( H - dto.getHeightM() ) / pow( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
 
                     intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) ) * ( exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) ) )
-                                 / ( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ) + pow( H - dto.getHeight(), 2D ) );
+                                 / ( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ) + pow( H - dto.getHeightM(), 2D ) );
                 }
 
                 if ( intensity >= 10 ) {
                     summary.add( new Point( x, y ) );
+                }
+            }
+        }
+
+        return summary;
+    }
+
+    public static Map< Integer, Set< Integer > > calculateSanzoneForSummaryV_V1( CreateSanzoneRequest dto, int sectorN ) {
+
+        Map< Integer, Set< Integer > > summary = new HashMap<>();
+
+        double H, P, G, TL, EF, Q05H, Q05V;
+
+        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
+        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
+        double azimuth = dto.getSectors().get( sectorN - 1 ).getAzimuth();
+        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
+
+        List< CreateSectorDTO > sectors = dto.getSectors();
+
+        double [][] offsets = new double[ sectors.size() ][ 3 ];
+
+        for ( int i = 0; i < offsets.length; i++ ) {
+
+            // offsetLat
+            if ( Double.compare( sectors.get( i ).getLatitude(), latitude ) != 0 ) {
+                offsets[ i ][ 0 ] = distance( latitude, longitude, 0, sectors.get( i ).getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sectors.get( i ).getLatitude() );
+            }
+
+            // offsetLon
+            if ( Double.compare( sectors.get( i ).getLongitude(), longitude ) != 0 ) {
+                offsets[ i ][ 1 ] = distance( latitude, longitude, 0, latitude, sectors.get( i ).getLongitude(), 0, METER ) * Double.compare( sectors.get( i ).getLongitude(), longitude );
+            }
+
+            // azimuthToPolarAngle
+            offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
+        }
+
+        for ( int i = 0, y = MAX_DISTANCE; i < 2 * MAX_DISTANCE + 1; i++, y-- ) {
+
+            for ( int j = 0, x = -MAX_DISTANCE; j < 2 * MAX_DISTANCE + 1; j++, x++ ) {
+
+                double currentAngle = atan2( y + offsets[ sectorN - 1 ][ 0 ], x - offsets[ sectorN - 1 ][ 1 ] ) * 360 / ( 2 * PI );
+                currentAngle += currentAngle < 0 ? 360 : 0;
+
+                if ( currentAngle >= offsets[ sectorN - 1 ][ 2 ] + 2 || currentAngle <= offsets[ sectorN - 1 ][ 2 ] - 2 ) {
+                    continue;
+                }
+
+                /*if ( ( int ) currentAngle != ( int ) offsets[ sectorN - 1 ][ 2 ] ) {
+                    continue;
+                }*/
+
+                for ( int h = 0; h < ( height + 100 ) * POINT_STEP; h++ ) {
+
+                    double intensity = 0;
+
+                    for ( int s = 0; s < sectors.size(); s++ ) {
+
+                        CreateSectorDTO sector = sectors.get( s );
+
+                        double polarAngle = atan2( y + offsets[ s ][ 0 ], x - offsets[ s ][ 1 ] ) * 360 / ( 2 * PI );
+                        polarAngle += polarAngle < 0 ? 360 : 0;
+
+                        if ( offsets[ s ][ 2 ] - 90 + ( offsets[ s ][ 2 ] - 90 < 0 ? 360 : 0 ) > polarAngle && ( offsets[ s ][ 2 ] + 90 ) % 360 < polarAngle ) {
+                            continue;
+                        }
+
+                        double phi = polarAngle - offsets[ s ][ 2 ];
+
+                        if ( phi > 90  ) {
+                            phi -= 360;
+                        } else if ( phi < -90 ) {
+                            phi += 360;
+                        }
+
+                        H = sector.getHeight();
+                        P = sector.getAntenna().getP();
+                        G = sector.getAntenna().getG();
+                        TL = sector.getAntenna().getTL();
+                        EF = sector.getAntenna().getEF();
+                        Q05H = sector.getAntenna().getQ05H();
+                        Q05V = sector.getAntenna().getQ05V();
+
+                        G = pow( 10, G / 10 );
+                        TL = pow( 10, TL / 10 );
+
+                        double teta = atan( ( H - ( double ) h / POINT_STEP ) / pow( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
+
+                        intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) ) * ( exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) ) )
+                                / ( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ) + pow( H - ( double ) h / POINT_STEP, 2D ) );
+                    }
+
+                    if ( intensity >= 10 ) {
+
+                        int distance = ( int ) pow( pow( x, 2D ) + pow( y , 2D ), 0.5 );
+
+                        if ( summary.containsKey( h / POINT_STEP ) ) {
+                            summary.get( h / POINT_STEP ).add( distance );
+                        } else {
+                            summary.put( h / POINT_STEP, new HashSet<>( asList( distance ) ) );
+                        }
+                    }
+                }
+            }
+        }
+
+        return summary;
+    }
+
+    public static Map< Integer, Set< Integer > > calculateSanzoneForSummaryV_V2( CreateSanzoneRequest dto, int sectorN ) {
+
+        Map< Integer, Set< Integer > > summary = new HashMap<>();
+
+        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
+        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
+        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
+
+        List< CreateSectorDTO > sectors = dto.getSectors();
+
+        double [][] offsets = new double[ sectors.size() ][ 3 ];
+
+        for ( int i = 0; i < offsets.length; i++ ) {
+
+            // offsetLat
+            if ( Double.compare( sectors.get( i ).getLatitude(), latitude ) != 0 ) {
+                offsets[ i ][ 0 ] = distance( latitude, longitude, 0, sectors.get( i ).getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sectors.get( i ).getLatitude() );
+            }
+
+            // offsetLon
+            if ( Double.compare( sectors.get( i ).getLongitude(), longitude ) != 0 ) {
+                offsets[ i ][ 1 ] = distance( latitude, longitude, 0, latitude, sectors.get( i ).getLongitude(), 0, METER ) * Double.compare( sectors.get( i ).getLongitude(), longitude );
+            }
+
+            // azimuthToPolarAngle
+            offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
+        }
+
+        for ( int h = 0; h < ( height + 100 ) * POINT_STEP; h++ ) {
+
+            final int currentHeight = h;
+
+            dto.setHeightM( ( double ) h / POINT_STEP );
+
+            List< Point > points = calculateSanzoneForSummaryH( dto, sectorN );
+
+            points.stream()
+                  .filter( point -> {
+
+                        double currentAngle = atan2( point.y + offsets[ sectorN - 1 ][ 0 ], point.x - offsets[ sectorN - 1 ][ 1 ] ) * 360 / ( 2 * PI );
+                        currentAngle += currentAngle < 0 ? 360 : 0;
+
+                        if ( currentAngle <= offsets[ sectorN - 1 ][ 2 ] + 2 || currentAngle >= offsets[ sectorN - 1 ][ 2 ] - 2 ) {
+                            return true;
+                        }
+
+                        /*if ( ( int ) currentAngle == ( int ) offsets[ sectorN - 1 ][ 2 ] ) {
+                            return true;
+                        }*/
+
+                        return false;
+                    } )
+                  .collect( Collectors.toList() )
+                  .forEach( point -> {
+
+                      int distance = ( int ) pow( pow( point.x, 2D ) + pow( point.y , 2D ), 0.5 );
+
+                      if ( summary.containsKey( currentHeight / POINT_STEP ) ) {
+                          summary.get( currentHeight / POINT_STEP ).add( distance );
+                      } else {
+                          summary.put( currentHeight / POINT_STEP, new HashSet<>( asList( distance ) ) );
+                      }
+                  } );
+        }
+
+        return summary;
+    }
+
+    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV_V3( CreateSanzoneRequest dto, int sectorN ) {
+
+        Map< Double, Set< Integer > > summary = new HashMap<>();
+
+        double H, P, G, TL, EF, Q05H, Q05V;
+
+        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
+        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
+        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
+        double polarAngleM = 90 - dto.getAzimuthM() + ( 90 - dto.getAzimuthM() <= 0 ? 360 : 0 );
+
+        List< CreateSectorDTO > sectors = dto.getSectors();
+
+        double [][] offsets = new double[ sectors.size() ][ 3 ];
+
+        for ( int i = 0; i < offsets.length; i++ ) {
+
+            // offsetLat
+            if ( Double.compare( sectors.get( i ).getLatitude(), latitude ) != 0 ) {
+                offsets[ i ][ 0 ] = distance( latitude, longitude, 0, sectors.get( i ).getLatitude(), longitude, 0, METER ) * Double.compare( latitude, sectors.get( i ).getLatitude() );
+            }
+
+            // offsetLon
+            if ( Double.compare( sectors.get( i ).getLongitude(), longitude ) != 0 ) {
+                offsets[ i ][ 1 ] = distance( latitude, longitude, 0, latitude, sectors.get( i ).getLongitude(), 0, METER ) * Double.compare( sectors.get( i ).getLongitude(), longitude );
+            }
+
+            // azimuthToPolarAngle
+            offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
+        }
+
+        summary.put( height, new HashSet<>( asList( 0 ) ) );
+
+        for ( int h = 0; h < ( height + MAX_DISTANCE / 2 ) * POINT_STEP; h++ ) {
+
+            for ( int d = 0; d < MAX_DISTANCE * POINT_STEP / 2; d++ ) {
+
+                double intensity = 0;
+
+                double X = cos( toRadians( polarAngleM ) ) * d / POINT_STEP;
+                double Y = sin( toRadians( polarAngleM ) ) * d / POINT_STEP;
+
+                for ( int s = 0; s < sectors.size(); s++ ) {
+
+                    CreateSectorDTO sector = sectors.get( s );
+
+                    double polarAngle = atan2( Y + offsets[ s ][ 0 ], X - offsets[ s ][ 1 ] ) * 360 / ( 2 * PI );
+                    polarAngle += polarAngle < 0 ? 360 : 0;
+
+                    if ( offsets[ s ][ 2 ] - 90 + ( offsets[ s ][ 2 ] - 90 < 0 ? 360 : 0 ) > polarAngle && ( offsets[ s ][ 2 ] + 90 ) % 360 < polarAngle ) {
+                        continue;
+                    }
+
+                    double phi = polarAngle - offsets[ s ][ 2 ];
+
+                    if ( phi > 90  ) {
+                        phi -= 360;
+                    } else if ( phi < -90 ) {
+                        phi += 360;
+                    }
+
+                    H = sector.getHeight();
+                    P = sector.getAntenna().getP();
+                    G = sector.getAntenna().getG();
+                    TL = sector.getAntenna().getTL();
+                    EF = sector.getAntenna().getEF();
+                    Q05H = sector.getAntenna().getQ05H();
+                    Q05V = sector.getAntenna().getQ05V();
+
+                    G = pow( 10, G / 10 );
+                    TL = pow( 10, TL / 10 );
+
+                    double teta = atan( ( H - ( double ) h / POINT_STEP ) / pow( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
+
+                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) ) * ( exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) ) )
+                            / ( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ) + pow( H - ( double ) h / POINT_STEP, 2D ) );
+                }
+
+                if ( intensity >= 10 ) {
+
+                    int distance = ( int ) round( pow( pow( X, 2D ) + pow( Y , 2D ), 0.5 ) );
+
+                    if ( summary.containsKey( ( double ) h / POINT_STEP ) ) {
+                        summary.get( ( double ) h / POINT_STEP ).add( distance );
+                    } else {
+                        summary.put( ( double ) h / POINT_STEP, new HashSet<>( asList( distance ) ) );
+                    }
                 }
             }
         }
