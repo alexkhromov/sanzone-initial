@@ -2,6 +2,7 @@ package khrom.test.sanzone.service;
 
 import com.google.maps.internal.PolylineEncoding;
 import com.google.maps.model.LatLng;
+import ij.gui.Arrow;
 import ij.process.ColorProcessor;
 import khrom.test.sanzone.config.GoogleStaticMapConfig;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
@@ -26,7 +27,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static ij.gui.Arrow.NOTCHED;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
@@ -655,8 +658,26 @@ public class SanzoneImageService {
     private void plotVerticalDiagram( Map< Double, Set< Integer > > sanzoneV, List< CreateSectorDTO > sectors,
                                       int sectorN, double ratioPixelToMeter, String destFileName, String testFileName ) {
 
+        int resultWidth = 400;
+        int resultHeight = 400;
+
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
+
+        double heightZone = sanzoneV.keySet().stream().min( Double::compareTo ).get();
+        double distanceZone = sanzoneV.values()
+                .stream()
+                .map( set -> set.stream().max( Integer::compareTo ).get() )
+                .collect( Collectors.toList() )
+                .stream().max( Integer::compareTo ).get();
+
+        int distanceFactor = ( int ) distanceZone / 49 + 1;
+
+        double scaleX = ratioPixelToMeter * 2;
+        double scaleY = ratioPixelToMeter * 2 / POINT_STEP;
+
+        int baseX = ( int ) round( centerX - ( int ) round( distanceZone * scaleX / 2 ) - googleStaticMapConfig.getImageWidth() / 10D );
+        int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 );
 
         try {
 
@@ -664,26 +685,29 @@ public class SanzoneImageService {
 
             for ( Map.Entry< Double, Set< Integer > > entry: sanzoneV.entrySet() ) {
 
-                int yPoint = centerY + ( int ) round( ( ( sectors.get( sectorN ).getHeight() - entry.getKey() ) * POINT_STEP ) );
+                int yPoint = centerY + ( int ) round( ( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP ) );
 
                 for ( Integer distance: entry.getValue() ) {
 
-                    int xPoint = centerX + distance;
+                    int xPoint = centerX - ( int ) round( distanceZone / 2 ) + distance;
 
                     pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
                 }
             }
 
+            heightZone *= ratioPixelToMeter * 2;
+            distanceZone *= ratioPixelToMeter * 2;
+
             BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
-            Graphics2D g2 = sanzoneImg.createGraphics();
-            g2.translate( -200, 200 );
             sanzoneImg.setRGB( 0, 0, googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), pixels, 0, googleStaticMapConfig.getImageWidth() );
 
             //TODO-improvement_#1: scale whole image with imageJ processor and define what is the best ( uncomment block below if needed )
             ColorProcessor processor = new ColorProcessor( sanzoneImg );
-            processor.scale( ratioPixelToMeter * 2, ratioPixelToMeter * 2 / POINT_STEP );
+            processor.scale( scaleX, scaleY );
+            processor.translate( -baseX, baseY );
+
+            Graphics2D g2 = sanzoneImg.createGraphics();
             g2.drawImage( processor.createImage(), null, null );
-            g2.translate( 50, 50 );
 
             //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
             Path testPath = Files.createFile( Paths.get( testFileName ) );
@@ -722,7 +746,7 @@ public class SanzoneImageService {
 
             g2.setColor( Color.WHITE );
             g2.fillRect ( 0, 0, diagram.getWidth(), diagram.getHeight() );
-            g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
+            g2.setStroke( new BasicStroke( 2.0f, CAP_BUTT, CAP_ROUND ) );
 
             for ( MatOfPoint point : contours ) {
 
@@ -781,9 +805,9 @@ public class SanzoneImageService {
                 g2.drawPolygon( polygon );
             }
 
-            Image scaledSanzone = diagram.getScaledInstance( 400, 400, SCALE_SMOOTH );
+            Image scaledSanzone = diagram.getScaledInstance( resultWidth, resultHeight, SCALE_SMOOTH );
 
-            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
+            BufferedImage result = new BufferedImage( resultWidth, resultHeight, TYPE_INT_RGB );
 
             g2.dispose();
             g2 = result.createGraphics();
@@ -795,13 +819,55 @@ public class SanzoneImageService {
 
             for ( int i = 40; i < result.getWidth(); i += 40 ) {
 
-                g2.drawLine( i, 0, i, result.getHeight() - 1 );
-                g2.drawLine( 0, i, result.getWidth() - 1, i );
+                if ( result.getWidth() / i == 10 ) {
+                    g2.drawLine( 0, i, result.getWidth(), i );
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+                    Arrow arrow = new Arrow( i, result.getHeight(), i, 0 );
+                    arrow.setStyle( NOTCHED );
+                    arrow.setStrokeWidth( 3.0 );
+                    arrow.setFillColor( Color.BLACK );
+                    arrow.drawOverlay( g2 );
+                    g2.dispose();
+                    g2 = result.createGraphics();
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+                    g2.setColor( Color.BLACK );
+                    continue;
+                }
+
+                if ( result.getWidth() - i == 40 ) {
+                    g2.drawLine( i, 0, i, result.getHeight() );
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+                    Arrow arrow = new Arrow( 0, i, result.getWidth(), i );
+                    arrow.setStyle( NOTCHED );
+                    arrow.setStrokeWidth( 3.0 );
+                    arrow.setFillColor( Color.BLACK );
+                    arrow.drawOverlay( g2 );
+                    g2.dispose();
+                    g2 = result.createGraphics();
+                    g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+                    g2.setColor( Color.BLACK );
+                    continue;
+                }
+
+                g2.drawLine( i, 0, i, result.getHeight() );
+                g2.drawLine( 0, i, result.getWidth(), i );
             }
 
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+
             g2.setColor( Color.RED );
-            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+            g2.fillOval( ( int ) round( resultWidth / 10D /*- resultWidth * baseX / ( 2D * centerX )*/ ) - 3,
+                         ( int ) round( resultHeight / 2D + resultHeight * baseY / ( 2D * centerY ) ) - 3,
+                         6, 6 );
+
+            g2.setStroke( new BasicStroke( 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float [] { 20, 10 }, 0 ) );
+            g2.setColor( Color.GREEN );
+            g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+            // +1 / -1 used for correction of stroke width
+            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZone / ( 2D * centerY ) ) + 1,
+                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZone / ( 2D * centerY ) ) + 1 );
+            g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX ) ) + 1, 0,
+                         ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX ) ) + 1, result.getHeight() );
 
             Path path = Files.createFile( Paths.get( destFileName ) );
 
