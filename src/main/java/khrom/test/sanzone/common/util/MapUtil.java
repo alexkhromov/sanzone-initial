@@ -750,7 +750,7 @@ public class MapUtil {
 
         for ( int h = 0; h < ( height + MAX_DISTANCE / 2 ) * POINT_STEP; h++ ) {
 
-            for ( int d = 0; d < MAX_DISTANCE * POINT_STEP / 2; d++ ) {
+            for ( int d = 0; d < MAX_DISTANCE * POINT_STEP; d++ ) {
 
                 double intensity = 0;
 

@@ -664,20 +664,27 @@ public class SanzoneImageService {
         int centerX = googleStaticMapConfig.getWidthCenter();
         int centerY = googleStaticMapConfig.getHeightCenter();
 
-        double heightZone = sanzoneV.keySet().stream().min( Double::compareTo ).get();
+        double heightZoneMin = sanzoneV.keySet().stream().min( Double::compareTo ).get();
+        double heightZoneMax = sanzoneV.keySet().stream().max( Double::compareTo ).get();
         double distanceZone = sanzoneV.values()
                 .stream()
                 .map( set -> set.stream().max( Integer::compareTo ).get() )
                 .collect( Collectors.toList() )
                 .stream().max( Integer::compareTo ).get();
 
-        int distanceFactor = ( int ) distanceZone / 49 + 1;
+        double distanceFactor = ( int ) distanceZone / 98 + 1;
 
-        double scaleX = ratioPixelToMeter * 2;
-        double scaleY = ratioPixelToMeter * 2 / POINT_STEP;
+        if ( distanceFactor == 1 && distanceZone < 48 ) {
+            distanceFactor = 0.5;
+        }
+
+        double heightFactorBaseMove = ( sectors.get( sectorN - 1 ).getHeight().intValue() + ( int ) heightZoneMax ) / 98 + 1;
+
+        double scaleX = ratioPixelToMeter * 2 / distanceFactor;
+        double scaleY = ratioPixelToMeter * 2 / ( POINT_STEP * distanceFactor );
 
         int baseX = ( int ) round( centerX - ( int ) round( distanceZone * scaleX / 2 ) - googleStaticMapConfig.getImageWidth() / 10D );
-        int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 );
+        int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 / distanceFactor );
 
         try {
 
@@ -695,7 +702,10 @@ public class SanzoneImageService {
                 }
             }
 
-            heightZone *= ratioPixelToMeter * 2;
+            double displayHeigth = heightZoneMin;
+            double displayDistance = distanceZone;
+
+            heightZoneMin *= ratioPixelToMeter * 2;
             distanceZone *= ratioPixelToMeter * 2;
 
             BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
@@ -703,6 +713,7 @@ public class SanzoneImageService {
 
             //TODO-improvement_#1: scale whole image with imageJ processor and define what is the best ( uncomment block below if needed )
             ColorProcessor processor = new ColorProcessor( sanzoneImg );
+            processor.setBackgroundValue( 1.0 );
             processor.scale( scaleX, scaleY );
             processor.translate( -baseX, baseY );
 
@@ -856,7 +867,7 @@ public class SanzoneImageService {
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
 
             g2.setColor( Color.RED );
-            g2.fillOval( ( int ) round( resultWidth / 10D /*- resultWidth * baseX / ( 2D * centerX )*/ ) - 3,
+            g2.fillOval( ( int ) round( resultWidth / 10D ) - 3,
                          ( int ) round( resultHeight / 2D + resultHeight * baseY / ( 2D * centerY ) ) - 3,
                          6, 6 );
 
@@ -864,10 +875,10 @@ public class SanzoneImageService {
             g2.setColor( Color.GREEN );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
             // +1 / -1 used for correction of stroke width
-            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZone / ( 2D * centerY ) ) + 1,
-                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZone / ( 2D * centerY ) ) + 1 );
-            g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX ) ) + 1, 0,
-                         ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX ) ) + 1, result.getHeight() );
+            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * distanceFactor ) ) + 1,
+                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * distanceFactor ) ) + 1 );
+            g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, 0,
+                         ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, result.getHeight() );
 
             Path path = Files.createFile( Paths.get( destFileName ) );
 
