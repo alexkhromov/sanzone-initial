@@ -36,30 +36,10 @@ public class SanzoneImageController {
         return response;
     }
 
-    @RequestMapping( value = "/v1/summary/pixels", method = POST, consumes = JSON )
-    public ResponseEntity< ? > createSummarySanzoneImage( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
-
-        sanzoneImageService.createSummarySanzoneImage( dto );
-
-        ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
-
-        return response;
-    }
-
-    @RequestMapping( value = "/v1/summary/blurGaussian", method = POST, consumes = JSON )
-    public ResponseEntity< ? > createSummarySanzoneImageWithColorProcessing( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
-
-        sanzoneImageService.createSummarySanzoneImageWithColorProcessing( dto );
-
-        ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
-
-        return response;
-    }
-
-    @RequestMapping( value = "/v1/summary/opencv", method = POST, consumes = JSON )
+    @RequestMapping( value = "/v1/summary", method = POST, consumes = JSON )
     public ResponseEntity< ? > createSummarySanzoneImageWithOpenCV( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
 
-        sanzoneImageService.createSummarySanzoneImageWithOpenCV( dto );
+        sanzoneImageService.createSummarySanzone( dto );
 
         ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
 
