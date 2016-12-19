@@ -35,6 +35,7 @@ import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
 import static java.awt.image.BufferedImage.TYPE_BYTE_GRAY;
 import static java.awt.image.BufferedImage.TYPE_INT_RGB;
+import static java.lang.Math.pow;
 import static java.lang.Math.round;
 import static java.lang.String.format;
 import static khrom.test.sanzone.common.util.ImageUtil.getImageType;
@@ -380,19 +381,21 @@ public class SanzoneImageService {
                 .collect( Collectors.toList() )
                 .stream().max( Integer::compareTo ).get();
 
-        double distanceFactor = ( int ) distanceZone / 98;
-        distanceFactor *= ( ( int ) distanceZone / 78 % 2 == 0 ? 2 : 1 );
-        distanceFactor = distanceFactor == 0 ? 1 : distanceFactor;
+        double distanceFactor = pow( 2, ( int ) distanceZone / 38 == 0 ? -1 : ( int ) distanceZone / 88 );
+        double heightFactor = pow( 2, ( int ) heightZoneMax / 38 == 0 ? -1 : ( int ) heightZoneMax / 88 );
 
-        double heightFactorBaseMove = ( int ) heightZoneMax / 78;
-        heightFactorBaseMove *= ( ( int ) heightZoneMax / 78 % 2 == 0 ? 2 : 1 );
-        heightFactorBaseMove = heightFactorBaseMove == 0 ? 1 : heightFactorBaseMove;
+        int checkedHeightMin = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - heightZoneMin ) * POINT_STEP );
+        int checkedHeightFactor = 1;
+
+        if ( checkedHeightMin >= googleStaticMapConfig.getImageHeight() ) {
+            checkedHeightFactor += checkedHeightMin / googleStaticMapConfig.getImageHeight();
+        }
 
         double scaleX = ratioPixelToMeter * 2 / distanceFactor;
-        double scaleY = ratioPixelToMeter * 2 / ( POINT_STEP * distanceFactor * heightFactorBaseMove );
+        double scaleY = ratioPixelToMeter * 2 * checkedHeightFactor / ( POINT_STEP * heightFactor );
 
         int baseX = ( int ) round( centerX - ( int ) round( distanceZone * scaleX / 2 ) - googleStaticMapConfig.getImageWidth() / 10D );
-        int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 / ( distanceFactor * heightFactorBaseMove ) );
+        int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 / heightFactor );
 
         try {
 
@@ -400,19 +403,25 @@ public class SanzoneImageService {
 
             for ( Map.Entry< Double, Set< Integer > > entry: sanzoneV.entrySet() ) {
 
-                int yPoint = centerY + ( int ) round( ( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP ) );
+                int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP / checkedHeightFactor );
 
                 for ( Integer distance: entry.getValue() ) {
 
                     int xPoint = centerX - ( int ) round( distanceZone / 2 ) + distance;
 
-                    pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
+                    try {
+                        pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
+                    } catch ( ArrayIndexOutOfBoundsException ex ) {
+                        System.out.println( String.format( "[ xPoint, yPoint ] = [ %s, %s ]; height = %.2f; distance = %s", xPoint, yPoint, entry.getKey(), distance ) );
+                        throw ex;
+                    }
                 }
             }
 
             double displayHeigth = heightZoneMin;
             double displayDistance = distanceZone;
 
+            // convert meters to pixels
             heightZoneMin *= ratioPixelToMeter * 2;
             distanceZone *= ratioPixelToMeter * 2;
 
@@ -465,7 +474,7 @@ public class SanzoneImageService {
                 matOfPoint2fs.add( approximated );
             }
 
-            for ( int i = 0; i < contours.size(); i++ ) {
+            for ( int i = 0; i < matOfPoint2fs.size(); i++ ) {
 
                 Polygon polygon = new Polygon();
 
@@ -559,8 +568,8 @@ public class SanzoneImageService {
             g2.setColor( Color.GREEN );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
             // +1 / -1 used for correction of stroke width
-            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * distanceFactor * heightFactorBaseMove ) ) + 1,
-                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * distanceFactor * heightFactorBaseMove ) ) + 1 );
+            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1,
+                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1 );
             g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, 0,
                          ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, result.getHeight() );
 
