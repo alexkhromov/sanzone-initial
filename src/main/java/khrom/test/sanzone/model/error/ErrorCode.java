@@ -8,6 +8,7 @@ public interface ErrorCode {
     String FIELD_MISSING = "field.missing";
     String FIELD_EMPTY = "field.empty";
     String FIELD_RANGE = "field.range";
+    String FIELD_INVALID = "field.invalid";
 
     String COLLECTION_EMPTY = "collection.empty";
     String COLLECTION_NULL_VALUES = "collection.null.values";

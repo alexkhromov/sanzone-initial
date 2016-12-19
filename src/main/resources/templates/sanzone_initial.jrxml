@@ -221,7 +221,7 @@
 							<textField>
 								<reportElement x="0" y="0" width="109" height="30" uuid="99d3bfb6-6248-4103-a0ff-7b5fa68629d7"/>
 								<textElement textAlignment="Center" verticalAlignment="Middle"/>
-								<textFieldExpression><![CDATA[$F{antenna}.getDiagramWidthHalfPower()]]></textFieldExpression>
+								<textFieldExpression><![CDATA[$F{antenna}.getDiagramWidthHalfPowerH()]]></textFieldExpression>
 							</textField>
 						</jr:detailCell>
 					</jr:column>

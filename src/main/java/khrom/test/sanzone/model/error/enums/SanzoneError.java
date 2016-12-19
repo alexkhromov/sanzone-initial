@@ -10,6 +10,7 @@ public enum SanzoneError {
     FIELD_MISSING( ErrorCode.FIELD_MISSING, "'%s' field is missing" ),
     FIELD_EMPTY( ErrorCode.FIELD_EMPTY, "'%s' field is empty" ),
     FIELD_RANGE( ErrorCode.FIELD_RANGE, "'%s' field is out of range [ %s; %s ]" ),
+    FIELD_INVALID( ErrorCode.FIELD_INVALID, "'%s' field have invalid value [ %s ]" ),
 
     COLLECTION_EMPTY( ErrorCode.COLLECTION_EMPTY, "'%s' collection is empty" ),
     COLLECTION_NULL_VALUES( ErrorCode.COLLECTION_NULL_VALUES, "'%s' collection have null elements" ),

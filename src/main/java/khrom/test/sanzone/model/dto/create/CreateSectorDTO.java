@@ -3,8 +3,10 @@ package khrom.test.sanzone.model.dto.create;
 import org.hibernate.validator.constraints.Range;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import static khrom.test.sanzone.model.error.ErrorCode.FIELD_INVALID;
 import static khrom.test.sanzone.model.error.ErrorCode.FIELD_MISSING;
 import static khrom.test.sanzone.model.error.ErrorCode.FIELD_RANGE;
 
@@ -24,6 +26,14 @@ public class CreateSectorDTO {
     @NotNull( message = FIELD_MISSING )
     @Range( min = 0, max = 360, message = FIELD_RANGE )
     private Double azimuth;
+
+    @NotNull( message = FIELD_MISSING )
+    @Range( min = -90, max = 90, message = FIELD_RANGE )
+    private Double downTilt;
+
+    @NotNull( message = FIELD_MISSING )
+    @Min( value = 0, message = FIELD_INVALID )
+    private Double height;
 
     @Valid
     @NotNull( message = FIELD_MISSING )
@@ -51,6 +61,22 @@ public class CreateSectorDTO {
 
     public void setAzimuth(Double azimuth) {
         this.azimuth = azimuth;
+    }
+
+    public Double getDownTilt() {
+        return downTilt;
+    }
+
+    public void setDownTilt(Double downTilt) {
+        this.downTilt = downTilt;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
     }
 
     public CreateAntennaDTO getAntenna() {
