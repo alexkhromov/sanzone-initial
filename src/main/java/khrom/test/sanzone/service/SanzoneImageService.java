@@ -5,6 +5,7 @@ import com.google.maps.model.LatLng;
 import ij.gui.Arrow;
 import ij.process.ColorProcessor;
 import khrom.test.sanzone.config.GoogleStaticMapConfig;
+import khrom.test.sanzone.config.SanzoneSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 import net.sf.jasperreports.engine.JRException;
@@ -67,6 +68,9 @@ public class SanzoneImageService {
     @Autowired
     private GoogleStaticMapConfig googleStaticMapConfig;
 
+    //@Autowired
+    //private SanzoneSettings plotSettings;
+
     @Autowired
     private ReportGeneratorService reportGeneratorService;
 
@@ -98,9 +102,6 @@ public class SanzoneImageService {
 
         String session = UUID.randomUUID().toString();
 
-        //TODO get this from request parameter or dto field
-        int sectorN = 1;
-
         try {
 
             Files.createDirectories( Paths.get( format( PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN, session ) ) );
@@ -108,19 +109,22 @@ public class SanzoneImageService {
         } catch ( IOException e ) {
         }
 
-        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
-        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
-
+        //TODO need to decide where put this logic
+        double latitude = dto.getSectors().get( 0 ).getLatitude();
+        double longitude = dto.getSectors().get( 0 ).getLongitude();
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sectorN );
-        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, sectorN );
+        SanzoneSettings plotSettings = getMaxDistance( dto );
+
+        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, plotSettings );
+        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, plotSettings );
 
         plotHorizontalDiagram( sanzoneH, dto.getSectors(), ratioPixelToMeter,
                                format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                                format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
-        plotVerticalDiagram( sanzoneV, dto.getSectors(), sectorN, ratioPixelToMeter,
+        //TODO this method should be called for each sector from list
+        plotVerticalDiagram( sanzoneV, dto.getSectors(), plotSettings.getSectorN(), ratioPixelToMeter,
                              format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                              format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 

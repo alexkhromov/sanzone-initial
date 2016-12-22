@@ -4,12 +4,15 @@ import com.google.maps.model.LatLng;
 import javafx.geometry.Point2D;
 import khrom.test.sanzone.common.util.enums.DistanceUnit;
 import khrom.test.sanzone.common.util.enums.SearchDirection;
+import khrom.test.sanzone.config.SanzoneSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static java.lang.Math.*;
 import static java.util.Arrays.asList;
@@ -340,14 +343,95 @@ public class MapUtil {
         return sanzone;
     }
 
-    public static List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, int sectorN ) {
+    public static SanzoneSettings getMaxDistance( CreateSanzoneRequest dto ) {
+
+        AtomicInteger count = new AtomicInteger( 1 );
+
+        Map< Integer, Double > sectorsDistance = dto.getSectors()
+                .stream()
+                .map( sector -> {
+
+                    double P = sector.getAntenna().getP();
+                    double G = sector.getAntenna().getG();
+                    double TL = sector.getAntenna().getTL();
+                    double EF = sector.getAntenna().getEF();
+
+                    G = pow( 10, G / 10 );
+                    TL = pow( 10, TL / 10 );
+
+                    return new AbstractMap.SimpleEntry<>( count.getAndIncrement(), pow( ( 8D * P * G * TL * EF ) / 10, 0.5 ) );
+
+                } )
+                .collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue ) );
+
+        List< LatLng > coordinates = dto.getSectors()
+                .stream()
+                .map( sector -> new LatLng( sector.getLatitude(), sector.getLongitude() ) )
+                .collect( Collectors.toList() );
+
+        double latitude = coordinates
+                .stream()
+                .mapToDouble( latLng -> latLng.lat )
+                .average()
+                .getAsDouble();
+
+        double sinComponent = coordinates
+                .stream()
+                .mapToDouble( latLng -> sin( toRadians( latLng.lng ) ) )
+                .average()
+                .getAsDouble();
+
+        double cosComponent = coordinates
+                .stream()
+                .mapToDouble( latLng -> cos( toRadians( latLng.lng ) ) )
+                .average()
+                .getAsDouble();
+
+        double longitude = toDegrees( atan2( sinComponent, cosComponent ) );
+
+        LatLng center = new LatLng( latitude, longitude );
+
+        count.set( 1 );
+        Map< Integer, Double > checkCenterMap = dto.getSectors()
+                .stream()
+                .map( sector -> {
+
+                    double offset = distance( sector.getLatitude(), sector.getLongitude(), 0, latitude, longitude, 0, METER );
+
+                    double distance = sectorsDistance.get( count.intValue() );
+                    sectorsDistance.put( count.intValue(), distance + offset );
+
+                    return new AbstractMap.SimpleEntry<>( count.getAndIncrement(), offset );
+
+                } )
+                .collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue ) );
+
+        double maxDistance = sectorsDistance.entrySet()
+                .stream()
+                .map( entry -> entry.getValue() )
+                .collect( Collectors.toList() )
+                .stream()
+                .max( Double::compareTo )
+                .get();
+
+        SanzoneSettings plotSettings = new SanzoneSettings();
+
+        plotSettings.setCenter( center );
+        plotSettings.setDistance( maxDistance );
+        //TODO this is temporary solution
+        plotSettings.setSectorN( 1 );
+
+        return plotSettings;
+    }
+
+    public static List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SanzoneSettings settings ) {
 
         List< Point > summary = new ArrayList<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
-        double latitude = dto.getSectors().get( sectorN ).getLatitude();
-        double longitude = dto.getSectors().get( sectorN ).getLongitude();
+        double latitude = settings.getCenter().lat;
+        double longitude = settings.getCenter().lng;
 
         List< CreateSectorDTO > sectors = dto.getSectors();
 
@@ -407,7 +491,7 @@ public class MapUtil {
 
                     double teta = atan( ( H - dto.getHeightM() ) / pow( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
 
-                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) ) * ( exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) ) )
+                    intensity += ( 8D * P * G * TL * EF * exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) * exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) )
                                  / ( pow( x - offsets[ s ][ 1 ], 2D ) + pow( y + offsets[ s ][ 0 ], 2D ) + pow( H - dto.getHeightM(), 2D ) );
                 }
 
@@ -420,15 +504,15 @@ public class MapUtil {
         return summary;
     }
 
-    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, int sectorN ) {
+    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, SanzoneSettings settings ) {
 
         Map< Double, Set< Integer > > summary = new HashMap<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
-        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
-        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
-        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
+        double latitude = settings.getCenter().lat;
+        double longitude = settings.getCenter().lng;
+        double height = dto.getSectors().get( settings.getSectorN() - 1 ).getHeight();
         double polarAngleM = 90 - dto.getAzimuthM() + ( 90 - dto.getAzimuthM() <= 0 ? 360 : 0 );
 
         List< CreateSectorDTO > sectors = dto.getSectors();
@@ -494,7 +578,7 @@ public class MapUtil {
 
                     double teta = atan( ( H - ( double ) h / POINT_STEP ) / pow( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
 
-                    intensity += ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) ) * ( exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) ) )
+                    intensity += ( 8D * P * G * TL * EF * exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) * exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) )
                             / ( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ) + pow( H - ( double ) h / POINT_STEP, 2D ) );
                 }
 
