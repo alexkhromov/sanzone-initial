@@ -5,7 +5,7 @@ import com.google.maps.model.LatLng;
 import ij.gui.Arrow;
 import ij.process.ColorProcessor;
 import khrom.test.sanzone.config.GoogleStaticMapConfig;
-import khrom.test.sanzone.config.SanzoneSettings;
+import khrom.test.sanzone.config.SessionSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 import net.sf.jasperreports.engine.JRException;
@@ -68,8 +68,8 @@ public class SanzoneImageService {
     @Autowired
     private GoogleStaticMapConfig googleStaticMapConfig;
 
-    //@Autowired
-    //private SanzoneSettings plotSettings;
+    @Autowired
+    private SessionSettings sessionSettings;
 
     @Autowired
     private ReportGeneratorService reportGeneratorService;
@@ -114,17 +114,17 @@ public class SanzoneImageService {
         double longitude = dto.getSectors().get( 0 ).getLongitude();
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        SanzoneSettings plotSettings = getMaxDistance( dto );
+        prepareSessionSettings( dto, sessionSettings );
 
-        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, plotSettings );
-        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, plotSettings );
+        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sessionSettings );
 
-        plotHorizontalDiagram( sanzoneH, dto.getSectors(), ratioPixelToMeter,
+        plotHorizontalDiagram( sanzoneH, ratioPixelToMeter,
                                format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                                format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
-        //TODO this method should be called for each sector from list
-        plotVerticalDiagram( sanzoneV, dto.getSectors(), plotSettings.getSectorN(), ratioPixelToMeter,
+        //TODO this methods should be called for each sector from list
+        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, 1 );
+        plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
                              format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                              format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
@@ -141,7 +141,7 @@ public class SanzoneImageService {
 
         try {
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( latitude, longitude ) ) );
+            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, sessionSettings.getObjectsForCommonPattern() ) );
 
             BufferedImage image = ImageIO.read( url );
 
@@ -218,26 +218,25 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, List< CreateSectorDTO > sectors,
-                                        double ratioPixelToMeter, String destFileName, String testFileName ) {
+    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName, String testFileName ) {
 
-        int centerX = googleStaticMapConfig.getWidthCenter();
-        int centerY = googleStaticMapConfig.getHeightCenter();
+        int centerX = sessionSettings.getWidthCenter();
+        int centerY = sessionSettings.getHeightCenter();
 
         try {
 
-            int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
+            int [] pixels = new int [ sessionSettings.getImageWidth() * sessionSettings.getImageHeight() ] ;
 
             for ( java.awt.Point point : sanzone ) {
 
                 int xPoint = centerX + point.x;
                 int yPoint = centerY - point.y;
 
-                pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
+                pixels[ yPoint * sessionSettings.getImageWidth() + xPoint ] = 0xFFFFFF;
             }
 
-            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
-            sanzoneImg.setRGB( 0, 0, googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), pixels, 0, googleStaticMapConfig.getImageWidth() );
+            BufferedImage sanzoneImg = new BufferedImage( sessionSettings.getImageWidth(), sessionSettings.getImageHeight(), TYPE_BYTE_GRAY );
+            sanzoneImg.setRGB( 0, 0, sessionSettings.getImageWidth(), sessionSettings.getImageHeight(), pixels, 0, sessionSettings.getImageWidth() );
 
             ColorProcessor processor = new ColorProcessor( sanzoneImg );
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
@@ -262,7 +261,7 @@ public class SanzoneImageService {
 
             List< MatOfPoint2f > matOfPoint2fs = new ArrayList<>();
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude() ) ) );
+            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, sessionSettings.getObjectsForCommonPattern() ) );
 
             BufferedImage googleMap = ImageIO.read( url );
 

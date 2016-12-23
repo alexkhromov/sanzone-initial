@@ -4,7 +4,7 @@ import com.google.maps.model.LatLng;
 import javafx.geometry.Point2D;
 import khrom.test.sanzone.common.util.enums.DistanceUnit;
 import khrom.test.sanzone.common.util.enums.SearchDirection;
-import khrom.test.sanzone.config.SanzoneSettings;
+import khrom.test.sanzone.config.SessionSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
@@ -24,7 +24,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
  */
 public class MapUtil {
 
-    public static final int MAX_DISTANCE = 200;
+    private static final int MAX_DISTANCE = 200;
     public static final int POINT_STEP = 5;
 
     /**
@@ -343,7 +343,7 @@ public class MapUtil {
         return sanzone;
     }
 
-    public static SanzoneSettings getMaxDistance( CreateSanzoneRequest dto ) {
+    public static void prepareSessionSettings( CreateSanzoneRequest dto, SessionSettings settings ) {
 
         AtomicInteger count = new AtomicInteger( 1 );
 
@@ -392,7 +392,7 @@ public class MapUtil {
         LatLng center = new LatLng( latitude, longitude );
 
         count.set( 1 );
-        Map< Integer, Double > checkCenterMap = dto.getSectors()
+        dto.getSectors()
                 .stream()
                 .map( sector -> {
 
@@ -414,17 +414,14 @@ public class MapUtil {
                 .max( Double::compareTo )
                 .get();
 
-        SanzoneSettings plotSettings = new SanzoneSettings();
+        int sessionScale = ( int ) ( maxDistance / 100 ) + 1;
 
-        plotSettings.setCenter( center );
-        plotSettings.setDistance( maxDistance );
-        //TODO this is temporary solution
-        plotSettings.setSectorN( 1 );
-
-        return plotSettings;
+        settings.setCenter( center );
+        settings.setDistance( 100 * sessionScale );
+        settings.setSessionScale( sessionScale >= 2 ? sessionScale : 1 );
     }
 
-    public static List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SanzoneSettings settings ) {
+    public static List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SessionSettings settings ) {
 
         List< Point > summary = new ArrayList<>();
 
@@ -453,9 +450,9 @@ public class MapUtil {
             offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
         }
 
-        for ( int i = 0, y = MAX_DISTANCE; i < 2 * MAX_DISTANCE + 1; i++, y-- ) {
+        for ( int i = 0, y = settings.getDistance(); i < 2 * settings.getDistance() + 1; i++, y-- ) {
 
-            for ( int j = 0, x = -MAX_DISTANCE; j < 2 * MAX_DISTANCE + 1; j++, x++ ) {
+            for ( int j = 0, x = -settings.getDistance(); j < 2 * settings.getDistance() + 1; j++, x++ ) {
 
                 double intensity = 0;
 
@@ -504,15 +501,15 @@ public class MapUtil {
         return summary;
     }
 
-    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, SanzoneSettings settings ) {
+    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, int sectorN ) {
 
         Map< Double, Set< Integer > > summary = new HashMap<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
-        double latitude = settings.getCenter().lat;
-        double longitude = settings.getCenter().lng;
-        double height = dto.getSectors().get( settings.getSectorN() - 1 ).getHeight();
+        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
+        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
+        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
         double polarAngleM = 90 - dto.getAzimuthM() + ( 90 - dto.getAzimuthM() <= 0 ? 360 : 0 );
 
         List< CreateSectorDTO > sectors = dto.getSectors();

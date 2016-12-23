@@ -197,9 +197,13 @@ public class GoogleStaticMapConfig {
         return MapUtil.getImageCenter( sizeY, scale );
     }
 
-    public Object [] getObjectsForCommonPattern( Double latitude, Double longitude ) {
+    public Object [] getObjectsForCommonPattern( Double latitude, Double longitude, Integer sessionScale ) {
 
-        return new Object [] { latitude, longitude, zoom, sizeX, sizeY, scale, mapType, format, language, key };
+        return new Object [] { latitude, longitude,
+                               zoom,
+                               sizeX * ( sessionScale != null ? sessionScale : 1 ),
+                               sizeY * ( sessionScale != null ? sessionScale : 1 ),
+                               scale, mapType, format, language, key };
     }
 
     public Object [] getObjectsForPolylinePattern( Double latitude, Double longitude, String polyline ) {
