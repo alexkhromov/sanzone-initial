@@ -5,6 +5,7 @@ import com.google.maps.model.LatLng;
 import ij.gui.Arrow;
 import ij.process.ColorProcessor;
 import khrom.test.sanzone.config.GoogleStaticMapConfig;
+import khrom.test.sanzone.config.SessionSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 import net.sf.jasperreports.engine.JRException;
@@ -57,6 +58,8 @@ public class SanzoneImageService {
     private static final String GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&%s&key=%s";
 
     private static final String PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN = "/sanzone/%s";
+    private static final String PATH_TO_STORAGE_WORK_DIRECTORY_MAPS_PATTERN = "/sanzone/%s/maps";
+    private static final String PATH_TO_MAP_FILE_PATTERN = "/sanzone/%s/maps/%s.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN = "/sanzone/%s/%s_google_map_polyline.%s";
     private static final String PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_H.%s";
@@ -66,6 +69,9 @@ public class SanzoneImageService {
 
     @Autowired
     private GoogleStaticMapConfig googleStaticMapConfig;
+
+    @Autowired
+    private SessionSettings sessionSettings;
 
     @Autowired
     private ReportGeneratorService reportGeneratorService;
@@ -98,9 +104,6 @@ public class SanzoneImageService {
 
         String session = UUID.randomUUID().toString();
 
-        //TODO get this from request parameter or dto field
-        int sectorN = 1;
-
         try {
 
             Files.createDirectories( Paths.get( format( PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN, session ) ) );
@@ -108,19 +111,23 @@ public class SanzoneImageService {
         } catch ( IOException e ) {
         }
 
-        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
-        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
-
+        //TODO need to decide where put this logic
+        double latitude = dto.getSectors().get( 0 ).getLatitude();
+        double longitude = dto.getSectors().get( 0 ).getLongitude();
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sectorN );
-        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, sectorN );
+        prepareSessionSettings( dto, sessionSettings );
 
-        plotHorizontalDiagram( sanzoneH, dto.getSectors(), ratioPixelToMeter,
+        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sessionSettings );
+
+        plotHorizontalDiagram( sanzoneH, ratioPixelToMeter,
                                format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                                format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
-        plotVerticalDiagram( sanzoneV, dto.getSectors(), sectorN, ratioPixelToMeter,
+        //TODO this methods should be called for each sector from list
+        sessionSettings.setSectorN( 1 );
+        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, sessionSettings );
+        plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
                              format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                              format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
 
@@ -137,7 +144,7 @@ public class SanzoneImageService {
 
         try {
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( latitude, longitude ) ) );
+            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, sessionSettings.getObjectsForCommonPattern() ) );
 
             BufferedImage image = ImageIO.read( url );
 
@@ -214,26 +221,25 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, List< CreateSectorDTO > sectors,
-                                        double ratioPixelToMeter, String destFileName, String testFileName ) {
+    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName, String testFileName ) {
 
-        int centerX = googleStaticMapConfig.getWidthCenter();
-        int centerY = googleStaticMapConfig.getHeightCenter();
+        int centerX = sessionSettings.getWidthCenter();
+        int centerY = sessionSettings.getHeightCenter();
 
         try {
 
-            int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
+            int [] pixels = new int [ sessionSettings.getImageWidth() * sessionSettings.getImageHeight() ] ;
 
             for ( java.awt.Point point : sanzone ) {
 
                 int xPoint = centerX + point.x;
                 int yPoint = centerY - point.y;
 
-                pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
+                pixels[ yPoint * sessionSettings.getImageWidth() + xPoint ] = 0xFFFFFF;
             }
 
-            BufferedImage sanzoneImg = new BufferedImage( googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), TYPE_BYTE_GRAY );
-            sanzoneImg.setRGB( 0, 0, googleStaticMapConfig.getImageWidth(), googleStaticMapConfig.getImageHeight(), pixels, 0, googleStaticMapConfig.getImageWidth() );
+            BufferedImage sanzoneImg = new BufferedImage( sessionSettings.getImageWidth(), sessionSettings.getImageHeight(), TYPE_BYTE_GRAY );
+            sanzoneImg.setRGB( 0, 0, sessionSettings.getImageWidth(), sessionSettings.getImageHeight(), pixels, 0, sessionSettings.getImageWidth() );
 
             ColorProcessor processor = new ColorProcessor( sanzoneImg );
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
@@ -243,6 +249,8 @@ public class SanzoneImageService {
             //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
             Path testPath = Files.createFile( Paths.get( testFileName ) );
             ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
+
+            g2.dispose();
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 
@@ -258,11 +266,17 @@ public class SanzoneImageService {
 
             List< MatOfPoint2f > matOfPoint2fs = new ArrayList<>();
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude() ) ) );
+            BufferedImage googleMap;
 
-            BufferedImage googleMap = ImageIO.read( url );
+            if ( googleStaticMapConfig.getMaxSize() > sessionSettings.getSizeX() ) {
 
-            g2.dispose();
+                URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, sessionSettings.getObjectsForCommonPattern() ) );
+                googleMap = ImageIO.read( url );
+
+            } else {
+                googleMap = getGoogleMap( ratioPixelToMeter );
+            }
+
             g2 = googleMap.createGraphics();
 
             g2.setStroke( new BasicStroke( 3.0f, CAP_BUTT, CAP_ROUND ) );
@@ -311,9 +325,9 @@ public class SanzoneImageService {
                 g2.drawPolygon( polygon );
             }
 
-            Image scaledSanzone = googleMap.getScaledInstance( 400, 400, SCALE_SMOOTH );
+            Image scaledSanzone = googleMap.getScaledInstance( sessionSettings.getResultSize(), sessionSettings.getResultSize(), SCALE_SMOOTH );
 
-            BufferedImage result = new BufferedImage( 400, 400, TYPE_INT_RGB );
+            BufferedImage result = new BufferedImage( sessionSettings.getResultSize(), sessionSettings.getResultSize(), TYPE_INT_RGB );
 
             g2.dispose();
             g2 = result.createGraphics();
@@ -331,7 +345,7 @@ public class SanzoneImageService {
 
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
             g2.setColor( Color.RED );
-            g2.fillOval( 200 - 3, 200 - 3, 6, 6 );
+            g2.fillOval( sessionSettings.getResultSize() / 2 - 3, sessionSettings.getResultSize() / 2 - 3, 6, 6 );
 
             Path path = Files.createFile( Paths.get( destFileName ) );
 
@@ -579,5 +593,46 @@ public class SanzoneImageService {
 
         } catch ( IOException e ) {
         }
+    }
+
+    private BufferedImage getGoogleMap( double ratioPixelToMeter ) {
+
+        BufferedImage googleMap = new BufferedImage( sessionSettings.getImageWidth(), sessionSettings.getImageHeight(), TYPE_INT_RGB );
+
+        Graphics2D g2 = googleMap.createGraphics();
+
+        double startDistance = pow( 2 * pow( googleStaticMapConfig.getSizeX() *
+                                             googleStaticMapConfig.getScale() *
+                                             ( sessionSettings.getSessionScale() - 1 ) / ( 2 * ratioPixelToMeter ), 2 ), 0.5 );
+        double incrementDistance = googleStaticMapConfig.getSizeX() * googleStaticMapConfig.getScale() / ratioPixelToMeter ;
+
+        LatLng start = getLatLng( sessionSettings.getCenter().lat, sessionSettings.getCenter().lng, startDistance, 315, METER );
+
+        for ( int i = 0; i < sessionSettings.getSessionScale(); i++ ) {
+
+            LatLng next = new LatLng( start.lat, start.lng );
+
+            for ( int j = 0; j < sessionSettings.getSessionScale(); j++ ) {
+
+                try {
+
+                    URL url = new URL( format( GOOGLE_STATIC_MAPS_API_URL_PATTERN, googleStaticMapConfig.getObjectsForCommonPattern( next.lat, next.lng, 1 ) ) );
+                    BufferedImage temp = ImageIO.read( url );
+
+                    g2.drawImage( temp, j * googleStaticMapConfig.getImageWidth(), i * googleStaticMapConfig.getImageWidth(), null );
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                next = getLatLng( next.lat, next.lng, incrementDistance, 90, METER );
+            }
+
+            start = getLatLng( start.lat, start.lng, incrementDistance, 180, METER );
+        }
+
+        g2.dispose();
+
+        return googleMap;
     }
 }

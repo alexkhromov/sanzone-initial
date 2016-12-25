@@ -15,6 +15,7 @@ public class GoogleStaticMapConfig {
     private int zoom;
     private int sizeX;
     private int sizeY;
+    private int maxSize;
     private int scale;
     private String mapType;
     private String format;
@@ -44,6 +45,14 @@ public class GoogleStaticMapConfig {
 
     public void setSizeY(int sizeY) {
         this.sizeY = sizeY;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
     }
 
     public int getScale() {
@@ -197,9 +206,13 @@ public class GoogleStaticMapConfig {
         return MapUtil.getImageCenter( sizeY, scale );
     }
 
-    public Object [] getObjectsForCommonPattern( Double latitude, Double longitude ) {
+    public Object [] getObjectsForCommonPattern( Double latitude, Double longitude, Integer sessionScale ) {
 
-        return new Object [] { latitude, longitude, zoom, sizeX, sizeY, scale, mapType, format, language, key };
+        return new Object [] { latitude, longitude,
+                               zoom,
+                               sizeX * ( sessionScale != null ? sessionScale : 1 ),
+                               sizeY * ( sessionScale != null ? sessionScale : 1 ),
+                               scale, mapType, format, language, key };
     }
 
     public Object [] getObjectsForPolylinePattern( Double latitude, Double longitude, String polyline ) {
