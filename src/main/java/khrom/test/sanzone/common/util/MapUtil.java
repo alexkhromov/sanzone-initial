@@ -501,15 +501,15 @@ public class MapUtil {
         return summary;
     }
 
-    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, int sectorN ) {
+    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, SessionSettings sessionSettings ) {
 
         Map< Double, Set< Integer > > summary = new HashMap<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
-        double latitude = dto.getSectors().get( sectorN - 1 ).getLatitude();
-        double longitude = dto.getSectors().get( sectorN - 1 ).getLongitude();
-        double height = dto.getSectors().get( sectorN - 1 ).getHeight();
+        double latitude = dto.getSectors().get( sessionSettings.getSectorN() - 1 ).getLatitude();
+        double longitude = dto.getSectors().get( sessionSettings.getSectorN() - 1 ).getLongitude();
+        double height = dto.getSectors().get( sessionSettings.getSectorN() - 1 ).getHeight();
         double polarAngleM = 90 - dto.getAzimuthM() + ( 90 - dto.getAzimuthM() <= 0 ? 360 : 0 );
 
         List< CreateSectorDTO > sectors = dto.getSectors();
@@ -536,7 +536,7 @@ public class MapUtil {
 
         for ( int h = 0; h < ( height + MAX_DISTANCE / 2 ) * POINT_STEP; h++ ) {
 
-            for ( int d = 0; d < MAX_DISTANCE * POINT_STEP; d++ ) {
+            for ( int d = 0; d < sessionSettings.getDistance() * POINT_STEP; d++ ) {
 
                 double intensity = 0;
 

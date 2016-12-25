@@ -2,6 +2,7 @@ package khrom.test.sanzone.config;
 
 import com.google.maps.model.LatLng;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -16,9 +17,11 @@ public class SessionSettings {
     @Autowired
     private GoogleStaticMapConfig mapConfig;
 
+    @Value( "${default.size}" )
+    private Integer size;
+
     private Integer sectorN;
     private Integer sessionScale;
-    private Integer mapZoom;
     private Integer distance;
 
     private LatLng center;
@@ -55,6 +58,14 @@ public class SessionSettings {
         this.center = center;
     }
 
+    public int getSizeX() {
+        return sessionScale * mapConfig.getSizeX();
+    }
+
+    public int getSizeY() {
+        return sessionScale * mapConfig.getSizeY();
+    }
+
     public int getImageWidth() {
 
         return sessionScale * mapConfig.getImageWidth();
@@ -78,5 +89,10 @@ public class SessionSettings {
     public Object [] getObjectsForCommonPattern() {
 
         return mapConfig.getObjectsForCommonPattern( center.lat, center.lng, sessionScale );
+    }
+
+    public Integer getResultSize() {
+
+        return size * ( sessionScale > 1 ? 2 : 1 );
     }
 }

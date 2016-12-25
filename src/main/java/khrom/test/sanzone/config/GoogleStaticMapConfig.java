@@ -15,6 +15,7 @@ public class GoogleStaticMapConfig {
     private int zoom;
     private int sizeX;
     private int sizeY;
+    private int maxSize;
     private int scale;
     private String mapType;
     private String format;
@@ -44,6 +45,14 @@ public class GoogleStaticMapConfig {
 
     public void setSizeY(int sizeY) {
         this.sizeY = sizeY;
+    }
+
+    public int getMaxSize() {
+        return maxSize;
+    }
+
+    public void setMaxSize(int maxSize) {
+        this.maxSize = maxSize;
     }
 
     public int getScale() {
