@@ -535,7 +535,7 @@ public class SanzoneImageService {
             g2.setColor( Color.BLACK );
             g2.drawRect( 0, 0, result.getWidth() - 1, result.getHeight() - 1 );
 
-            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+            for ( int i = 40, x = 1, y = 8; i < result.getWidth(); i += 40, x++, y-- ) {
 
                 if ( result.getWidth() / i == 10 ) {
                     g2.drawLine( 0, i, result.getWidth(), i );
@@ -550,6 +550,8 @@ public class SanzoneImageService {
                     g2 = result.createGraphics();
                     g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
                     g2.setColor( Color.BLACK );
+                    g2.drawString( format( "%.0f", 10 * heightFactor * y ), 15, i + 15 );
+                    g2.drawString( format( "%.0f", 10 * distanceFactor * x ), i + 15, resultWidth - 25 );
                     continue;
                 }
 
@@ -571,6 +573,9 @@ public class SanzoneImageService {
 
                 g2.drawLine( i, 0, i, result.getHeight() );
                 g2.drawLine( 0, i, result.getWidth(), i );
+
+                g2.drawString( format( "%.0f", 10 * heightFactor * y ), 15, i + 15 );
+                g2.drawString( format( "%.0f", 10 * distanceFactor * x ), i + 15, resultWidth - 25 );
             }
 
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
@@ -583,11 +588,17 @@ public class SanzoneImageService {
             g2.setStroke( new BasicStroke( 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float [] { 20, 10 }, 0 ) );
             g2.setColor( Color.GREEN );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+
             // +1 / -1 used for correction of stroke width
-            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1,
-                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1 );
-            g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, 0,
-                         ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, result.getHeight() );
+            int pixelX = ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1;
+            int pixelY = ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1;
+
+            g2.drawLine( 0, pixelY, result.getWidth(), pixelY );
+            g2.drawLine( pixelX, 0, pixelX, result.getHeight() );
+
+            g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+            g2.drawString( format( "distance = %.2f", displayDistance ), pixelX + ( pixelX < resultWidth / 2 ? 100 : -100 ), 15 );
+            g2.drawString( format( "height = %.2f", displayHeigth ), 50, pixelY > resultWidth - 60 ? resultWidth - 10 : pixelY + 15 );
 
             Path path = Files.createFile( Paths.get( destFileName ) );
 
