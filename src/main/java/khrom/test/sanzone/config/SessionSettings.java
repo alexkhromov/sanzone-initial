@@ -17,8 +17,8 @@ public class SessionSettings {
     @Autowired
     private GoogleStaticMapConfig mapConfig;
 
-    @Value( "${default.size}" )
-    private Integer size;
+    @Value( "${default.resultSize}" )
+    private Integer resultSize;
 
     private Integer sectorN;
     private Integer sessionScale;
@@ -93,6 +93,6 @@ public class SessionSettings {
 
     public Integer getResultSize() {
 
-        return size * ( sessionScale > 1 ? 2 : 1 );
+        return resultSize * ( sessionScale > 1 ? 2 : 1 );
     }
 }
