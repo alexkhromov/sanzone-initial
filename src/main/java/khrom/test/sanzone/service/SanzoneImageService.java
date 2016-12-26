@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ij.gui.Arrow.NOTCHED;
+import static ij.gui.Arrow.FILLED;
 import static java.awt.BasicStroke.CAP_BUTT;
 import static java.awt.BasicStroke.CAP_ROUND;
 import static java.awt.Image.SCALE_SMOOTH;
@@ -126,7 +126,7 @@ public class SanzoneImageService {
 
         //TODO this methods should be called for each sector from list
         sessionSettings.setSectorN( 1 );
-        Map< Double, Set< Integer > > sanzoneV = calculateSanzoneForSummaryV( dto, sessionSettings );
+        Map< Double, Set< Double > > sanzoneV = calculateSanzoneForSummaryV( dto, sessionSettings );
         plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
                              format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                              format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
@@ -378,7 +378,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotVerticalDiagram( Map< Double, Set< Integer > > sanzoneV, List< CreateSectorDTO > sectors,
+    private void plotVerticalDiagram( Map< Double, Set< Double > > sanzoneV, List< CreateSectorDTO > sectors,
                                       int sectorN, double ratioPixelToMeter, String destFileName, String testFileName ) {
 
         int resultWidth = 400;
@@ -391,9 +391,9 @@ public class SanzoneImageService {
         double heightZoneMax = sanzoneV.keySet().stream().max( Double::compareTo ).get();
         double distanceZone = sanzoneV.values()
                 .stream()
-                .map( set -> set.stream().max( Integer::compareTo ).get() )
+                .map( set -> set.stream().max( Double::compareTo ).get() )
                 .collect( Collectors.toList() )
-                .stream().max( Integer::compareTo ).get();
+                .stream().max( Double::compareTo ).get();
 
         double distanceFactor = pow( 2, ( int ) distanceZone / 38 == 0 ? -1 : ( int ) distanceZone / 88 );
         double heightFactor = pow( 2, ( int ) heightZoneMax / 38 == 0 ? -1 : ( int ) heightZoneMax / 88 );
@@ -415,13 +415,13 @@ public class SanzoneImageService {
 
             int [] pixels = new int [ googleStaticMapConfig.getImageWidth() * googleStaticMapConfig.getImageHeight() ] ;
 
-            for ( Map.Entry< Double, Set< Integer > > entry: sanzoneV.entrySet() ) {
+            for ( Map.Entry< Double, Set< Double > > entry: sanzoneV.entrySet() ) {
 
                 int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP / checkedHeightFactor );
 
-                for ( Integer distance: entry.getValue() ) {
+                for ( Double distance: entry.getValue() ) {
 
-                    int xPoint = centerX - ( int ) round( distanceZone / 2 ) + distance;
+                    int xPoint = centerX - ( int ) round( distanceZone / 2 ) + distance.intValue();
 
                     try {
                         pixels[ yPoint * googleStaticMapConfig.getImageWidth() + xPoint ] = 0xFFFFFF;
@@ -541,8 +541,9 @@ public class SanzoneImageService {
                     g2.drawLine( 0, i, result.getWidth(), i );
                     g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
                     Arrow arrow = new Arrow( i, result.getHeight(), i, 0 );
-                    arrow.setStyle( NOTCHED );
-                    arrow.setStrokeWidth( 3.0 );
+                    arrow.setStyle( FILLED );
+                    arrow.setStrokeWidth( 1.5 );
+                    arrow.setHeadSize( 7 );
                     arrow.setFillColor( Color.BLACK );
                     arrow.drawOverlay( g2 );
                     g2.dispose();
@@ -556,8 +557,9 @@ public class SanzoneImageService {
                     g2.drawLine( i, 0, i, result.getHeight() );
                     g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
                     Arrow arrow = new Arrow( 0, i, result.getWidth(), i );
-                    arrow.setStyle( NOTCHED );
-                    arrow.setStrokeWidth( 3.0 );
+                    arrow.setStyle( FILLED );
+                    arrow.setStrokeWidth( 1.5 );
+                    arrow.setHeadSize( 7 );
                     arrow.setFillColor( Color.BLACK );
                     arrow.drawOverlay( g2 );
                     g2.dispose();

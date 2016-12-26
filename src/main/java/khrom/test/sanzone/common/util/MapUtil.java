@@ -9,6 +9,7 @@ import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -394,17 +395,13 @@ public class MapUtil {
         count.set( 1 );
         dto.getSectors()
                 .stream()
-                .map( sector -> {
+                .forEach( sector -> {
 
                     double offset = distance( sector.getLatitude(), sector.getLongitude(), 0, latitude, longitude, 0, METER );
 
                     double distance = sectorsDistance.get( count.intValue() );
                     sectorsDistance.put( count.intValue(), distance + offset );
-
-                    return new AbstractMap.SimpleEntry<>( count.getAndIncrement(), offset );
-
-                } )
-                .collect( Collectors.toMap( Map.Entry::getKey, Map.Entry::getValue ) );
+                } );
 
         double maxDistance = sectorsDistance.entrySet()
                 .stream()
@@ -501,9 +498,9 @@ public class MapUtil {
         return summary;
     }
 
-    public static Map< Double, Set< Integer > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, SessionSettings sessionSettings ) {
+    public static Map< Double, Set< Double > > calculateSanzoneForSummaryV( CreateSanzoneRequest dto, SessionSettings sessionSettings ) {
 
-        Map< Double, Set< Integer > > summary = new HashMap<>();
+        Map< Double, Set< Double > > summary = new HashMap<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
@@ -513,6 +510,8 @@ public class MapUtil {
         double polarAngleM = 90 - dto.getAzimuthM() + ( 90 - dto.getAzimuthM() <= 0 ? 360 : 0 );
 
         List< CreateSectorDTO > sectors = dto.getSectors();
+
+        DecimalFormat df = new DecimalFormat( "#.##" );
 
         double [][] offsets = new double[ sectors.size() ][ 3 ];
 
@@ -532,7 +531,7 @@ public class MapUtil {
             offsets[ i ][ 2 ] = 90 - sectors.get( i ).getAzimuth() + ( 90 - sectors.get( i ).getAzimuth() <= 0 ? 360 : 0 );
         }
 
-        summary.put( height, new HashSet<>( asList( 0 ) ) );
+        summary.put( height, new HashSet<>( asList( 0.0 ) ) );
 
         for ( int h = 0; h < ( height + MAX_DISTANCE / 2 ) * POINT_STEP; h++ ) {
 
@@ -581,7 +580,7 @@ public class MapUtil {
 
                 if ( intensity >= 10 ) {
 
-                    int distance = ( int ) round( pow( pow( X, 2D ) + pow( Y , 2D ), 0.5 ) );
+                    double distance = Double.valueOf( df.format( pow( pow( X, 2D ) + pow( Y , 2D ), 0.5 ) ) );
 
                     if ( summary.containsKey( ( double ) h / POINT_STEP ) ) {
                         summary.get( ( double ) h / POINT_STEP ).add( distance );
