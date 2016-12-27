@@ -74,6 +74,9 @@ public class SanzoneImageService {
     private SessionSettings sessionSettings;
 
     @Autowired
+    private SanzoneCalculationService calculationService;
+
+    @Autowired
     private ReportGeneratorService reportGeneratorService;
 
     public void createSectorSanzoneImage( CreateSanzoneRequest dto ) {
@@ -116,9 +119,9 @@ public class SanzoneImageService {
         double longitude = dto.getSectors().get( 0 ).getLongitude();
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        prepareSessionSettings( dto, sessionSettings );
+        sessionSettings.prepareSessionSettings( dto );
 
-        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sessionSettings );
+        List< java.awt.Point > sanzoneH = calculationService.calculateSanzoneForSummaryH( dto, sessionSettings );
 
         plotHorizontalDiagram( sanzoneH, ratioPixelToMeter,
                                format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
@@ -126,7 +129,7 @@ public class SanzoneImageService {
 
         //TODO this methods should be called for each sector from list
         sessionSettings.setSectorN( 1 );
-        Map< Double, Set< Double > > sanzoneV = calculateSanzoneForSummaryV( dto, sessionSettings );
+        Map< Double, Set< Double > > sanzoneV = calculationService.calculateSanzoneForSummaryV( dto, sessionSettings );
         plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
                              format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
                              format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
