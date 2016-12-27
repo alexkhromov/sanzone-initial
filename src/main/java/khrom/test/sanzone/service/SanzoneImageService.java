@@ -94,13 +94,13 @@ public class SanzoneImageService {
 
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( sector.getLatitude(), sector.getLongitude(), METER );
 
-        double [][] sanzone = calculateSanzoneForSector( sector );
+        //double [][] sanzone = calculateSanzoneForSector( sector );
 
-        getGoogleStaticMapWithPolylineForSector( sanzone, sector, session );
+        //getGoogleStaticMapWithPolylineForSector( sanzone, sector, session );
 
         // This call is optional. It is draw sanzone border using "image pixels" approach.
         // It is also insure that plot from "coordinates approach" draw same image as "image pixels"
-        plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
+        //plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
     }
 
     public void createSummarySanzone( CreateSanzoneRequest dto ) throws IOException {
@@ -178,19 +178,19 @@ public class SanzoneImageService {
 
     private void getGoogleStaticMapWithPolylineForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, File map ) {
 
-        try {
+        //try {
 
-            LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
+            //LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
-                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
+            //URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
+            //        googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
 
-            BufferedImage image = ImageIO.read( url );
+            //BufferedImage image = ImageIO.read( url );
 
-            ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
+            //ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
 
-        } catch ( IOException e ) {
-        }
+        //} catch ( IOException e ) {
+        //}
     }
 
     private void plotSanzoneByPixelsDataForSector( double [][] sanzone, CreateSectorDTO sector, double ratioPixelToMeter, String fileName, String session ) {
@@ -401,7 +401,7 @@ public class SanzoneImageService {
         double distanceFactor = pow( 2, ( int ) distanceZone / 38 == 0 ? -1 : ( int ) distanceZone / 88 );
         double heightFactor = pow( 2, ( int ) heightZoneMax / 38 == 0 ? -1 : ( int ) heightZoneMax / 88 );
 
-        int checkedHeightMin = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - heightZoneMin ) * POINT_STEP );
+        int checkedHeightMin = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - heightZoneMin ) * sessionSettings.getDefaultPointStep() );
         int checkedHeightFactor = 1;
 
         if ( checkedHeightMin >= googleStaticMapConfig.getImageHeight() ) {
@@ -409,7 +409,7 @@ public class SanzoneImageService {
         }
 
         double scaleX = ratioPixelToMeter * 2 / distanceFactor;
-        double scaleY = ratioPixelToMeter * 2 * checkedHeightFactor / ( POINT_STEP * heightFactor );
+        double scaleY = ratioPixelToMeter * 2 * checkedHeightFactor / ( sessionSettings.getDefaultPointStep() * heightFactor );
 
         int baseX = ( int ) round( centerX - ( int ) round( distanceZone * scaleX / 2 ) - googleStaticMapConfig.getImageWidth() / 10D );
         int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 / heightFactor );
@@ -420,7 +420,7 @@ public class SanzoneImageService {
 
             for ( Map.Entry< Double, Set< Double > > entry: sanzoneV.entrySet() ) {
 
-                int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP / checkedHeightFactor );
+                int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * sessionSettings.getDefaultPointStep() / checkedHeightFactor );
 
                 for ( Double distance: entry.getValue() ) {
 

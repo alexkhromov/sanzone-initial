@@ -21,9 +21,6 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 @Service
 public class SanzoneCalculationService {
 
-    private static final int MAX_DISTANCE = 200;
-    private static final int POINT_STEP = 5;
-
     public List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SessionSettings settings ) {
 
         List< Point > summary = new ArrayList<>();
@@ -139,15 +136,15 @@ public class SanzoneCalculationService {
 
         summary.put( height, new HashSet<>( asList( 0.0 ) ) );
 
-        //TODO get max height from sessionSettings
-        for ( int h = 0; h < ( height + MAX_DISTANCE / 2 ) * POINT_STEP; h++ ) {
+        //TODO-improvement_#1: default max size can be not enough for this calculation
+        for ( int h = 0; h < ( height + sessionSettings.getDefaultMaxSize() / 2 ) * sessionSettings.getDefaultPointStep(); h++ ) {
 
-            for ( int d = 0; d < sessionSettings.getDistance() * POINT_STEP; d++ ) {
+            for ( int d = 0; d < sessionSettings.getDistance() * sessionSettings.getDefaultPointStep(); d++ ) {
 
                 double intensity = 0;
 
-                double X = cos( toRadians( polarAngleM ) ) * d / POINT_STEP;
-                double Y = sin( toRadians( polarAngleM ) ) * d / POINT_STEP;
+                double X = cos( toRadians( polarAngleM ) ) * d / sessionSettings.getDefaultPointStep();
+                double Y = sin( toRadians( polarAngleM ) ) * d / sessionSettings.getDefaultPointStep();
 
                 for ( int s = 0; s < sectors.size(); s++ ) {
 
@@ -179,20 +176,20 @@ public class SanzoneCalculationService {
                     G = pow( 10, G / 10 );
                     TL = pow( 10, TL / 10 );
 
-                    double teta = atan( ( H - ( double ) h / POINT_STEP ) / pow( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
+                    double teta = atan( ( H - ( double ) h / sessionSettings.getDefaultPointStep() ) / pow( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ), 0.5 ) ) * 180D / PI;
 
                     intensity += ( 8D * P * G * TL * EF * exp( -0.69D * pow( phi * 2D / Q05H, 2D ) ) * exp( -0.69D * pow( ( teta - sector.getDownTilt() ) * 2D / Q05V, 2D ) ) )
-                            / ( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ) + pow( H - ( double ) h / POINT_STEP, 2D ) );
+                            / ( pow( X - offsets[ s ][ 1 ], 2D ) + pow( Y + offsets[ s ][ 0 ], 2D ) + pow( H - ( double ) h / sessionSettings.getDefaultPointStep(), 2D ) );
                 }
 
                 if ( intensity >= 10 ) {
 
                     double distance = Double.valueOf( df.format( pow( pow( X, 2D ) + pow( Y , 2D ), 0.5 ) ) );
 
-                    if ( summary.containsKey( ( double ) h / POINT_STEP ) ) {
-                        summary.get( ( double ) h / POINT_STEP ).add( distance );
+                    if ( summary.containsKey( ( double ) h / sessionSettings.getDefaultPointStep() ) ) {
+                        summary.get( ( double ) h / sessionSettings.getDefaultPointStep() ).add( distance );
                     } else {
-                        summary.put( ( double ) h / POINT_STEP, new HashSet<>( asList( distance ) ) );
+                        summary.put( ( double ) h / sessionSettings.getDefaultPointStep(), new HashSet<>( asList( distance ) ) );
                     }
                 }
             }
@@ -200,5 +197,4 @@ public class SanzoneCalculationService {
 
         return summary;
     }
-
 }

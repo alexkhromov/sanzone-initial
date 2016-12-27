@@ -7,6 +7,7 @@ import static java.awt.image.BufferedImage.*;
 /**
  * Created by DEV on 9/13/2016.
  */
+//TODO need to decide do we need this util???
 public class ImageUtil {
 
     public static int getImageType( BufferedImage image ) {

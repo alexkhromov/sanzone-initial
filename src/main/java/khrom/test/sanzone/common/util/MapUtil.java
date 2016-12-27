@@ -3,11 +3,9 @@ package khrom.test.sanzone.common.util;
 import com.google.maps.model.LatLng;
 import javafx.geometry.Point2D;
 import khrom.test.sanzone.common.util.enums.DistanceUnit;
-import khrom.test.sanzone.common.util.enums.SearchDirection;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,9 +16,6 @@ import static khrom.test.sanzone.common.constant.Constant.EARTH_RADIUS;
  * Created by DEV on 9/16/2016.
  */
 public class MapUtil {
-
-    private static final int MAX_DISTANCE = 200;
-    public static final int POINT_STEP = 5;
 
     /**
      * Returns an angle of map image in degrees that falls on given image width size and given zoom.
@@ -131,45 +126,7 @@ public class MapUtil {
         return coordinates;
     }
 
-    public static LatLng [] getCoordinatesForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, DistanceUnit unit ) {
-
-        List< Point2D > points = getBorderPointsForSummary( sanzone );
-
-        List< Point2D > polarPoints = new LinkedList<>();
-
-        for ( int i = 0; i < points.size() - 1; i = i + POINT_STEP ) {
-
-            Point2D point2D = points.get( i );
-
-            double phi = atan( ( MAX_DISTANCE - point2D.getX() ) / ( point2D.getY() - MAX_DISTANCE ) ) * 180D / PI;
-
-            if ( ( MAX_DISTANCE - point2D.getX() <= 0 ) && ( point2D.getY() - MAX_DISTANCE  >= 0 ) ) {
-                phi = abs( phi ) + 90;
-            } else if ( ( MAX_DISTANCE - point2D.getX() <= 0 ) && ( point2D.getY() - MAX_DISTANCE <= 0 ) ) {
-                phi = 270 - abs( phi );
-            } else if ( ( MAX_DISTANCE - point2D.getX() >= 0 ) && ( point2D.getY() - MAX_DISTANCE <= 0 ) ) {
-                phi = abs( phi ) + 270;
-            } else {
-                phi = 90 - abs( phi );
-            }
-
-            double distance = sqrt( pow( point2D.getX() - MAX_DISTANCE, 2D ) + pow( MAX_DISTANCE - point2D.getY(), 2D ) );
-
-            polarPoints.add( new Point2D( phi, distance ) );
-        }
-
-        LatLng [] coordinates = new LatLng[ polarPoints.size() - 1 ];
-
-        double latitude = sectors.get( 0 ).getLatitude();
-        double longitude = sectors.get( 0 ).getLongitude();
-
-        for ( int i = 0; i < coordinates.length; i++ ) {
-            coordinates[ i ] = getLatLng( latitude, longitude, polarPoints.get( i ).getY(), polarPoints.get( i ).getX(), unit );
-        }
-
-        return coordinates;
-    }
-
+    //TODO NOT DELETE!!!
     public static LatLng [] getCoordinatesForSummary( List< org.opencv.core.Point > points, List< CreateSectorDTO > sectors, DistanceUnit unit ) {
 
         List< Point2D > polarPoints = new LinkedList<>();
@@ -237,147 +194,5 @@ public class MapUtil {
         }
 
         return new Polygon( xPoints, yPoints, nPoints );
-    }
-
-    public static Polygon getPolygonForSummary( List< Point2D > points, int centerX, int centerY, double ratioPixelToMeter ) {
-
-        int [] xPoints  = new int [ points.size() / POINT_STEP ];
-        int [] yPoints  = new int [ points.size() / POINT_STEP ];
-        int nPoints = points.size() / POINT_STEP;
-
-        for ( int i = 0; i < points.size() / POINT_STEP; i++ ) {
-
-            Point2D point = points.get( i * POINT_STEP );
-
-            xPoints[ i ] = centerX + ( int ) ( ( point.getY() - MAX_DISTANCE ) * ratioPixelToMeter );
-            yPoints[ i ] = centerY - ( int ) ( ( MAX_DISTANCE - point.getX() ) * ratioPixelToMeter );
-        }
-
-        return new Polygon( xPoints, yPoints, nPoints );
-    }
-
-    public static double [][] calculateSanzoneForSector( CreateSectorDTO sector ) {
-
-        double P = sector.getAntenna().getP();
-        double G = sector.getAntenna().getG();
-        double TL = sector.getAntenna().getTL();
-        double EF = sector.getAntenna().getEF();
-        double Q05 = sector.getAntenna().getQ05H();
-
-        G = pow( 10, G / 10 );
-        TL = pow( 10, TL / 10 );
-
-        double [][] rawData = new double[ MAX_DISTANCE + 1 ][ MAX_DISTANCE + 1 ];
-
-        for ( int i = 1; i < rawData.length; i++ ) {
-
-            for ( int j = 0, offsetY = MAX_DISTANCE / 2; j < rawData.length; j++, offsetY-- ) {
-
-                double phi = atan( ( ( double ) offsetY ) / ( ( double ) i ) ) * 180D / PI;
-                rawData[ j ][ i ] = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) i ), 2D ) + pow( ( ( double ) offsetY ), 2D ) );
-            }
-        }
-
-        /*// @formatter:off
-        final AtomicInteger counter = new AtomicInteger( 0 );
-        String temp  = DoubleStream.of( rawData[ 100 ] )
-                                   .boxed()
-                                   .map( String::valueOf )
-                                   .collect( Collector.of( () -> new StringJoiner( ", ", "{ ", " }" ),
-                                                           ( j, p ) -> j.add( "[ " + p + ";" + counter.getAndIncrement() + " ]" ),
-                                                           ( j1, j2 ) -> j1.merge( j2 ),
-                                                           StringJoiner::toString ) );
-        // @formatter:on*/
-
-        List< Point2D > points = new ArrayList<>();
-
-        for ( int i = 1; i < MAX_DISTANCE; i++ ) {
-
-            Point2D p = null;
-
-            for ( int j = 0; j <= MAX_DISTANCE / 2; j++ ) {
-
-                if ( rawData[ j ][ i ] > 10 ) {
-
-                    p = new Point2D( i, ( MAX_DISTANCE / 2 ) - j );
-                    points.add( p );
-                    break;
-                }
-            }
-
-            if ( p == null || p.getY() <= 0 ) {
-                break;
-            }
-        }
-
-        double levelAtZeroDegree = sqrt( 8D * P * G * TL * EF / 10D );
-
-        List< Point2D > polarPoints = new ArrayList<>();
-
-        polarPoints.add( new Point2D( 0D, levelAtZeroDegree ) );
-
-        for ( int i = points.size() - 1; i > 0; i-- ) {
-
-            Point2D point2D = points.get( i );
-
-            double phi = atan( point2D.getY() / point2D.getX() ) * 180D / PI;
-            double distance = sqrt( pow( point2D.getX(), 2D ) + pow( point2D.getY(), 2D ) );
-
-            polarPoints.add( new Point2D( phi, distance ) );
-        }
-
-        double [][] sanzone = new double[ polarPoints.size() ][];
-
-        for ( int i = 0; i < sanzone.length; i++ ) {
-
-            Point2D polarPoint = polarPoints.get( i );
-
-            sanzone[ i ] = new double[] { polarPoint.getX(), polarPoint.getY() };
-        }
-
-        return sanzone;
-    }
-
-    public static List< Point2D > getBorderPointsForSummary( double [][] summary ) {
-
-        List< Point2D > points = new LinkedList<>();
-        Point2D start = null;
-
-        for ( int i = 0; i < MAX_DISTANCE ; i++ ) {
-
-            if ( summary[ MAX_DISTANCE ][ i ] >= 10 ) {
-
-                start = new Point2D( MAX_DISTANCE, i );
-                points.add( start );
-
-                break;
-            }
-        }
-
-        SearchDirection direction = SearchDirection.NORTH_WEST;
-
-        for ( ; ; ) {
-
-            Point2D previous = points.get( points.size() - 1 );
-            Point2D next = direction.getNext( previous );
-
-            if ( summary[ ( int ) next.getX() ][ ( int ) next.getY() ] >= 10 ) {
-
-                points.add( next );
-                direction = direction.getNextPointDirection();
-            } else {
-
-                direction = direction.getRotatePointDirection();
-                continue;
-            }
-
-            if ( ( ( int ) start.getX() == ( int ) points.get( points.size() - 1 ).getX() ) &&
-                    ( ( int ) start.getY() == ( int ) points.get( points.size() - 1 ).getY() ) ) {
-
-                break;
-            }
-        }
-
-        return points;
     }
 }

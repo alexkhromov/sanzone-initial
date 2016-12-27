@@ -4,7 +4,6 @@ import com.google.maps.model.LatLng;
 import khrom.test.sanzone.common.util.MapUtil;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -28,8 +27,8 @@ public class SessionSettings {
     @Autowired
     private GoogleStaticMapConfig mapConfig;
 
-    @Value( "${default.resultSize}" )
-    private Integer resultSize;
+    @Autowired
+    private DefaultSettings defaultSettings;
 
     private Integer sectorN;
     private Integer sessionScale;
@@ -104,7 +103,17 @@ public class SessionSettings {
 
     public Integer getResultSize() {
 
-        return resultSize * ( sessionScale > 1 ? 2 : 1 );
+        return defaultSettings.getResultSize() * ( sessionScale > 1 ? 2 : 1 );
+    }
+
+    public Integer getDefaultMaxSize() {
+
+        return defaultSettings.getMaxDistance();
+    }
+
+    public Integer getDefaultPointStep() {
+
+        return defaultSettings.getPointStep();
     }
 
     public void prepareSessionSettings( CreateSanzoneRequest dto ) {
