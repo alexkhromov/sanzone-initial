@@ -21,16 +21,16 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 @Service
 public class SanzoneCalculationService {
 
-    public List< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SessionSettings settings ) {
+    public Set< Point > calculateSanzoneForSummaryH( CreateSanzoneRequest dto, SessionSettings settings ) {
 
-        List< Point > summary = new ArrayList<>();
+        Set< Point > summary = new HashSet<>();
 
         double H, P, G, TL, EF, Q05H, Q05V;
 
         double latitude = settings.getCenter().lat;
         double longitude = settings.getCenter().lng;
 
-        List<CreateSectorDTO> sectors = dto.getSectors();
+        List< CreateSectorDTO > sectors = dto.getSectors();
 
         double [][] offsets = new double[ sectors.size() ][ 3 ];
 

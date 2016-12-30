@@ -49,7 +49,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
  * TODO need to double check: how to deal with default settings and custom settings
  */
 @Service
-public class SanzoneImageService {
+public class SanzoneReportService {
 
     private static final String GOOGLE_STATIC_MAPS_API_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&style=feature:poi|element:labels|visibility:off&style=feature:transit.station|element:labels|visibility:off&key=%s";
     private static final String GOOGLE_STATIC_MAPS_API_WITH_MARKERS_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=&markers=%s&key=%s";
@@ -58,12 +58,10 @@ public class SanzoneImageService {
     private static final String GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&%s&key=%s";
 
     private static final String PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN = "/sanzone/%s";
-    private static final String PATH_TO_STORAGE_WORK_DIRECTORY_MAPS_PATTERN = "/sanzone/%s/maps";
-    private static final String PATH_TO_MAP_FILE_PATTERN = "/sanzone/%s/maps/%s.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN = "/sanzone/%s/%s_google_map_polyline.%s";
     private static final String PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_H.%s";
-    private static final String PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_V.%s";
+    private static final String PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_V_S%s.%s";
     private static final String PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_H.%s";
     private static final String PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_V.%s";
 
@@ -121,18 +119,30 @@ public class SanzoneImageService {
 
         sessionSettings.prepareSessionSettings( dto );
 
-        List< java.awt.Point > sanzoneH = calculationService.calculateSanzoneForSummaryH( dto, sessionSettings );
+        Set< java.awt.Point > resultSanzoneH = new HashSet<>();
 
-        plotHorizontalDiagram( sanzoneH, ratioPixelToMeter,
-                               format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                               format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+        double heightM = sessionSettings.getHeightMin();
+        for ( ; heightM < sessionSettings.getHeightMax(); heightM += 0.1 ) {
 
-        //TODO this methods should be called for each sector from list
-        sessionSettings.setSectorN( 1 );
-        Map< Double, Set< Double > > sanzoneV = calculationService.calculateSanzoneForSummaryV( dto, sessionSettings );
-        plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
-                             format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                             format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+            dto.setHeightM( heightM );
+
+            Set< java.awt.Point > sanzoneH = calculationService.calculateSanzoneForSummaryH( dto, sessionSettings );
+
+            resultSanzoneH.addAll( sanzoneH );
+        }
+
+        plotHorizontalDiagram( new ArrayList<>( resultSanzoneH ), ratioPixelToMeter,
+                               format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+
+        for ( int i = 0, s = 1; i < dto.getSectors().size(); i++, s++ ) {
+
+            sessionSettings.setSectorN( s );
+            dto.setAzimuthM( dto.getSectors().get( i ).getAzimuth() );
+
+            Map< Double, Set< Double > > sanzoneV = calculationService.calculateSanzoneForSummaryV( dto, sessionSettings );
+            plotVerticalDiagram( sanzoneV, dto.getSectors(), s, ratioPixelToMeter,
+                                 format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, s, googleStaticMapConfig.getFormat() ) );
+        }
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -224,7 +234,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName, String testFileName ) {
+    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName ) {
 
         int centerX = sessionSettings.getWidthCenter();
         int centerY = sessionSettings.getHeightCenter();
@@ -248,10 +258,6 @@ public class SanzoneImageService {
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
             Graphics2D g2 = sanzoneImg.createGraphics();
             g2.drawImage( processor.createImage(), null, null );
-
-            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
-            Path testPath = Files.createFile( Paths.get( testFileName ) );
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
 
             g2.dispose();
 
@@ -382,7 +388,7 @@ public class SanzoneImageService {
     }
 
     private void plotVerticalDiagram( Map< Double, Set< Double > > sanzoneV, List< CreateSectorDTO > sectors,
-                                      int sectorN, double ratioPixelToMeter, String destFileName, String testFileName ) {
+                                      int sectorN, double ratioPixelToMeter, String destFileName ) {
 
         int resultWidth = 400;
         int resultHeight = 400;
@@ -452,10 +458,6 @@ public class SanzoneImageService {
 
             Graphics2D g2 = sanzoneImg.createGraphics();
             g2.drawImage( processor.createImage(), null, null );
-
-            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
-            Path testPath = Files.createFile( Paths.get( testFileName ) );
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 

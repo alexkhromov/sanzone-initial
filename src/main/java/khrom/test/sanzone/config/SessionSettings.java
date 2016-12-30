@@ -3,6 +3,7 @@ package khrom.test.sanzone.config;
 import com.google.maps.model.LatLng;
 import khrom.test.sanzone.common.util.MapUtil;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
+import khrom.test.sanzone.service.SanzoneCalculationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -30,9 +32,15 @@ public class SessionSettings {
     @Autowired
     private DefaultSettings defaultSettings;
 
+    @Autowired
+    private SanzoneCalculationService calculationService;
+
     private Integer sectorN;
     private Integer sessionScale;
     private Integer distance;
+
+    private Double heightMax;
+    private Double heightMin;
 
     private LatLng center;
 
@@ -58,6 +66,22 @@ public class SessionSettings {
 
     public void setDistance(Integer distance) {
         this.distance = distance;
+    }
+
+    public Double getHeightMax() {
+        return heightMax;
+    }
+
+    public void setHeightMax(Double heightMax) {
+        this.heightMax = heightMax;
+    }
+
+    public Double getHeightMin() {
+        return heightMin;
+    }
+
+    public void setHeightMin(Double heightMin) {
+        this.heightMin = heightMin;
     }
 
     public LatLng getCenter() {
@@ -188,5 +212,22 @@ public class SessionSettings {
         this.center = center;
         this.distance = 100 * sessionScale;
         this.sessionScale = sessionScale >= 2 ? sessionScale : 1;
+
+        this.heightMax = 0.0;
+        this.heightMin = 0.0;
+
+        for ( int i = 0, s = 1; i < dto.getSectors().size(); i++, s++ ) {
+
+            this.sectorN = s;
+            dto.setAzimuthM( dto.getSectors().get( i ).getAzimuth() );
+
+            Map< Double, Set< Double > > sanzoneV = calculationService.calculateSanzoneForSummaryV( dto, this );
+
+            double heightZoneMax = sanzoneV.keySet().stream().max( Double::compareTo ).get();
+            double heightZoneMin = sanzoneV.keySet().stream().min( Double::compareTo ).get();
+
+            this.heightMax = this.heightMax < heightZoneMax ? heightZoneMax : this.heightMax;
+            this.heightMin = this.heightMin > heightZoneMin ? heightZoneMin : this.heightMin;
+        }
     }
 }
