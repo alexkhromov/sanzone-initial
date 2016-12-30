@@ -2,7 +2,7 @@ package khrom.test.sanzone.controller;
 
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.response.ResponseBuilder;
-import khrom.test.sanzone.service.SanzoneImageService;
+import khrom.test.sanzone.service.SanzoneReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,15 +21,15 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  */
 @RestController
 @RequestMapping( "/" )
-public class SanzoneImageController {
+public class SanzoneReportController {
 
     @Autowired
-    private SanzoneImageService sanzoneImageService;
+    private SanzoneReportService sanzoneReportService;
 
     @RequestMapping( value = "/v1/sector", method = POST, consumes = JSON )
     public ResponseEntity< ? > createSectorSanzoneImage( @Validated @RequestBody CreateSanzoneRequest dto ) {
 
-        sanzoneImageService.createSectorSanzoneImage( dto );
+        sanzoneReportService.createSectorSanzoneImage( dto );
 
         ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
 
@@ -39,7 +39,7 @@ public class SanzoneImageController {
     @RequestMapping( value = "/v1/summary", method = POST, consumes = JSON )
     public ResponseEntity< ? > createSummarySanzoneImageWithOpenCV( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
 
-        sanzoneImageService.createSummarySanzone( dto );
+        sanzoneReportService.createSummarySanzone( dto );
 
         ResponseEntity response = ResponseBuilder.success().code( CREATED ).buildResponseEntity();
 

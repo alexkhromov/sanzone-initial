@@ -49,7 +49,7 @@ import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
  * TODO need to double check: how to deal with default settings and custom settings
  */
 @Service
-public class SanzoneImageService {
+public class SanzoneReportService {
 
     private static final String GOOGLE_STATIC_MAPS_API_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&style=feature:poi|element:labels|visibility:off&style=feature:transit.station|element:labels|visibility:off&key=%s";
     private static final String GOOGLE_STATIC_MAPS_API_WITH_MARKERS_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=&markers=%s&key=%s";
@@ -58,12 +58,10 @@ public class SanzoneImageService {
     private static final String GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN = "https://maps.googleapis.com/maps/api/staticmap?center=%s,%s&zoom=%s&size=%sx%s&scale=%s&maptype=%s&format=%s&language=%s&%s&key=%s";
 
     private static final String PATH_TO_STORAGE_WORK_DIRECTORY_PATTERN = "/sanzone/%s";
-    private static final String PATH_TO_STORAGE_WORK_DIRECTORY_MAPS_PATTERN = "/sanzone/%s/maps";
-    private static final String PATH_TO_MAP_FILE_PATTERN = "/sanzone/%s/maps/%s.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_FILE_PATTERN = "/sanzone/%s/%s_google_map.%s";
     private static final String PATH_TO_GOOGLE_MAP_IMAGE_WITH_POLYLINE_FILE_PATTERN = "/sanzone/%s/%s_google_map_polyline.%s";
     private static final String PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_H.%s";
-    private static final String PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_V.%s";
+    private static final String PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN = "/sanzone/%s/%s_sanzone_V_S%s.%s";
     private static final String PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_H.%s";
     private static final String PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN = "/sanzone/%s/%s_test_V.%s";
 
@@ -72,6 +70,9 @@ public class SanzoneImageService {
 
     @Autowired
     private SessionSettings sessionSettings;
+
+    @Autowired
+    private SanzoneCalculationService calculationService;
 
     @Autowired
     private ReportGeneratorService reportGeneratorService;
@@ -91,13 +92,13 @@ public class SanzoneImageService {
 
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( sector.getLatitude(), sector.getLongitude(), METER );
 
-        double [][] sanzone = calculateSanzoneForSector( sector );
+        //double [][] sanzone = calculateSanzoneForSector( sector );
 
-        getGoogleStaticMapWithPolylineForSector( sanzone, sector, session );
+        //getGoogleStaticMapWithPolylineForSector( sanzone, sector, session );
 
         // This call is optional. It is draw sanzone border using "image pixels" approach.
         // It is also insure that plot from "coordinates approach" draw same image as "image pixels"
-        plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
+        //plotSanzoneByPixelsDataForSector( sanzone, sector, ratioPixelToMeter, format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ), session );
     }
 
     public void createSummarySanzone( CreateSanzoneRequest dto ) throws IOException {
@@ -116,20 +117,32 @@ public class SanzoneImageService {
         double longitude = dto.getSectors().get( 0 ).getLongitude();
         double ratioPixelToMeter = googleStaticMapConfig.getRatioPixelToDistance( latitude, longitude, METER );
 
-        prepareSessionSettings( dto, sessionSettings );
+        sessionSettings.prepareSessionSettings( dto );
 
-        List< java.awt.Point > sanzoneH = calculateSanzoneForSummaryH( dto, sessionSettings );
+        Set< java.awt.Point > resultSanzoneH = new HashSet<>();
 
-        plotHorizontalDiagram( sanzoneH, ratioPixelToMeter,
-                               format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                               format( PATH_TO_HORIZONTAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+        double heightM = sessionSettings.getHeightMin();
+        for ( ; heightM < sessionSettings.getHeightMax(); heightM += 0.1 ) {
 
-        //TODO this methods should be called for each sector from list
-        sessionSettings.setSectorN( 1 );
-        Map< Double, Set< Double > > sanzoneV = calculateSanzoneForSummaryV( dto, sessionSettings );
-        plotVerticalDiagram( sanzoneV, dto.getSectors(), 1, ratioPixelToMeter,
-                             format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ),
-                             format( PATH_TO_VERTICAL_DIAGRAM_TEST_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+            dto.setHeightM( heightM );
+
+            Set< java.awt.Point > sanzoneH = calculationService.calculateSanzoneForSummaryH( dto, sessionSettings );
+
+            resultSanzoneH.addAll( sanzoneH );
+        }
+
+        plotHorizontalDiagram( new ArrayList<>( resultSanzoneH ), ratioPixelToMeter,
+                               format( PATH_TO_HORIZONTAL_DIAGRAM_FILE_PATTERN, session, session, googleStaticMapConfig.getFormat() ) );
+
+        for ( int i = 0, s = 1; i < dto.getSectors().size(); i++, s++ ) {
+
+            sessionSettings.setSectorN( s );
+            dto.setAzimuthM( dto.getSectors().get( i ).getAzimuth() );
+
+            Map< Double, Set< Double > > sanzoneV = calculationService.calculateSanzoneForSummaryV( dto, sessionSettings );
+            plotVerticalDiagram( sanzoneV, dto.getSectors(), s, ratioPixelToMeter,
+                                 format( PATH_TO_VERTICAL_DIAGRAM_FILE_PATTERN, session, session, s, googleStaticMapConfig.getFormat() ) );
+        }
 
         try {
             reportGeneratorService.generateReport( session, dto.getSectors() );
@@ -175,19 +188,19 @@ public class SanzoneImageService {
 
     private void getGoogleStaticMapWithPolylineForSummary( double [][] sanzone, List< CreateSectorDTO > sectors, File map ) {
 
-        try {
+        //try {
 
-            LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
+            //LatLng [] coordinates = getCoordinatesForSummary( sanzone, sectors, METER );
 
-            URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
-                    googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
+            //URL url = new URL( format( GOOGLE_STATIC_MAPS_API_WITH_POLYLINE_URL_PATTERN,
+            //        googleStaticMapConfig.getObjectsForPolylinePattern( sectors.get( 0 ).getLatitude(), sectors.get( 0 ).getLongitude(), PolylineEncoding.encode( coordinates ) ) ) );
 
-            BufferedImage image = ImageIO.read( url );
+            //BufferedImage image = ImageIO.read( url );
 
-            ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
+            //ImageIO.write( image, googleStaticMapConfig.getFormat(), map );
 
-        } catch ( IOException e ) {
-        }
+        //} catch ( IOException e ) {
+        //}
     }
 
     private void plotSanzoneByPixelsDataForSector( double [][] sanzone, CreateSectorDTO sector, double ratioPixelToMeter, String fileName, String session ) {
@@ -221,7 +234,7 @@ public class SanzoneImageService {
         }
     }
 
-    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName, String testFileName ) {
+    private void plotHorizontalDiagram( List< java.awt.Point > sanzone, double ratioPixelToMeter, String destFileName ) {
 
         int centerX = sessionSettings.getWidthCenter();
         int centerY = sessionSettings.getHeightCenter();
@@ -245,10 +258,6 @@ public class SanzoneImageService {
             processor.scale( ratioPixelToMeter, ratioPixelToMeter );
             Graphics2D g2 = sanzoneImg.createGraphics();
             g2.drawImage( processor.createImage(), null, null );
-
-            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
-            Path testPath = Files.createFile( Paths.get( testFileName ) );
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
 
             g2.dispose();
 
@@ -379,7 +388,7 @@ public class SanzoneImageService {
     }
 
     private void plotVerticalDiagram( Map< Double, Set< Double > > sanzoneV, List< CreateSectorDTO > sectors,
-                                      int sectorN, double ratioPixelToMeter, String destFileName, String testFileName ) {
+                                      int sectorN, double ratioPixelToMeter, String destFileName ) {
 
         int resultWidth = 400;
         int resultHeight = 400;
@@ -398,7 +407,7 @@ public class SanzoneImageService {
         double distanceFactor = pow( 2, ( int ) distanceZone / 38 == 0 ? -1 : ( int ) distanceZone / 88 );
         double heightFactor = pow( 2, ( int ) heightZoneMax / 38 == 0 ? -1 : ( int ) heightZoneMax / 88 );
 
-        int checkedHeightMin = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - heightZoneMin ) * POINT_STEP );
+        int checkedHeightMin = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - heightZoneMin ) * sessionSettings.getDefaultPointStep() );
         int checkedHeightFactor = 1;
 
         if ( checkedHeightMin >= googleStaticMapConfig.getImageHeight() ) {
@@ -406,7 +415,7 @@ public class SanzoneImageService {
         }
 
         double scaleX = ratioPixelToMeter * 2 / distanceFactor;
-        double scaleY = ratioPixelToMeter * 2 * checkedHeightFactor / ( POINT_STEP * heightFactor );
+        double scaleY = ratioPixelToMeter * 2 * checkedHeightFactor / ( sessionSettings.getDefaultPointStep() * heightFactor );
 
         int baseX = ( int ) round( centerX - ( int ) round( distanceZone * scaleX / 2 ) - googleStaticMapConfig.getImageWidth() / 10D );
         int baseY = ( int ) round( centerY - googleStaticMapConfig.getImageHeight() / 10D - sectors.get( sectorN - 1 ).getHeight() * ratioPixelToMeter * 2 / heightFactor );
@@ -417,7 +426,7 @@ public class SanzoneImageService {
 
             for ( Map.Entry< Double, Set< Double > > entry: sanzoneV.entrySet() ) {
 
-                int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * POINT_STEP / checkedHeightFactor );
+                int yPoint = centerY + ( int ) round( ( sectors.get( sectorN - 1 ).getHeight() - entry.getKey() ) * sessionSettings.getDefaultPointStep() / checkedHeightFactor );
 
                 for ( Double distance: entry.getValue() ) {
 
@@ -449,10 +458,6 @@ public class SanzoneImageService {
 
             Graphics2D g2 = sanzoneImg.createGraphics();
             g2.drawImage( processor.createImage(), null, null );
-
-            //TODO next 2 lines is only for test purpose ( modify method signature when testFileName become unnecessary )
-            Path testPath = Files.createFile( Paths.get( testFileName ) );
-            ImageIO.write( sanzoneImg, googleStaticMapConfig.getFormat(), testPath.toFile() );
 
             System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
 
@@ -535,7 +540,7 @@ public class SanzoneImageService {
             g2.setColor( Color.BLACK );
             g2.drawRect( 0, 0, result.getWidth() - 1, result.getHeight() - 1 );
 
-            for ( int i = 40; i < result.getWidth(); i += 40 ) {
+            for ( int i = 40, x = 1, y = 8; i < result.getWidth(); i += 40, x++, y-- ) {
 
                 if ( result.getWidth() / i == 10 ) {
                     g2.drawLine( 0, i, result.getWidth(), i );
@@ -550,6 +555,8 @@ public class SanzoneImageService {
                     g2 = result.createGraphics();
                     g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
                     g2.setColor( Color.BLACK );
+                    g2.drawString( format( "%.0f", 10 * heightFactor * y ), 15, i + 15 );
+                    g2.drawString( format( "%.0f", 10 * distanceFactor * x ), i + 15, resultWidth - 25 );
                     continue;
                 }
 
@@ -571,6 +578,9 @@ public class SanzoneImageService {
 
                 g2.drawLine( i, 0, i, result.getHeight() );
                 g2.drawLine( 0, i, result.getWidth(), i );
+
+                g2.drawString( format( "%.0f", 10 * heightFactor * y ), 15, i + 15 );
+                g2.drawString( format( "%.0f", 10 * distanceFactor * x ), i + 15, resultWidth - 25 );
             }
 
             g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
@@ -583,11 +593,17 @@ public class SanzoneImageService {
             g2.setStroke( new BasicStroke( 2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float [] { 20, 10 }, 0 ) );
             g2.setColor( Color.GREEN );
             g2.setComposite( AlphaComposite.SrcOver.derive( 0.5f ) );
+
             // +1 / -1 used for correction of stroke width
-            g2.drawLine( 0, ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1,
-                         result.getWidth(), ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1 );
-            g2.drawLine( ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, 0,
-                         ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1, result.getHeight() );
+            int pixelX = ( int ) round( resultWidth / 10D ) + ( int ) round( resultWidth * distanceZone / ( 2D * centerX * distanceFactor ) ) + 1;
+            int pixelY = ( int ) round( resultHeight * 9 / 10D ) - ( int ) round( resultHeight * heightZoneMin / ( 2D * centerY * heightFactor ) ) + 1;
+
+            g2.drawLine( 0, pixelY, result.getWidth(), pixelY );
+            g2.drawLine( pixelX, 0, pixelX, result.getHeight() );
+
+            g2.setComposite( AlphaComposite.SrcOver.derive( 1.0f ) );
+            g2.drawString( format( "distance = %.2f", displayDistance ), pixelX + ( pixelX < resultWidth / 2 ? 100 : -100 ), 15 );
+            g2.drawString( format( "height = %.2f", displayHeigth ), 50, pixelY > resultWidth - 60 ? resultWidth - 10 : pixelY + 15 );
 
             Path path = Files.createFile( Paths.get( destFileName ) );
 
