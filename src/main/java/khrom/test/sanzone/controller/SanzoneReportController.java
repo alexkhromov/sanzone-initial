@@ -20,7 +20,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
  * Created by DEV on 9/12/2016.
  */
 @RestController
-@RequestMapping( "/" )
 public class SanzoneReportController {
 
     @Autowired
@@ -37,7 +36,7 @@ public class SanzoneReportController {
     }
 
     @RequestMapping( value = "/v1/summary", method = POST, consumes = JSON )
-    public ResponseEntity< ? > createSummarySanzoneImageWithOpenCV( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
+    public ResponseEntity< ? > createSummarySanzone( @Validated @RequestBody CreateSanzoneRequest dto ) throws IOException {
 
         sanzoneReportService.createSummarySanzone( dto );
 

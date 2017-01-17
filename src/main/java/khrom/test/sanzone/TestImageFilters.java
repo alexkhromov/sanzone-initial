@@ -22,7 +22,7 @@ import static java.awt.image.BufferedImage.TYPE_INT_RGB;
 /**
  * Created by DEV on 11/9/2016.
  */
-public class Test {
+public class TestImageFilters {
 
     public static void main( String[] args ) {
 
