@@ -6,6 +6,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+import static khrom.test.sanzone.model.response.enums.ResponseStatus.FAILURE;
+import static khrom.test.sanzone.model.response.enums.ResponseStatus.SUCCESS;
+
 /**
  * Created by DEV on 9/12/2016.
  */
@@ -16,27 +19,30 @@ public class ResponseBuilder< T > {
 
     public ResponseEntity< SanzoneResponse< T > > buildResponseEntity() {
 
-        return new ResponseEntity< SanzoneResponse< T > >( response, code );
+        return new ResponseEntity<>( response, code );
     }
 
     public static < T > ResponseBuilder< T > success() {
 
-        return withEmptyResponse();
+        return withEmptyData( SUCCESS );
     }
 
-    public static < T > ResponseBuilder< T > success( SanzoneResponse< T > response ) {
+    public static < T > ResponseBuilder< T > success( T data ) {
 
-        return withResponse( response, ResponseStatus.SUCCESS );
+        SanzoneResponse< T > response = new SanzoneResponse<>();
+        response.addData( data );
+
+        return withData( response, SUCCESS );
     }
 
     public static < T > ResponseBuilder< T > failure() {
 
-        return withEmptyResponse();
+        return withEmptyData( FAILURE );
     }
 
     public static < T > ResponseBuilder< T > failure( SanzoneResponse< T > response ) {
 
-        return withResponse( response, ResponseStatus.FAILURE );
+        return withData( response, FAILURE );
     }
 
     public ResponseBuilder< T > code( HttpStatus code ) {
@@ -55,18 +61,19 @@ public class ResponseBuilder< T > {
         return this;
     }
 
-    private static < T > ResponseBuilder< T > withEmptyResponse() {
+    private static < T > ResponseBuilder< T > withEmptyData( ResponseStatus status ) {
 
         ResponseBuilder builder = new ResponseBuilder();
 
-        SanzoneResponse response = null;
+        SanzoneResponse response = new SanzoneResponse();
 
         builder.response = response;
+        builder.response.setStatus( status );
 
         return builder;
     }
 
-    private static < T > ResponseBuilder< T > withResponse( SanzoneResponse< T > response, ResponseStatus status ) {
+    private static < T > ResponseBuilder< T > withData( SanzoneResponse< T > response, ResponseStatus status ) {
 
         ResponseBuilder builder = new ResponseBuilder();
 
