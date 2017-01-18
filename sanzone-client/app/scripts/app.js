@@ -1,15 +1,15 @@
 'use strict';
 
-angular.module( 'F1FeederApp', [
-  'F1FeederApp.controllers',
-  'F1FeederApp.services',
-  'F1FeederApp.config',
+angular.module( 'Sanzone', [
+  'Sanzone.controllers',
+  'Sanzone.services',
+  'Sanzone.config',
   'angularShamSpinner'
 ] );
 
-  angular.module( 'F1FeederApp.controllers', [] ).
+  angular.module( 'Sanzone.controllers', [] ).
   controller( 'sectorsController', function( $scope, sanzoneAPIservice, configuration ) {
-    
+
     $scope.environment = null;
     $scope.heightM = null;
     $scope.azimuthM = null;
@@ -21,7 +21,7 @@ angular.module( 'F1FeederApp', [
     $scope.environment = configuration.baseUrl;
 
     sanzoneAPIservice.test().then( function ( response ) {
-        
+
         $scope.status = response.status;
         $scope.heightM = response.data.data[ 0 ].heightM;
         $scope.azimuthM = response.data.data[ 0 ].azimuthM;

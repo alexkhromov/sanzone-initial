@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>F-1 Feeder</title>
+  <title>Sanzone</title>
 
   <!-- build:css({.tmp,app}) styles/style.css -->
   <link rel="stylesheet" type="text/css" href="styles/spinner.css">
@@ -10,7 +10,7 @@
 
 </head>
 
-<body ng-app="F1FeederApp" ng-controller="sectorsController">
+<body ng-app="Sanzone" ng-controller="sectorsController">
 
   <div class="jumbotron">
     <div class="container">
@@ -63,17 +63,17 @@
             </tr>
           </tbody>
         </table>
-      </div> 
- 
+      </div>
+
       <button type="button"
               class="btn btn-success"
-              ng-click="createSummarySanzone()", ng-disabled="inProcess">Generate Report</button> 
+              ng-click="createSummarySanzone()", ng-disabled="inProcess">Generate Report</button>
 
     </div>
 
     <sham-spinner class="sham-spinner-blocker sham-spinner-container spinner" text="Prepare report..."></sham-spinner>
-  
-  </div> 
+
+  </div>
 
   <!-- build:js(.) scripts/vendor.js -->
   <!-- bower:js -->

@@ -276,7 +276,7 @@ module.exports = function ( grunt ) {
     ngtemplates: {
       dist: {
         options: {
-          module: 'F1FeederApp',
+          module: 'Sanzone',
           htmlmin: '<%= htmlmin.dist.options %>',
           usemin: 'scripts/scripts.js'
         },

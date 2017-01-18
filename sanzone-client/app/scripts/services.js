@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module( 'F1FeederApp.services', [ 'F1FeederApp.config' ] ).
+angular.module( 'Sanzone.services', [ 'Sanzone.config' ] ).
   factory( 'sanzoneAPIservice', function( $http, configuration ) {
 
     var sanzoneAPI = {};
