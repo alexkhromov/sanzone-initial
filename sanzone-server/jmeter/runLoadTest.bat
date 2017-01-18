@@ -6,5 +6,5 @@ cd /jmeter
 del /q *
 FOR /D %%p IN (*.*) DO rmdir "%%p" /s /q
 
-call jmeter -n -t C:\DEV\projects\sanzone-initial\jmeter\createSummarySanzone_v1.jmx -l createSummarySanzone_v1.log
+call jmeter -n -t C:\DEV\projects\sanzone-initial\sanzone-server\jmeter\createSummarySanzone_v1.jmx -l createSummarySanzone_v1.log
 call jmeter -g createSummarySanzone_v1.log
