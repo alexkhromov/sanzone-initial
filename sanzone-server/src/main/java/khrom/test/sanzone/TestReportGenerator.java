@@ -30,7 +30,7 @@ public class TestReportGenerator {
         parameters.put( "sectorsDataSource", collectionDataSource );
         parameters.put( "summarySanzone", format( PATH_TO_SANZONE_FILE_PATTERN, "test_session", "test_session", "jpg" ) );
 
-        JasperReport jasperReport = JasperCompileManager.compileReport( "C:\\DEV\\projects\\sanzone-initial\\src\\main\\resources\\templates\\sanzone_initial.jrxml" );
+        JasperReport jasperReport = JasperCompileManager.compileReport( "C:\\DEV\\projects\\sanzone-initial\\sanzone-server\\src\\main\\resources\\templates\\sanzone_initial.jrxml" );
         JasperPrint jasperPrint = JasperFillManager.fillReport( jasperReport, parameters, new JREmptyDataSource() );
         JasperExportManager.exportReportToPdfFile( jasperPrint, format( PATH_TO_SANZONE_PDF_REPORT_PATTERN, "test_session", "test_session" ) );
         //JasperExportManager.exportReportToHtmlFile( jasperPrint, format( PATH_TO_SANZONE_HTML_REPORT_PATTERN, session, session ) );

@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="sanzone_load_test" type="BatchConfigurationType" factoryName="Batch">
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="WORKING_DIRECTORY" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs />
+    <module name="" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sanzone-server/jmeter/runLoadTest.bat" />
+    <option name="PARAMETERS" value="" />
+    <method />
+  </configuration>
+</component>

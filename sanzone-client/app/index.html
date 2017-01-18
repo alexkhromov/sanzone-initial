@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>F-1 Feeder</title>
+
+  <!-- build:css({.tmp,app}) styles/style.css -->
+  <link rel="stylesheet" type="text/css" href="styles/spinner.css">
+  <link rel="stylesheet" type="text/css" href="../bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <!-- endbuild -->
+
+</head>
+
+<body ng-app="F1FeederApp" ng-controller="sectorsController">
+
+  <div class="jumbotron">
+    <div class="container">
+
+      <div>
+        <h3><span class="label label-success">Environment - {{environment}}</span></h3>
+      </div>
+      <div>
+        <h3><span class="label label-success">Response status - {{status}}</span></h3>
+      </div>
+      <div>
+        <h4><span class="label label-info">HeightM - {{heightM}}</span></h4>
+      </div>
+      <div>
+        <h4><span class="label label-info">AzimuthM - {{azimuthM}}</span></h4>
+      </div>
+
+      <div class="panel panel-default">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Latitude</th>
+              <th >Longitude</th>
+              <th>Azimuth</th>
+              <th>DownTilt</th>
+              <th>Height</th>
+              <th>Power</th>
+              <th>Gain</th>
+              <th>TractLost</th>
+              <th>EarthFactor</th>
+              <th>DiagramWidthHalfPowerH</th>
+              <th>DiagramWidthHalfPowerV</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="text-align: center" ng-repeat="sector in sectors">
+              <th>{{$index + 1}}</th>
+              <td>{{sector.latitude}}</td>
+              <td>{{sector.longitude}}</td>
+              <td>{{sector.azimuth}}</td>
+              <td>{{sector.downTilt}}</td>
+              <td>{{sector.height}}</td>
+              <td>{{sector.antenna.power}}</td>
+              <td>{{sector.antenna.gain}}</td>
+              <td>{{sector.antenna.tractLost}}</td>
+              <td>{{sector.antenna.earthFactor}}</td>
+              <td>{{sector.antenna.diagramWidthHalfPowerH}}</td>
+              <td>{{sector.antenna.diagramWidthHalfPowerV}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div> 
+ 
+      <button type="button"
+              class="btn btn-success"
+              ng-click="createSummarySanzone()", ng-disabled="inProcess">Generate Report</button> 
+
+    </div>
+
+    <sham-spinner class="sham-spinner-blocker sham-spinner-container spinner" text="Prepare report..."></sham-spinner>
+  
+  </div> 
+
+  <!-- build:js(.) scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-sham-spinner/angular-sham-spinner.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js({.tmp,app}) scripts/scripts.js -->
+  <script src="scripts/app.js"></script>
+  <script src="scripts/services.js"></script>
+  <script src="scripts/config/config.js"></script>
+  <!-- endbuild -->
+
+</body>
+</html>
