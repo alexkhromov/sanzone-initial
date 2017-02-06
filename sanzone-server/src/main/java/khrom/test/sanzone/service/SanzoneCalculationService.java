@@ -8,11 +8,13 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
 import static java.lang.Math.*;
 import static java.util.Arrays.asList;
+import static java.util.Locale.US;
 import static khrom.test.sanzone.common.util.MapUtil.distance;
 import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 
@@ -115,7 +117,8 @@ public class SanzoneCalculationService {
 
         List< CreateSectorDTO > sectors = dto.getSectors();
 
-        DecimalFormat df = new DecimalFormat( "#.##" );
+        DecimalFormat df = ( DecimalFormat ) NumberFormat.getNumberInstance( US );
+        df.applyPattern( "#.00" );
 
         double [][] offsets = new double[ sectors.size() ][ 3 ];
 
