@@ -1,5 +1,6 @@
 package khrom.test.sanzone.service;
 
+import javafx.geometry.Point2D;
 import khrom.test.sanzone.config.SessionSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
@@ -7,11 +8,13 @@ import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
 
 import static java.lang.Math.*;
 import static java.util.Arrays.asList;
+import static java.util.Locale.US;
 import static khrom.test.sanzone.common.util.MapUtil.distance;
 import static khrom.test.sanzone.common.util.enums.DistanceUnit.METER;
 
@@ -114,7 +117,8 @@ public class SanzoneCalculationService {
 
         List< CreateSectorDTO > sectors = dto.getSectors();
 
-        DecimalFormat df = new DecimalFormat( "#.##" );
+        DecimalFormat df = ( DecimalFormat ) NumberFormat.getNumberInstance( US );
+        df.applyPattern( "#.00" );
 
         double [][] offsets = new double[ sectors.size() ][ 3 ];
 
@@ -196,5 +200,88 @@ public class SanzoneCalculationService {
         }
 
         return summary;
+    }
+
+    //TODO NOT DELETE!!!
+    public double [][] calculateSanzoneForSector( CreateSectorDTO sector, SessionSettings sessionSettings ) {
+
+        double P = sector.getAntenna().getP();
+        double G = sector.getAntenna().getG();
+        double TL = sector.getAntenna().getTL();
+        double EF = sector.getAntenna().getEF();
+        double Q05 = sector.getAntenna().getQ05H();
+
+        G = pow( 10, G / 10 );
+        TL = pow( 10, TL / 10 );
+
+        double [][] rawData = new double[ sessionSettings.getDefaultMaxSize() + 1 ][ sessionSettings.getDefaultMaxSize() + 1 ];
+
+        for ( int i = 1; i < rawData.length; i++ ) {
+
+            for ( int j = 0, offsetY = sessionSettings.getDefaultMaxSize() / 2; j < rawData.length; j++, offsetY-- ) {
+
+                double phi = atan( ( ( double ) offsetY ) / ( ( double ) i ) ) * 180D / PI;
+                rawData[ j ][ i ] = ( 8D * P * G * TL * EF * ( exp( -0.69D * pow( phi * 2D / Q05, 2D ) ) ) ) / ( pow( ( ( double ) i ), 2D ) + pow( ( ( double ) offsetY ), 2D ) );
+            }
+        }
+
+        /*// @formatter:off
+        final AtomicInteger counter = new AtomicInteger( 0 );
+        String temp  = DoubleStream.of( rawData[ 100 ] )
+                                   .boxed()
+                                   .map( String::valueOf )
+                                   .collect( Collector.of( () -> new StringJoiner( ", ", "{ ", " }" ),
+                                                           ( j, p ) -> j.add( "[ " + p + ";" + counter.getAndIncrement() + " ]" ),
+                                                           ( j1, j2 ) -> j1.merge( j2 ),
+                                                           StringJoiner::toString ) );
+        // @formatter:on*/
+
+        List< Point2D > points = new ArrayList<>();
+
+        for ( int i = 1; i < sessionSettings.getDefaultMaxSize(); i++ ) {
+
+            Point2D p = null;
+
+            for ( int j = 0; j <= sessionSettings.getDefaultMaxSize() / 2; j++ ) {
+
+                if ( rawData[ j ][ i ] > 10 ) {
+
+                    p = new Point2D( i, ( sessionSettings.getDefaultMaxSize() / 2 ) - j );
+                    points.add( p );
+                    break;
+                }
+            }
+
+            if ( p == null || p.getY() <= 0 ) {
+                break;
+            }
+        }
+
+        double levelAtZeroDegree = sqrt( 8D * P * G * TL * EF / 10D );
+
+        List< Point2D > polarPoints = new ArrayList<>();
+
+        polarPoints.add( new Point2D( 0D, levelAtZeroDegree ) );
+
+        for ( int i = points.size() - 1; i > 0; i-- ) {
+
+            Point2D point2D = points.get( i );
+
+            double phi = atan( point2D.getY() / point2D.getX() ) * 180D / PI;
+            double distance = sqrt( pow( point2D.getX(), 2D ) + pow( point2D.getY(), 2D ) );
+
+            polarPoints.add( new Point2D( phi, distance ) );
+        }
+
+        double [][] sanzone = new double[ polarPoints.size() ][];
+
+        for ( int i = 0; i < sanzone.length; i++ ) {
+
+            Point2D polarPoint = polarPoints.get( i );
+
+            sanzone[ i ] = new double[] { polarPoint.getX(), polarPoint.getY() };
+        }
+
+        return sanzone;
     }
 }
