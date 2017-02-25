@@ -37,4 +37,4 @@ angular.module( 'Sanzone', [
                $scope.status = response.status;
             } );
     };
-  } );
+} );
