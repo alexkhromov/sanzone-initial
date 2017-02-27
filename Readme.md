@@ -8,3 +8,6 @@ installation: http://opencv-java-tutorials.readthedocs.io/en/latest/01-installin
 
 how it can be useful: http://stackoverflow.com/questions/11925777/opencv-how-to-use-arrays-of-points-for-smoothing-and-sampling-contours
                       http://stackoverflow.com/questions/29477049/opencv-find-concave-hull
+                      
+                      
+Jasper reports library releases: http://community.jaspersoft.com/project/jasperreports-library/releases
