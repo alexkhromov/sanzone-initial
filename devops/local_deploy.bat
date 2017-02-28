@@ -43,7 +43,7 @@ cd %PROJECT_HOME%\%BACK_END%
 call mvn clean install -P %ENV%
 
 cd %PROJECT_HOME%\%FRONT_END%
-call %GIT_HOME%\bin\sh -c "grunt --env=%ENV%"
+call grunt --env=%ENV%
 
 xcopy %PROJECT_HOME%\%BACK_END%\%BUILD_TARGET%\ROOT.war %CATALINA_HOME%\webapps
 xcopy /s %PROJECT_HOME%\%FRONT_END%\%BUILD_TARGET% %APACHE_HOME%\htdocs\sanzone\
