@@ -18,6 +18,10 @@
   <!-- 2. Configure SystemJS -->
   <script>
       System.config({
+          map: {
+              component: '../target/component',
+              service: '../target/service'
+          },
           packages: {
               component: {
                   format: 'register',
