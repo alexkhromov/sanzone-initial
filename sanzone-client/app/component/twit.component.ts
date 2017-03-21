@@ -1,28 +1,25 @@
 /**
  * Created by DEV on 13.03.2017.
  */
-import {Component} from "angular2/core";
-import {PostComponent} from "./post.component";
+import {Component} from '@angular/core';
 import {PostService} from "../service/post.service";
-@Component({
 
-    selector: 'twitt',
+@Component( {
+
+    selector: 'twit',
 
     template: `<ul>
-                   <post *ngFor = "#post of posts"
+                   <post *ngFor = "let post of posts"
                          [image]="post.image"
                          [author]="post.author"
-                         [twitt-handle]="post.twittHandle"
+                         [twit-handle]="post.twitHandle"
                          [message]="post.message"
                          [likes]="post.likes"
                          [liked]="post.liked"></post>
-               </ul>`,
+               </ul>`
+} )
 
-    directives: [ PostComponent ],
-    providers: [ PostService ]
-})
-
-export class TwittComponent {
+export class TwitComponent {
 
     posts;
 

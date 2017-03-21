@@ -1,7 +1,7 @@
 /**
  * Created by DEV on 13.03.2017.
  */
-import {bootstrap}    from 'angular2/platform/browser'
-import {AppComponent} from './app.component'
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import {AppModule} from "./app.module";
 
-bootstrap(AppComponent);
+platformBrowserDynamic().bootstrapModule( AppModule );

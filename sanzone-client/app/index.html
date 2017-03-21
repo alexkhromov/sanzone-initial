@@ -3,38 +3,23 @@
 <head>
   <title>Sanzone</title>
 
+  <!-- inject:css -->
   <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+  <!-- endinject -->
 
   <!-- 1. Load libraries -->
   <!-- IE required polyfills, in this exact order -->
-  <script src="../node_modules/es6-shim/es6-shim.min.js"></script>
-  <script src="../node_modules/systemjs/dist/system-polyfills.js"></script>
 
-  <script src="../node_modules/angular2/bundles/angular2-polyfills.js"></script>
-  <script src="../node_modules/systemjs/dist/system.src.js"></script>
-  <script src="../node_modules/rxjs/bundles/Rx.js"></script>
-  <script src="../node_modules/angular2/bundles/angular2.dev.js"></script>
+  <!-- inject:js -->
+  <script src="node_modules/core-js/client/shim.min.js"></script>
+  <script src="node_modules/zone.js/dist/zone.js"></script>
+  <script src="node_modules/systemjs/dist/system.src.js"></script>
+  <!-- endinject -->
 
   <!-- 2. Configure SystemJS -->
+  <script src="systemjs.config.js"></script>
   <script>
-      System.config({
-          map: {
-              component: '../target/component',
-              service: '../target/service'
-          },
-          packages: {
-              component: {
-                  format: 'register',
-                  defaultExtension: 'js'
-              },
-              service: {
-                  format: 'register',
-                  defaultExtension: 'js'
-              }
-          }
-      });
-      System.import('component/boot')
-          .then(null, console.error.bind(console));
+      System.import( 'component/boot.js' ).catch(function(err){ console.error(err); });
   </script>
 
 </head>

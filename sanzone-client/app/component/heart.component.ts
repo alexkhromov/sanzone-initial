@@ -1,9 +1,9 @@
 /**
  * Created by DEV on 12.03.2017.
  */
-import {Component, Input, Output} from "angular2/src/core/metadata";
+import {Component, Input} from '@angular/core';
 
-@Component({
+@Component( {
 
     selector: 'heart',
 
@@ -14,12 +14,12 @@ import {Component, Input, Output} from "angular2/src/core/metadata";
                     <span>{{ likes }} </span>
                </div>`,
 
-    styles: [`
-        .glyphicon-heart {
+    styles: [
+        `.glyphicon-heart {
             cursor: pointer;
-        }
-    `]
-})
+        }`
+    ]
+} )
 
 export class HeartComponent {
 

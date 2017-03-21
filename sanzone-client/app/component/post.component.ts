@@ -1,10 +1,9 @@
 /**
  * Created by DEV on 13.03.2017.
  */
-import {Component, Input} from "angular2/core";
-import {HeartComponent} from "./heart.component";
+import {Component, Input} from '@angular/core';
 
-@Component({
+@Component( {
 
     selector: 'post',
 
@@ -15,14 +14,12 @@ import {HeartComponent} from "./heart.component";
                        </a>
                    </div>
                    <div class="media-body">
-                       <h4 class="media-heading twitt-head">{{author}}</h4>
-                       <h4 class="twitt-handle">&nbsp;{{twittHandle}}</h4>
+                       <h4 class="media-heading twit-head">{{author}}</h4>
+                       <h4 class="twit-handle">&nbsp;{{twitHandle}}</h4>
                        <h5>{{message}}</h5>
                        <heart [likes]="likes" [liked]="liked"></heart>
                    </div>
                </div>`,
-
-    directives: [ HeartComponent ],
 
     styles: [
 
@@ -30,22 +27,22 @@ import {HeartComponent} from "./heart.component";
             padding: 10;
         }
         
-        .twitt-head, .twitt-handle {
+        .twit-head, .twit-handle {
             font-weight: bold;
             display: inline;
         }
         
-        .twitt-handle {
+        .twit-handle {
             color: #ccc;
         }`
     ]
-})
+} )
 
 export class PostComponent {
 
     @Input() image = "";
     @Input() author = "";
-    @Input( 'twitt-handle' ) twittHandle = "";
+    @Input( 'twit-handle' ) twitHandle = "";
     @Input() message = "";
     @Input() likes = 0;
     @Input() liked = false;
