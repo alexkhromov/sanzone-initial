@@ -9,6 +9,7 @@ import {PostService} from "../service/post.service";
 import {HeartComponent} from "./heart.component";
 import {PostComponent} from "./post.component";
 import {TwitComponent} from "./twit.component";
+import {NavbarComponent} from "./navbar.component";
 
 @NgModule( {
 
@@ -16,6 +17,7 @@ import {TwitComponent} from "./twit.component";
 
     declarations: [
 
+        NavbarComponent,
         AppComponent,
         TwitComponent,
         PostComponent,
