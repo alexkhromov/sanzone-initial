@@ -3,15 +3,19 @@
  */
 import {Component} from 'angular2/core';
 import {TwittComponent} from "./twitt.component";
+import {NavbarComponent} from "./navbar/navbar.component";
 
 @Component({
 
     selector: 'my-app',
 
-    template: `<h1>My First Angular 2 App</h1>
+    template: `<navbar></navbar>
+               <h1>My First Angular 2 App</h1>
+                                     
+               
                <twitt></twitt>`,
 
-    directives: [ TwittComponent ]
+    directives: [ NavbarComponent, TwittComponent ]
 })
 
 export class AppComponent { }
