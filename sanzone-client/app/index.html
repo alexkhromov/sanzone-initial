@@ -11,16 +11,20 @@
   <!-- IE required polyfills, in this exact order -->
 
   <!-- inject:js -->
+  <!-- build:vendor -->
   <script src="node_modules/core-js/client/shim.min.js"></script>
   <script src="node_modules/zone.js/dist/zone.js"></script>
   <script src="node_modules/systemjs/dist/system.src.js"></script>
-  <!-- endinject -->
+  <script src="systemjs.config.js"></script>
+  <!-- endbuild -->
 
   <!-- 2. Configure SystemJS -->
-  <script src="systemjs.config.js"></script>
+  <!-- build:app -->
   <script>
-      System.import( 'component/boot.js' ).catch(function(err){ console.error(err); });
+      System.import( 'component/boot' ).catch( function( err ){ console.error( err ); } );
   </script>
+  <!-- endbuild -->
+  <!-- endinject -->
 
 </head>
 

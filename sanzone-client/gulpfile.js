@@ -7,10 +7,16 @@ var gulp = require( 'gulp' );
 var del = require( 'del' );
 var typescript = require( 'gulp-typescript' );
 var sourcemaps = require( 'gulp-sourcemaps' );
+var htmlreplace = require( 'gulp-html-replace' );
 var inject = require( 'gulp-inject' );
 var tscConfig = require( './tsconfig.json' );
+var Builder = require( 'systemjs-builder' );
+var builder = new Builder( '.', './app/systemjs.config.js' );
 
 var target = 'target';
+var bundleHash = new Date().getTime();
+var mainBundleName = bundleHash + '.app.bundle.js';
+var vendorBundleName = bundleHash + '.vendor.bundle.js';
 
 // clean the contents of the target directory
 gulp.task( 'clean', function () {
@@ -21,12 +27,16 @@ gulp.task( 'clean', function () {
 gulp.task( 'copy:lib', [ 'clean' ], function() {
     return gulp.src( [
         'node_modules/core-js/client/shim.min.js',
-        'node_modules/systemjs/dist/system-polyfills.js',
+        'node_modules/zone.js/dist/zone.js',
         'node_modules/systemjs/dist/system.src.js',
-        'node_modules/reflect-metadata/Reflect.js',
+        'node_modules/systemjs/dist/system-polyfills.js',
         'node_modules/rxjs/**/*.js',
-        'node_modules/zone.js/dist/**',
-        'node_modules/@angular/**/bundles/**' ] )
+        'node_modules/@angular/core/bundles/core.umd.js',
+        'node_modules/@angular/common/bundles/common.umd.js',
+        'node_modules/@angular/compiler/bundles/compiler.umd.js',
+        'node_modules/@angular/platform-browser/bundles/platform-browser.umd.js',
+        'node_modules/@angular/platform-browser-dynamic/bundles/platform-browser-dynamic.umd.js',
+        'node_modules/@angular/core/bundles/core.umd.js' ] )
         .pipe( gulp.dest( target + '/lib' ) )
 } );
 
@@ -45,8 +55,35 @@ gulp.task( 'copy:css', [ 'clean' ], function() {
         .pipe( gulp.dest( target + '/styles' ) )
 } );
 
+gulp.task( 'bundle', [ 'bundle:vendor', 'bundle:app' ], function () {
+    return gulp.src( target + '/index.html' )
+        .pipe( htmlreplace( {
+            'app': mainBundleName,
+            'vendor': vendorBundleName
+        } ) )
+        .pipe( gulp.dest( target ) )
+} );
+
+gulp.task( 'bundle:app', [ 'compile', 'bundle:vendor' ], function () {
+    return builder
+        .buildStatic( target + '/component/boot', target + '/lib/' + mainBundleName )
+        .catch( function( err ) {
+            console.log( 'App bundle error');
+            console.log( err );
+        });
+});
+
+gulp.task( 'bundle:vendor', [ 'compile' ], function () {
+    return builder
+        .buildStatic( target + '/vendor', target + '/lib/' + vendorBundleName )
+        .catch( function( err ) {
+            console.log( 'Vendor bundle error');
+            console.log( err );
+        });
+});
+
 // inject js libs
-gulp.task( 'inject', [ 'copy:lib', 'copy:html' ], function() {
+gulp.task( 'inject', [ 'bundle' ], function() {
     gulp.src( target + '/index.html' )
         .pipe( inject( gulp.src( target + '/lib/*.js', { read: false } ),
                        { ignorePath: target, addRootSlash: false } ) )
@@ -56,7 +93,7 @@ gulp.task( 'inject', [ 'copy:lib', 'copy:html' ], function() {
 } );
 
 // TypeScript compile
-gulp.task( 'compile', [ 'clean', 'copy:lib', 'copy:html', 'copy:css', 'inject' ], function () {
+gulp.task( 'compile', [ 'clean', 'copy:html', 'copy:css' ], function () {
     return gulp
         .src( 'app/**/*.ts' )
         .pipe( sourcemaps.init() )
@@ -65,5 +102,5 @@ gulp.task( 'compile', [ 'clean', 'copy:lib', 'copy:html', 'copy:css', 'inject' ]
         .pipe( gulp.dest( target ) );
 } );
 
-gulp.task( 'build', [ 'compile' ] );
+gulp.task( 'build', [ 'compile', 'bundle', 'inject' ] );
 gulp.task( 'default', [ 'build' ] );
