@@ -11,7 +11,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 /**
  * Created by DEV on 10/3/2016.
  */
-public class CollectionNullValuesValidator implements ConstraintValidator< NotNullElements, Collection> {
+public class CollectionNullValuesValidator implements ConstraintValidator< NotNullElements, Collection > {
 
     @Override
     public void initialize( NotNullElements constraintAnnotation ) {

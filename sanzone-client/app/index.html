@@ -1,30 +1,30 @@
 <html>
 
 <head>
-  <title>Sanzone</title>
+    <title>Sanzone</title>
 
-  <!-- inject:css -->
-  <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
-  <!-- endinject -->
+    <!-- inject:css -->
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+    <!-- endinject -->
 
-  <!-- 1. Load libraries -->
-  <!-- IE required polyfills, in this exact order -->
-
-  <!-- inject:js -->
-  <!-- build:vendor -->
-  <script src="node_modules/core-js/client/shim.min.js"></script>
-  <script src="node_modules/zone.js/dist/zone.js"></script>
-  <script src="node_modules/systemjs/dist/system.src.js"></script>
-  <script src="systemjs.config.js"></script>
-  <!-- endbuild -->
-
-  <!-- 2. Configure SystemJS -->
-  <!-- build:app -->
-  <script>
-      System.import( 'component/boot' ).catch( function( err ){ console.error( err ); } );
-  </script>
-  <!-- endbuild -->
-  <!-- endinject -->
+    <!-- 1. Load libraries -->
+    <!-- IE required polyfills, in this exact order -->
+    <!-- inject:js -->
+    <!-- build:vendor -->
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <!--<script src="node_modules/core-js/client/shim.min.js"></script>
+    <script src="node_modules/zone.js/dist/zone.js"></script>-->
+    <script src="systemjs.config.js"></script>
+    <!-- endbuild -->
+    <!-- 2. Configure SystemJS -->
+    <!-- build:app -->
+    <script>
+        System.import('vendor').then(function() {
+            System.import('component/boot').catch(function(err){ console.error(err); });
+        });
+    </script>
+    <!-- endbuild -->
+    <!-- endinject -->
 
 </head>
 

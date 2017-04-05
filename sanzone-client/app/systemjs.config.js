@@ -13,6 +13,7 @@
         map: {
             component: '../target/component',
             service: '../target/service',
+            vendor: '../target/vendor.js',
 
             // angular bundles
             '@angular/core': 'npm:@angular/core/bundles/core.umd.js',
@@ -26,6 +27,7 @@
             'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js',
 
             //shims
+            //'systemjs': 'npm:systemjs/dist/system.src.js',
             'core-js': 'npm:core-js/client/shim.min.js',
             'zone': 'npm:zone.js/dist/zone.js'
         },
