@@ -5,14 +5,20 @@ import {Component} from '@angular/core';
     selector: 'navbar',
 
     template: `
-                <nav class="navbar navbar-default">
+                <nav class="navbar navbar-default ">
                     <div class="container-fluid">
-                         <div class="navbar-header">
-                              <a class="navbar-brand" href="#">Electro Marnetic Field Software
-                              <img class="logo-emfs" alt="Brand" src="http://res.cloudinary.com/emfs/image/upload/v1491570457/logo-emfs_h4hrpj.svg">
-                              </a>
-                              <button type="button" class="btn btn-default navbar-btn pull-right">Sign in</button>
-                         </div>
+                         <!-- Brand and toggle get grouped for better mobile display -->
+                              <div class="navbar-header">
+                                  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                                  <span class="sr-only">Toggle navigation</span>
+                                      <span class="icon-bar"></span>
+                                      <span class="icon-bar"></span>
+                                      <span class="icon-bar"></span>
+                                  </button>
+                                  <a class="navbar-brand" href="#">Electro Magnetic Field Software
+                                  <img class="logo-emfs" alt="logo-emfs" src="http://res.cloudinary.com/emfs/image/upload/v1491570457/logo-emfs_h4hrpj.svg">
+                                  </a>
+                              </div>
                     </div>
                 </nav>
               `,
@@ -22,9 +28,12 @@ import {Component} from '@angular/core';
              `
              .navbar
                 {
-                 background-color:transparent;
+                 background-color:green;
                 }
-                
+             .navbar-brand
+                {
+                 color: blue;
+                }          
              .logo-emfs
                 {
                  position: absolute;
