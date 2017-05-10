@@ -52,7 +52,7 @@ gulp.task( 'copy:html', [ 'clean' ], function() {
 // copy css
 gulp.task( 'copy:css', [ 'clean' ], function() {
     return gulp.src( [
-        'node_modules/bootstrap/dist/css/bootstrap.css' ] )
+        'node_modules/bootstrap/dist/**' ] )
         .pipe( gulp.dest( target + '/styles' ) )
 } );
 
@@ -67,7 +67,7 @@ gulp.task( 'bundle', [ 'bundle:vendor', 'bundle:app' ], function () {
 
 gulp.task( 'bundle:app', [ 'bundle:vendor' ], function () {
     return builder
-        .bundle( target + '/component/boot', target + '/lib/' + mainBundleName )
+        .buildStatic( target + '/component/boot', target + '/lib/' + mainBundleName )
         .catch( function( err ) {
             console.log( 'App bundle error');
             console.log( err );
@@ -76,7 +76,7 @@ gulp.task( 'bundle:app', [ 'bundle:vendor' ], function () {
 
 gulp.task( 'bundle:vendor', [ 'compile' ], function () {
     return builder
-        .bundle( target + '/vendor', target + '/lib/' + vendorBundleName )
+        .buildStatic( target + '/vendor', target + '/lib/' + vendorBundleName )
         .catch( function( err ) {
             console.log( 'Vendor bundle error');
             console.log( err );
@@ -88,7 +88,7 @@ gulp.task( 'inject', [ 'bundle' ], function() {
     gulp.src( target + '/index.html' )
         .pipe( inject( series( gulp.src( target + '/lib/*.vendor.bundle.js', { read: false } ),
                                gulp.src( target + '/lib/*.app.bundle.js', { read: false } ),
-                               gulp.src( target + '/styles/*.css', { read: false } ) ),
+                               gulp.src( target + '/styles/**/bootstrap.css', { read: false } ) ),
                        { ignorePath: target, addRootSlash: false } ) )
         .pipe( gulp.dest( target ) );
 } );
