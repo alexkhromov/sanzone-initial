@@ -13,7 +13,7 @@
         map: {
             component: '../target/component',
             service: '../target/service',
-            vendor: '../target/vendor.js',
+            vendor: '../target/scripts/vendor.js',
 
             // angular bundles
             '@angular/core': 'npm:@angular/core/bundles/core.umd.js',
