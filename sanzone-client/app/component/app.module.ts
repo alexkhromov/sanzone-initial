@@ -10,6 +10,7 @@ import {HeartComponent} from "./heart.component";
 import {PostComponent} from "./post.component";
 import {TwitComponent} from "./twit.component";
 import {NavbarComponent} from "./navbar.component";
+import {FooterComponent} from "./footer.component";
 
 @NgModule( {
 
@@ -21,7 +22,8 @@ import {NavbarComponent} from "./navbar.component";
         AppComponent,
         TwitComponent,
         PostComponent,
-        HeartComponent
+        HeartComponent,
+        FooterComponent
     ],
 
     providers: [
