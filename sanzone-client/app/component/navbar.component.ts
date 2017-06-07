@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 @Component( {
 
-    selector: 'navbar',
+    selector: 'navbarComponent',
 
     template: `<nav class="navbar navbar-default">
                  <div class="container-fluid">
