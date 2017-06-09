@@ -8,9 +8,8 @@ import {Component} from '@angular/core';
     selector: 'my-app',
 
     template: `<navbarComponent></navbarComponent>
-               <h4>Программное обеспечение Electro Magnetic Fields Software  (EMFs) предназначено для расчета санитарно-защитных зон и зон ограничения застройки по методикам и санитарным нормам действующих на территории Республики Беларусь.</h4>
                <bodyComponent></bodyComponent>
-               <twit></twit>
+               <!--<twit></twit>-->
                <footerComponent></footerComponent>
 
 `
