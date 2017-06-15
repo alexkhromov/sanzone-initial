@@ -2,11 +2,10 @@ import {Component} from '@angular/core';
 
 @Component( {
 
-    selector: 'navbar',
+    selector: 'signinComponent',
 
     template: `
                
-                <body>
 
     <div class="container">
 
@@ -29,8 +28,7 @@ import {Component} from '@angular/core';
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
-  </body>
-           
+             
               `,
 
 
@@ -81,4 +79,4 @@ import {Component} from '@angular/core';
     ]
 } )
 
-export class NavbarComponent { }
+export class SigninComponent { }
