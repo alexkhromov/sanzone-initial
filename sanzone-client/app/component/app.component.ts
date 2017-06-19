@@ -8,11 +8,9 @@ import {Component} from '@angular/core';
     selector: 'my-app',
 
     template: `<navbarComponent></navbarComponent>
-               <bodyComponent></bodyComponent>
-               <!--<twit></twit>-->
-               <footerComponent></footerComponent>
-
-`
+               <exampleComponent></exampleComponent>
+                <heroComponent></heroComponent>
+              `
 } )
 
 export class AppComponent { }

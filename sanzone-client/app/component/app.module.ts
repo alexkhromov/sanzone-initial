@@ -5,13 +5,9 @@ import {NgModule}      from '@angular/core';
 import {CommonModule}      from '@angular/common';
 import {BrowserModule} from '@angular/platform-browser';
 import {AppComponent} from "./app.component";
-import {PostService} from "../service/post.service";
-import {HeartComponent} from "./heart.component";
-import {PostComponent} from "./post.component";
-import {TwitComponent} from "./twit.component";
 import {NavbarComponent} from "./navbar.component";
-import {FooterComponent} from "./footer.component";
-import {BodyComponent} from "./body.component";
+import {ExampleComponent} from "./example.component";
+import {HeroComponent} from "./hero.component";
 
 @NgModule( {
 
@@ -19,18 +15,12 @@ import {BodyComponent} from "./body.component";
 
     declarations: [
 
-        NavbarComponent,
         AppComponent,
-        TwitComponent,
-        PostComponent,
-        HeartComponent,
-        FooterComponent,
-        BodyComponent
+        NavbarComponent,
+        ExampleComponent,
+        HeroComponent
     ],
 
-    providers: [
-        PostService
-    ],
 
     bootstrap: [
         AppComponent
