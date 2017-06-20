@@ -7,7 +7,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {AppComponent} from "./app.component";
 import {NavbarComponent} from "./navbar.component";
 import {ExampleComponent} from "./example.component";
-import {HeroComponent} from "./hero.component";
+
 
 @NgModule( {
 
@@ -17,8 +17,7 @@ import {HeroComponent} from "./hero.component";
 
         AppComponent,
         NavbarComponent,
-        ExampleComponent,
-        HeroComponent
+        ExampleComponent
     ],
 
 
