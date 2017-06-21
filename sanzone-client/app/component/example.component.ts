@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 
-export class Hero {
+export class Example {
     id: number;
     name: string;
     article: string;
     imagePath: string;
 }
 
-const HEROES: Hero[] = [
-    { id: 1, name: 'Расчет санитарно-защитной зоны в горизонтальной плоскости антенн в одной точке' article:'Данный расчет позволяет рассчитывать санитарно-защитнйю зону при расположении антенн в одной точке горизонтальной плссокти,т.е. при совпадении широты и долготы', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/d4bb0131-0bea-4f42-8e66-1bf3d14ff665_sanzone_H_hbeem2.jpg' },
-    { id: 2, name: 'Расчет в горизонтальной плоскости 2',article:'', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/df2bce65-c2be-4a17-9d03-9beb5bda1fac_sanzone_H_gizvin.jpg' },
+const EXAMPLES: Example[] = [
+    { id: 1, name: 'Расчет санитарно-защитной зоны в горизонтальной плоскости антенн расположенных в одной точке пространства при одинаковых характеристиках антенн',article:'Данный расчет позволяет рассчитывать санитарно-защитную зону при расположении антенн в одной точке в горизонтальной плоскости, т.е. при совпадении координат (x, y, z) антенн.',       imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/d4bb0131-0bea-4f42-8e66-1bf3d14ff665_sanzone_H_hbeem2.jpg' },
+    { id: 2, name: 'Расчет санитарно-защитной зоны в горизонтальной плоскости антенн расположенных в одной точке пространства при одинаковых характеристиках антенн', article:'', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/df2bce65-c2be-4a17-9d03-9beb5bda1fac_sanzone_H_gizvin.jpg' },
     { id: 3, name: 'Расчет в горизонтальной плоскости 3', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/ca898906-3643-4cc2-9d68-43c7db7194a7_sanzone_H_cqeedc.jpg' },
     { id: 4, name: 'Расчет в горизонтальной плоскости 4', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/4a231c7a-00ec-46bf-a9d8-3c7db3c50348_sanzone_H_cj4xld.jpg' },
     { id: 5, name: 'Расчет в горизонтальной плоскости 5', imagePath: 'http://res.cloudinary.com/emfs/image/upload/v1497878339/8145a307-f9dc-4528-a8f9-e4df79c0fdab_sanzone_H_ugadio.jpg' },
@@ -20,28 +20,33 @@ const HEROES: Hero[] = [
 @Component({
     selector: 'exampleComponent',
     template: `
- <div class="container marketing">
-    <ul class="heroes">
-      <li *ngFor="let hero of heroes">
-      <hr class="featurette-divider">
-          <div class="row featurette">
-        <div class="col-md-7">
-          <h3>Решение №{{hero.id}}
-          <p><span class="text-muted">{{hero.name}}</span></p></h3>
-          <p class="lead">{{hero.article}}</p>
-        </div>
-        <div class="col-md-5">
-          <img class="featurette-image img-responsive center-block" src={{hero.imagePath}} alt="Generic placeholder image">
-        </div>
-      </div>
-      </li>
-    </ul>
-    <hr class="featurette-divider">
- </div>
+               <div class="container">
+                   <ul *ngFor="let example of examples">
+                     <div class="row">
+                       <div class="col-md-7">
+                         <p class="bg-primary">{{example.name}}</p>
+                         <em>{{example.article}}</em> 
+                       </div>
+                       <div class="col-md-5">
+                       <img class="img-responsive center-block" src={{example.imagePath}} alt="">
+                       </div>
+                     </div>
+                     <hr>
+                   </ul>
+                 
+               <!-- FOOTER -->
+                 <footer>
+                   <p class="pull-right"><a href="#">Вернуться к началу</a></p>
+                   <p>&copy; 2017 EMFs. &middot; <a href="#">Конфиденциально</a>
+                 </footer>
+               </div>
+               
+               
+             
   `,
     styleUrls: ['']
 })
 export class ExampleComponent {
-    heroes = HEROES;
+    examples = EXAMPLES;
      }
 }
