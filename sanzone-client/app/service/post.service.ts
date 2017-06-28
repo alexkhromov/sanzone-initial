@@ -11,28 +11,57 @@ export class PostService {
         return [
 
             {
-                "image": "http://lorempixel.com/100/100/people/?1",
-                "author": "Windward",
-                "twitHandle": "@winwardstudios",
-                "message": "Looking for a better company reporting or docgen app",
-                "likes": 0,
-                "liked": false
+                "id": 1,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/1_kexgrw.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №1",
+                "article": "Данный расчет позволяет рассчитывать СЗЗ при расположении антенн в одной точке пространства в горизонтальной плоскости, т.е. при совпадении координат (x, y, z) у антенн.",
             },
 
             {
-                "image": "http://lorempixel.com/100/100/people/?2",
-                "author": "AngularJS News",
-                "twitHandle": "@angularjs_news",
-                "message": "Right Relevance : Influencers, Articles and Conversations",
-                "likes": 5,
-                "liked": true
+                "id": 2,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/2_rdpf7i.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №2",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при расположении антенн в различных точках в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
             },
 
             {
-                "image": "http://lorempixel.com/100/100/people/?3",
-                "author": "UX & Bootstrap",
+                "id": 3,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/3_dpcjyw.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №3",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
+            }
+
+            {
+                "id": 4,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/4_eeklzm.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №4",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
+            }
+
+            {
+                "id": 5,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/5_csy2yi.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №5",
                 "twitHandle": "@3rdwave",
-                "message": "10 Reasons Why Web Projects Fail",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
+                "likes": 1,
+                "liked": true
+            }
+
+            {
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg",
+                "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №6",
+                "twitHandle": "@3rdwave",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
+                "likes": 1,
+                "liked": true
+            }
+
+            {
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg",
+                "title": "Расчет в вертикальной плоскости",
+                "twitHandle": "@3rdwave",
+                "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
                 "likes": 1,
                 "liked": true
             }

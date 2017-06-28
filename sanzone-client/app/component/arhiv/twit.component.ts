@@ -11,11 +11,11 @@ import {PostService} from "../../service/post.service";
     template: `<ul>
                    <post *ngFor = "let post of posts"
                          [image]="post.image"
-                         [author]="post.author"
-                         [twit-handle]="post.twitHandle"
-                         [message]="post.message"
-                         [likes]="post.likes"
-                         [liked]="post.liked"></post>
+                         [author]="post.title"
+                         
+                         [message]="post.message">
+                         <!--[likes]="post.likes"-->
+                         <!--[liked]="post.liked"--></post>
                </ul>`
 } )
 
