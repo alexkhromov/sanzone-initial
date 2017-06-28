@@ -11,9 +11,9 @@ import {PostService} from "../../service/post.service";
     template: `<ul>
                    <post *ngFor = "let post of posts"
                          [image]="post.image"
-                         [author]="post.title"
+                         [title]="post.title"
                          
-                         [message]="post.message">
+                         [article]="post.article">
                          <!--[likes]="post.likes"-->
                          <!--[liked]="post.liked"--></post>
                </ul>`

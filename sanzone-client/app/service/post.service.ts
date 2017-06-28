@@ -42,28 +42,21 @@ export class PostService {
                 "id": 5,
                 "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/5_csy2yi.jpg",
                 "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №5",
-                "twitHandle": "@3rdwave",
                 "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
-                "likes": 1,
-                "liked": true
             }
 
             {
+                "id": 6,
                 "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg",
                 "title": "Расчет СЗЗ в горизонтальной плоскости.  Вариант №6",
-                "twitHandle": "@3rdwave",
                 "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
-                "likes": 1,
-                "liked": true
             }
 
             {
-                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg",
+                "id": 7,
+                "image": "http://res.cloudinary.com/sanzone/image/upload/v1498126296/7_e2lv6t.jpg",
                 "title": "Расчет в вертикальной плоскости",
-                "twitHandle": "@3rdwave",
                 "article": "Данный расчет позволяет рассчитывать санитарно-защитную зону при совпадении координат антенн в горизонтальной плоскости, т.е. при несовпадении координат (x, y, z) антенн.",
-                "likes": 1,
-                "liked": true
             }
         ];
     }

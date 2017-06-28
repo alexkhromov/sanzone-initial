@@ -15,8 +15,8 @@ import {Component, Input} from '@angular/core';
                    </div>
                    <div class="media-body">
                        <h4 class="media-heading twit-head">{{title}}</h4>
-                       <!--<h4 class="twit-handle">&nbsp;{{twitHandle}}</h4>
-                       <h5>{{message}}</h5>
+                       <!--<h4 class="twit-handle">&nbsp;{{twitHandle}}</h4>-->
+                       <h5>{{article}}</h5>
                        <!--<heart [likes]="likes" [liked]="liked"></heart>-->
                    </div>
                </div>`,
@@ -40,10 +40,8 @@ import {Component, Input} from '@angular/core';
 
 export class PostComponent {
 
+    @Input() id = 0;
     @Input() image = "";
     @Input() title = "";
-    @Input( 'twit-handle' ) twitHandle = "";
-    @Input() message = "";
-    @Input() likes = 0;
-    @Input() liked = false;
+    @Input() article = "";
 }
