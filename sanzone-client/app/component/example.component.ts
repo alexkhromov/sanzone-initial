@@ -10,11 +10,11 @@ export class Example {
 const EXAMPLES: Example[] = [
     { id: 1, name: 'Расчет санитарно-защитной зоны в горизонтальной плоскости антенн расположенных в одной точке пространства при одинаковых характеристиках антенн',article:'Данный расчет позволяет рассчитывать санитарно-защитную зону при расположении антенн в одной точке в горизонтальной плоскости, т.е. при совпадении координат (x, y, z) антенн.',       imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/1_kexgrw.jpg' },
     { id: 2, name: 'Расчет санитарно-защитной зоны в горизонтальной плоскости антенн расположенных в одной точке пространства при одинаковых характеристиках антенн', article:'', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/2_rdpf7i.jpg' },
-    { id: 3, name: 'Расчет в горизонтальной плоскости 3', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/3_dpcjyw.jpg' },
-    { id: 4, name: 'Расчет в горизонтальной плоскости 4', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/4_eeklzm.jpg' },
-    { id: 5, name: 'Расчет в горизонтальной плоскости 5', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/5_csy2yi.jpg' },
-    { id: 6, name: 'Расчет в горизонтальной плоскости 6', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg' },
-    { id: 7, name: 'Расчет в вертикальной плоскости', imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/7_e2lv6t.jpg' },
+    { id: 3, name: 'Расчет в горизонтальной плоскости 3', article: null, imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/3_dpcjyw.jpg' },
+    { id: 4, name: 'Расчет в горизонтальной плоскости 4', article: null, imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/4_eeklzm.jpg' },
+    { id: 5, name: 'Расчет в горизонтальной плоскости 5', article: null, imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/5_csy2yi.jpg' },
+    { id: 6, name: 'Расчет в горизонтальной плоскости 6', article: null, imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/6_z9sgpp.jpg' },
+    { id: 7, name: 'Расчет в вертикальной плоскости', article: null, imagePath: 'http://res.cloudinary.com/sanzone/image/upload/v1498126296/7_e2lv6t.jpg' },
 ];
 
 @Component({
@@ -48,5 +48,4 @@ const EXAMPLES: Example[] = [
 })
 export class ExampleComponent {
     examples = EXAMPLES;
-     }
 }
