@@ -6,10 +6,8 @@ import {CommonModule}      from '@angular/common';
 import {BrowserModule} from '@angular/platform-browser';
 import {AppComponent} from "./app.component";
 import {NavbarComponent} from "./navbar.component";
-import {ExampleComponent} from "./example.component";
-import {PostComponent} from "./arhiv/post.component";
-import {TwitComponent} from "./arhiv/twit.component";
-import {HeartComponent} from "./arhiv/heart.component";
+import {PostComponent} from "./post.component";
+import {TwitComponent} from "./twit.component";
 import {PostService} from "../service/post.service";
 
 
@@ -21,10 +19,9 @@ import {PostService} from "../service/post.service";
 
         AppComponent,
         NavbarComponent,
-        ExampleComponent,
         TwitComponent,
         PostComponent,
-        HeartComponent
+
     ],
 
     providers: [
