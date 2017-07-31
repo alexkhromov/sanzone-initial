@@ -17,57 +17,36 @@ import {Component} from '@angular/core';
   <thead>
     <tr>
       <th>#</th>
-      <th>Тип антенны</th>
-      <th>Мощность несущей, Вт.</th>
-      <th>Кол-во каналов (несущих)</th>
-      <th>Высота подвеса, м.</th>
-      <th>Собственник</th>
+              <th>Latitude</th>
+              <th >Longitude</th>
+              <th>Azimuth</th>
+              <th>Down Tilt</th>
+              <th>Height</th>
+              <th>Power</th>
+              <th>Gain</th>
+              <th>Tract Lost</th>
+              <th>Earth Factor</th>
+              <th>Diagram WidthHalf PowerH</th>
+              <th>Diagram WidthHalf PowerV</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <th scope="row">1</th>
-      <td> <input [(ngModel)]="type" placeholder="Тип"></td>
-      <td> <input [(ngModel)]="name" placeholder="Мощность"></td>
-      <td>@mdo</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td>Larry</td>
-      <td>the Bird</td>
-      <td>@twitter</td>
+      <th><input size="5" [(ngModel)]="Latitude" placeholder="Latitude"></th>
+      <th><input size="5" [(ngModel)]="Longitude" placeholder="Longitude"></th>
+      <th><input size="5" [(ngModel)]="Azimuth" placeholder="Azimuth"></th>
+      <th><input size="5" [(ngModel)]="DownTilt" placeholder="DownTilt"></th>
+      <th><input size="5" [(ngModel)]="Height" placeholder="Height"></th>
+      <th><input size="5" [(ngModel)]="Power" placeholder="Power"></th>
+      <th><input size="5" [(ngModel)]="Gain" placeholder="Gain"></th>
+      <th><input size="5" [(ngModel)]="TractLost" placeholder="TractLost"></th>
+      <th><input size="5" [(ngModel)]="EarthFactor" placeholder="EarthFactor"></th>
+      <th><input size="5" [(ngModel)]="DiagramWidthHalfPowerH" placeholder="DiagramWidthHalfPowerH"></th>
+      <th><input size="5" [(ngModel)]="DiagramWidthHalfPowerV" placeholder="DiagramWidthHalfPowerV"></th> 
     </tr>
   </tbody>
 </table>
-</div>
-
-
-               <div class="panel panel-primary">
-                 <div class="panel-body">
-    Basic panel example
-  </div>
-              <table class="table table-bordered">
-              <input [(ngModel)]="name" placeholder="name">
-              </table> 
-              </div>
-              
-              <div class="row">
-  <div class="col-xs-2">
-    <input type="text" class="form-control" placeholder=".col-xs-2">
-  </div>
-  <div class="col-xs-3">
-    <input type="text" class="form-control" placeholder=".col-xs-3">
-  </div>
-  <div class="col-xs-4">
-    <input type="text" class="form-control" placeholder=".col-xs-4">
-  </div>
 </div>
 
               </div>
