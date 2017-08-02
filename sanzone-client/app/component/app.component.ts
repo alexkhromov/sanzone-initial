@@ -9,7 +9,7 @@ import {Component} from '@angular/core';
 
     template: `<navbarComponent></navbarComponent>
                <demo></demo>
-               <twit></twit>
+              <!-- <twit></twit> -->
 
               `
             } )
