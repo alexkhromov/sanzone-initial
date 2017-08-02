@@ -11,6 +11,7 @@ import {PostComponent}   from "./post.component";
 import {TwitComponent}   from "./twit.component";
 import {PostService}     from "../service/post.service";
 import {DemoComponent}     from "./demo.component";
+import { AntennaDetailComponent } from './antenna-detail.component';
 
 @NgModule( {
 
@@ -22,7 +23,8 @@ import {DemoComponent}     from "./demo.component";
         NavbarComponent,
         TwitComponent,
         PostComponent,
-        DemoComponent
+        DemoComponent,
+        AntennaDetailComponent
 
     ],
 

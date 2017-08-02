@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-
+import { Component, Input } from '@angular/core';
+import { Hero } from './antenna';
 @Component({
     selector: 'antenna-detail',
     template: `
@@ -14,4 +14,5 @@ import { Component } from '@angular/core';
   `
 })
 export class AntennaDetailComponent {
+    @Input() hero: Hero;
 }
