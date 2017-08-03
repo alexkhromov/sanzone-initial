@@ -3,16 +3,16 @@ import { Hero } from './antenna';
 @Component({
     selector: 'antenna-detail',
     template: `
-    <div *ngIf="hero">
-      <h2>{{hero.name}} details!</h2>
-      <div><label>id: </label>{{hero.id}}</div>
+    <div *ngIf="antenna">
+      <h2>{{antenna.name}} details!</h2>
+      <div><label>id: </label>{{antenna.id}}</div>
       <div>
         <label>name: </label>
-        <input [(ngModel)]="hero.name" placeholder="name"/>
+        <input [(ngModel)]="antenna.name" placeholder="name"/>
       </div>
     </div>
   `
 })
 export class AntennaDetailComponent {
-    @Input() hero: Hero;
+    @Input() antenna: Antenna;
 }

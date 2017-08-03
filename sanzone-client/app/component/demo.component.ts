@@ -1,21 +1,10 @@
 /**
  * Created by DEV on 13.03.2017.
  */
-import {Component} from '@angular/core';
-import { Hero } from './antenna';
+import { Component, OnInit } from '@angular/core';
+import { Antenna } from './antenna';
+import { AntennaService } from './antenna.service';
 
-const HEROES: Hero[] = [
-    { id: 11, name: 'Mr. Nice' },
-    { id: 12, name: 'Narco' },
-    { id: 13, name: 'Bombasto' },
-    { id: 14, name: 'Celeritas' },
-    { id: 15, name: 'Magneta' },
-    { id: 16, name: 'RubberMan' },
-    { id: 17, name: 'Dynama' },
-    { id: 18, name: 'Dr IQ' },
-    { id: 19, name: 'Magma' },
-    { id: 20, name: 'Tornado' }
-];
 
 @Component( {
 
@@ -26,14 +15,14 @@ const HEROES: Hero[] = [
 
  <h1>{{title}}</h1>
     <h2>My Heroes</h2>
-    <ul class="heroes">
-      <li *ngFor="let hero of heroes"
-        [class.selected]="hero === selectedHero"
-        (click)="onSelect(hero)">
-        <span class="badge">{{hero.id}}</span> {{hero.name}}
+    <ul class="antennas">
+      <li *ngFor="let antenna of antennas"
+        [class.selected]="antenna === selectedAntenna"
+        (click)="onSelect(antenna)">
+        <span class="badge">{{antenna.id}}</span> {{antenna.name}}
       </li>
     </ul>
-            <antenna-detail [hero]="selectedHero"></antenna-detail>
+            <antenna-detail [antenna]="selectedAntenna"></antenna-detail>
         </div>
 
 
@@ -130,16 +119,27 @@ const HEROES: Hero[] = [
       margin-right: .8em;
       border-radius: 4px 0 0 4px;
     }
-  `]
+  `],
+    providers: [AntennaService]
 } )
 
-export class DemoComponent {
+export class DemoComponent implements OnInit {
     title = 'Tour of Heroes';
-    heroes = HEROES;
-    selectedHero: Hero;
+    antennas: Antenna[];
+    selectedAntenna: Antenna;
 
-    onSelect(hero: Hero): void {
-        this.selectedHero = hero;
+    constructor(private antennaService: AntennaService) { }
+
+    getAntennas(): void {
+        this.antennaService.getAntennas().then(antennas => this.antennas = antennas);
+    }
+
+    ngOnInit(): void {
+        this.getAntennas();
+    }
+
+    onSelect(antenna: Antenna): void {
+        this.selectedAntenna = antenna;
     }
 }
 
