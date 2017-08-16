@@ -16,19 +16,24 @@ import {DemoComponent}   from "./demo.component";
 import {AntennaDetailComponent} from './antenna-detail.component';
 import {AntennasComponent}      from './antennas.component';
 import {AntennaService}         from './antenna.service';
+import {BankService} from "../service/bank.service";
+import {HttpClientModule} from "@angular/common/http";
 
 
 @NgModule( {
 
-    imports: [ CommonModule,
-               BrowserModule,
-               FormsModule,
-               RouterModule.forRoot([
-         {
-            path: 'antennas',
-            component: AntennasComponent
-        }
-         ])
+    imports: [
+
+        CommonModule,
+        BrowserModule,
+        FormsModule,
+        HttpClientModule,
+        RouterModule.forRoot( [
+            {
+                path: 'antennas',
+                component: AntennasComponent
+            }
+        ] )
     ],
 
     declarations: [
@@ -45,7 +50,8 @@ import {AntennaService}         from './antenna.service';
 
     providers: [
         PostService,
-        AntennaService
+        AntennaService,
+        BankService
     ],
 
     bootstrap: [
