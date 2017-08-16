@@ -13,13 +13,13 @@ import {Component} from '@angular/core';
                           <span class="icon-bar"></span>
                           <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="#">
+                        <a routerLink="/main" class="navbar-brand" href="#">
                           <img src="http://res.cloudinary.com/emfs/image/upload/v1491570457/logo-emfs_h4hrpj.svg" class="img-responsive" alt="Responsive image">
                         </a>
                       </div>
                       <div id="navbar" class="navbar-collapse collapse">
                         <ul class="nav navbar-nav ">
-                          <li class="active"><a href="#">Главная</a></li>
+                          <li class="active"><a routerLink="/main" href="#">Главная</a></li>
                           <li><a href="#about">О нас</a></li>
                           <li><a href="#contact">Контакты</a></li>
                           <li class="dropdown">
@@ -52,7 +52,7 @@ import {Component} from '@angular/core';
                               </ul>
                           </li>
                           <button type="button" class="btn btn-primary navbar-btn">Sign in</button>
-                         <button type="button" class="btn btn-warning navbar-btn">Пробный расчет</button>
+                         <button routerLink="/demo" type="button" class="btn btn-warning navbar-btn">Пробный расчет</button>
                         </ul>
                       </div>
                     </div>

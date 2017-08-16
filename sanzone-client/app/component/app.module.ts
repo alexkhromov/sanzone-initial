@@ -12,7 +12,7 @@ import {NavbarComponent} from "./navbar.component";
 import {PostComponent}   from "./post.component";
 import {TwitComponent}   from "./twit.component";
 import {PostService}     from "../service/post.service";
-import {DemoComponent}   from "./demo.component";
+import {DemoComponent}          from "./demo.component";
 import {AntennaDetailComponent} from './antenna-detail.component';
 import {AntennasComponent}      from './antennas.component';
 import {AntennaService}         from './antenna.service';
@@ -24,10 +24,8 @@ import {AntennaService}         from './antenna.service';
                BrowserModule,
                FormsModule,
                RouterModule.forRoot([
-         {
-            path: 'antennas',
-            component: AntennasComponent
-        }
+                   {path: 'main', component: TwitComponent},
+                   {path: 'demo', component: AntennasComponent}
          ])
     ],
 

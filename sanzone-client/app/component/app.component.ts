@@ -8,7 +8,12 @@ import {Component} from '@angular/core';
     selector: 'my-app',
 
     template: `<navbarComponent></navbarComponent>
-               <my-demo></my-demo>
+   <!--<h1>{{title}}</h1>
+   <a routerLink="/main">Главная</a>
+   <a routerLink="/demo">Деморасчет</a>
+   <a routerLink="/antennas">Антенны</a>-->
+   <router-outlet></router-outlet>
+               <!--<my-demo></my-demo>-->
                <twit></twit>
 
               `
