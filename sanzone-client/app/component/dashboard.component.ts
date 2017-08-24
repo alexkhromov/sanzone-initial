@@ -1,14 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Antenna } from './antenna';
+import { AntennaService } from './antenna.service';
+
 
 @Component({
     selector: 'my-dashboard',
-    templateUrl: '<h3>Top Heroes</h3>
-    <div class="grid grid-pad">
-    <div *ngFor="let hero of heroes" class="col-1-4">
-    <div class="module hero">
-        <h4>{{hero.name}}</h4>
-</div>
-</div>
-</div>',
+    template: ` <h3>Активные антенны</h3>
+                <div *ngFor="let antenna of antennas">
+                    <div>
+                            <h4>{{antenna.name}}</h4>
+                    </div>
+                </div>`,
 })
-export class DashboardComponent { }
+
+export class DashboardComponent implements OnInit {
+
+    antennas: Antenna[] = [];
+
+    constructor(private antennaService: AntennaService) { }
+
+    ngOnInit(): void {
+        this.antennaService.getAntennas()
+            .then(antennas => this.antennas = antennas.slice(0, 10));
+    }
+}

@@ -1,5 +1,9 @@
-import { Component, Input } from '@angular/core';
-import { Antenna } from './antenna';
+import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Location }                 from '@angular/common';
+
+import { AntennaService } from './antenna.service';
+import 'rxjs/add/operator/switchMap';
 
 @Component( {
 
@@ -17,8 +21,16 @@ import { Antenna } from './antenna';
             <div>
                 <label>name: </label>
                 <input [(ngModel)]="antenna.name" placeholder="name"/>
+                <label>latitude: </label>
+                <input [(ngModel)]="antenna.latitude" placeholder="latitude"/>
             </div>
-        </div>`
+        </div>
+`,
+    constructor(
+        private antennaService: AntennaService,
+        private route: ActivatedRoute,
+        private location: Location
+    ) {}
 } )
 
 export class AntennaDetailComponent {

@@ -12,10 +12,10 @@ import {NavbarComponent} from "./navbar.component";
 import {PostComponent}   from "./post.component";
 import {TwitComponent}   from "./twit.component";
 import {PostService}     from "../service/post.service";
-import {DemoComponent}          from "./demo.component";
 import {AntennaDetailComponent} from './antenna-detail.component';
 import {AntennasComponent}      from './antennas.component';
 import {AntennaService}         from './antenna.service';
+import {DashboardComponent} from "./dashboard.component";
 
 
 @NgModule( {
@@ -25,8 +25,12 @@ import {AntennaService}         from './antenna.service';
                FormsModule,
                RouterModule.forRoot([
                    {path: 'main', component: TwitComponent},
-                   {path: 'demo', component: AntennasComponent}
-         ])
+                   {path: 'demo', component: AntennasComponent},
+                   {path: 'dashboard', component: DashboardComponent},
+                   {path: 'detail',component: AntennaDetailComponent},
+                   {path: '', redirectTo: '/main', pathMatch: 'full'},
+
+               ])
     ],
 
     declarations: [
@@ -35,10 +39,9 @@ import {AntennaService}         from './antenna.service';
         NavbarComponent,
         TwitComponent,
         PostComponent,
-        DemoComponent,
         AntennaDetailComponent,
-        AntennasComponent
-
+        AntennasComponent,
+        DashboardComponent
     ],
 
     providers: [
