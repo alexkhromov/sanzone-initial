@@ -8,4 +8,10 @@ import { ANTENNAS } from './mock-antenna';
         getAntennas(): Promise<Antenna[]> {
             return Promise.resolve(ANTENNAS);
             }
+
+
+    getAntenna(id: number): Promise<Antenna> {
+        return this.getAntennas()
+            .then(antennas => antennas.find(antenna => antenna.id === id));
+    }
     }

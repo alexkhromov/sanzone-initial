@@ -55,7 +55,7 @@ import {Component} from '@angular/core';
                                         </ul>
                                 </li>
                                 <button type="button" class="btn btn-primary navbar-btn">Sign in</button>-->
-                                <button routerLink="/demo" type="button" class="btn btn-warning navbar-btn">Пробный расчет</button>
+                                <button routerLink="/antennas" type="button" class="btn btn-warning navbar-btn">Пробный расчет</button>
                             </ul>
                         </div>
                         

@@ -25,9 +25,9 @@ import {DashboardComponent} from "./dashboard.component";
                FormsModule,
                RouterModule.forRoot([
                    {path: 'main', component: TwitComponent},
-                   {path: 'demo', component: AntennasComponent},
+                   {path: 'antennas', component: AntennasComponent},
                    {path: 'dashboard', component: DashboardComponent},
-                   {path: 'detail',component: AntennaDetailComponent},
+                   {path: 'detail/:id',component: AntennaDetailComponent},
                    {path: '', redirectTo: '/main', pathMatch: 'full'},
 
                ])

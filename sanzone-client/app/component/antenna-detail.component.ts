@@ -9,23 +9,8 @@ import 'rxjs/add/operator/switchMap';
 
     selector: 'antenna-detail',
 
-    template:
-        `<div *ngIf="antenna">
-            
-            <h2>{{antenna.name}} details!</h2>
-            
-            <div>
-                <label>id: </label>{{antenna.id}}
-            </div>
-            
-            <div>
-                <label>name: </label>
-                <input [(ngModel)]="antenna.name" placeholder="name"/>
-                <label>latitude: </label>
-                <input [(ngModel)]="antenna.latitude" placeholder="latitude"/>
-            </div>
-        </div>
-`,
+    templateUrl: 'component/antenna-detail.component.html',
+
     constructor(
         private antennaService: AntennaService,
         private route: ActivatedRoute,
@@ -33,7 +18,19 @@ import 'rxjs/add/operator/switchMap';
     ) {}
 } )
 
-export class AntennaDetailComponent {
+export class AntennaDetailComponent implements OnInit{
 
     @Input() antenna: Antenna;
+
+
+    ngOnInit(): void {
+        this.route.paramMap
+            .switchMap((params: ParamMap) => this.antennaService.getAntenna(+params.get('id')))
+            .subscribe(antenna => this.antenna = antenna);
+    }
+
+
+    goBack(): void {
+        this.location.back();
+    }
 }

@@ -5,12 +5,7 @@ import { AntennaService } from './antenna.service';
 
 @Component({
     selector: 'my-dashboard',
-    template: ` <h3>Активные антенны</h3>
-                <div *ngFor="let antenna of antennas">
-                    <div>
-                            <h4>{{antenna.name}}</h4>
-                    </div>
-                </div>`,
+    templateUrl: 'component/dashboard.component.html',
 })
 
 export class DashboardComponent implements OnInit {
