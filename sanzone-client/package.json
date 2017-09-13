@@ -11,21 +11,22 @@
   },
   "license": "ISC",
   "dependencies": {
-    "@angular/common": "~4.3.4",
-    "@angular/compiler": "~4.3.4",
-    "@angular/core": "~4.3.4",
-    "@angular/forms": "~4.3.4",
-    "@angular/http": "^4.3.4",
-    "@angular/router": "^4.3.4",
-    "@angular/platform-browser": "~4.3.4",
-    "@angular/platform-browser-dynamic": "~4.3.4",
-    "angular-in-memory-web-api": "~0.3.2",
+    "@angular/common": "~4.4.0-RC.0",
+    "@angular/compiler": "~4.4.0-RC.0",
+    "@angular/core": "~4.4.0-RC.0",
+    "@angular/forms": "~4.4.0-RC.0",
+    "@angular/http": "^4.4.0-RC.0",
+    "@angular/platform-browser": "~4.4.0-RC.0",
+    "@angular/platform-browser-dynamic": "~4.4.0-RC.0",
+    "@angular/router": "^4.4.0-RC.0",
+    "angular-in-memory-web-api": "~0.4.5",
     "bootstrap": "^3.3.7",
-    "core-js": "^2.5.0",
+    "core-js": "^2.5.1",
     "rxjs": "5.4.3",
-    "systemjs": "0.20.17",
+    "systemjs": "0.20.18",
     "tslib": "^1.7.1",
-    "zone.js": "^0.8.16"
+    "x-ng2-http-interceptor": "^0.15.0",
+    "zone.js": "^0.8.17"
   },
   "devDependencies": {
     "concurrently": "^3.5.0",
@@ -36,13 +37,13 @@
     "gulp-htmlmin": "^3.0.0",
     "gulp-inject": "^4.2.0",
     "gulp-rename": "^1.2.2",
-    "gulp-sourcemaps": "^2.6.0",
+    "gulp-sourcemaps": "^2.6.1",
     "gulp-strip-comments": "^2.5.1",
-    "gulp-typescript": "^3.2.1",
+    "gulp-typescript": "^3.2.2",
     "gulp-uglify": "^3.0.0",
     "lite-server": "^2.3.0",
     "stream-series": "^0.1.1",
-    "systemjs-builder": "^0.16.9",
-    "typescript": "^2.4.2"
+    "systemjs-builder": "^0.16.10",
+    "typescript": "^2.5.2"
   }
 }

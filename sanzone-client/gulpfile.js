@@ -31,7 +31,7 @@ gulp.task( 'pre:clean', function () {
 
 // clean up unnecessary artifacts
 gulp.task( 'post:clean', [ 'inject' ], function () {
-    return del( [ target + '/component/**', target + '/scripts/**',
+    return del( [ target + '/component/**', target + '/scripts/**', target + '/model/**',
                   target + '/service/**', target + '/systemjs.config.js' ] );
 } );
 

@@ -1,12 +1,8 @@
-/**
- * Created by DEV on 21.03.2017.
- */
 import {NgModule}        from '@angular/core';
 import {CommonModule}    from '@angular/common';
 import {BrowserModule}   from '@angular/platform-browser';
 import {FormsModule}     from '@angular/forms';
 import {RouterModule}    from '@angular/router';
-
 import {AppComponent}    from "./app.component";
 import {NavbarComponent} from "./navbar.component";
 import {PostComponent}   from "./post.component";
@@ -18,7 +14,18 @@ import {AntennasComponent}      from './antennas.component';
 import {AntennaService}         from './antenna.service';
 import {BankService} from "../service/bank.service";
 import {HttpClientModule} from "@angular/common/http";
+import {ServerURLInterceptor} from "../service/server.url.interceptor";
+import {InterceptorService} from "x-ng2-http-interceptor";
+import {XHRBackend, RequestOptions, HttpModule} from "@angular/http";
 
+export function interceptorFactory( xhrBackend: XHRBackend,
+                                    requestOptions: RequestOptions,
+                                    serverURLInterceptor: ServerURLInterceptor ) {
+
+    let service = new InterceptorService( xhrBackend, requestOptions );
+    service.addInterceptor( serverURLInterceptor );
+    return service;
+}
 
 @NgModule( {
 
@@ -28,6 +35,7 @@ import {HttpClientModule} from "@angular/common/http";
         BrowserModule,
         FormsModule,
         HttpClientModule,
+        HttpModule,
         RouterModule.forRoot( [
             {
                 path: 'antennas',
@@ -49,9 +57,16 @@ import {HttpClientModule} from "@angular/common/http";
     ],
 
     providers: [
+
         PostService,
         AntennaService,
-        BankService
+        BankService,
+        ServerURLInterceptor,
+        {
+            provide: InterceptorService,
+            useFactory: interceptorFactory,
+            deps: [ XHRBackend, RequestOptions, ServerURLInterceptor ]
+        }
     ],
 
     bootstrap: [

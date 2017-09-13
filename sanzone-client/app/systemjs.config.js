@@ -12,6 +12,7 @@
         // map tells the System loader where to look for things
         map: {
             component: '../target/component',
+            model: '../target/model',
             service: '../target/service',
             vendor: '../target/scripts/vendor.js',
 
@@ -30,6 +31,7 @@
             'rxjs': 'npm:rxjs',
             'angular-in-memory-web-api': 'npm:angular-in-memory-web-api/bundles/in-memory-web-api.umd.js',
             'tslib': 'npm:tslib/tslib.js',
+            'x-ng2-http-interceptor': 'npm:x-ng2-http-interceptor/bundles/x-ng2-http-interceptor.umd.js',
 
             //shims
             'core-js': 'npm:core-js/client/shim.min.js',
@@ -38,6 +40,10 @@
         // packages tells the System loader how to load when no filename and/or no extension
         packages: {
             component: {
+                format: 'register',
+                defaultExtension: 'js'
+            },
+            model: {
                 format: 'register',
                 defaultExtension: 'js'
             },
