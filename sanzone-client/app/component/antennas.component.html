@@ -1,0 +1,20 @@
+<div class="container">
+    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+    <a routerLink="/antennas" routerLinkActive="active">Антенны</a>
+    <h1>{{title}}</h1>
+
+    <ul class="antennas">
+        <li *ngFor="let antenna of antennas"
+            [class.selected]="antenna === selectedAntenna"
+            (click)="onSelect(antenna)">
+            <span class="badge">{{antenna.id}}</span> {{antenna.name}}
+        </li>
+    </ul>
+
+    <div *ngIf="selectedAntenna">
+        <h2>
+            {{selectedAntenna.name | uppercase}} is my antenna
+        </h2>
+        <button (click)="gotoDetail()">View Details</button>
+    </div>
+</div>

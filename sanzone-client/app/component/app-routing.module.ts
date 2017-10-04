@@ -1,13 +1,13 @@
 /**
  * Created by DEV on 21.03.2017.
  */
-import {NgModule}        from '@angular/core';
-import {RouterModule}    from '@angular/router';
-import {AntennaDetailComponent} from './antenna-detail.component';
-import {AntennasComponent}      from './antennas.component';
-import {DashboardComponent} from "./dashboard.component";
-import {TwitComponent}   from "./twit.component";
+import {NgModule}               from '@angular/core';
+import {RouterModule, Routes}   from '@angular/router';
 
+import {DashboardComponent}     from "./dashboard.component";
+import {AntennasComponent}      from './antennas.component';
+import {AntennaDetailComponent} from './antenna-detail.component';
+import {TwitComponent}          from "./twit.component";
 
 const routes: Routes = [
                    {path: '', redirectTo: '/main', pathMatch: 'full'},
@@ -16,8 +16,7 @@ const routes: Routes = [
                    {path: 'dashboard', component: DashboardComponent},
                    {path: 'detail/:id',component: AntennaDetailComponent}
 
-
-    ];
+                     ];
 
 
 @NgModule({

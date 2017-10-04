@@ -1,9 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
+import 'rxjs/add/operator/switchMap';
+import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Location }                 from '@angular/common';
 
+import { Antenna } from './antenna';
 import { AntennaService } from './antenna.service';
-import 'rxjs/add/operator/switchMap';
+
 
 @Component( {
 
@@ -11,16 +13,18 @@ import 'rxjs/add/operator/switchMap';
 
     templateUrl: 'component/antenna-detail.component.html',
 
+
+} )
+
+export class AntennaDetailComponent implements OnInit{
+
+    antenna: Antenna;
+
     constructor(
         private antennaService: AntennaService,
         private route: ActivatedRoute,
         private location: Location
     ) {}
-} )
-
-export class AntennaDetailComponent implements OnInit{
-
-    @Input() antenna: Antenna;
 
 
     ngOnInit(): void {
