@@ -37,4 +37,9 @@ export class AntennaDetailComponent implements OnInit{
     goBack(): void {
         this.location.back();
     }
+
+    save(): void {
+        this.antennaService.update(this.antenna)
+            .then(() => this.goBack());
+    }
 }
