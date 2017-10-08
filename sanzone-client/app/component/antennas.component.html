@@ -3,11 +3,20 @@
     <a routerLink="/antennas" routerLinkActive="active">Антенны</a>
     <h1>{{title}}</h1>
 
+    <div>
+        <label>Antenna name:</label> <input #antennaName />
+        <button (click)="add(antennaName.value); antennaName.value=''">
+            Add
+        </button>
+    </div>
+
     <ul class="antennas">
         <li *ngFor="let antenna of antennas"
             [class.selected]="antenna === selectedAntenna"
             (click)="onSelect(antenna)">
             <span class="badge">{{antenna.id}}</span> {{antenna.name}}
+            <button class="delete"
+                    (click)="delete(antenna); $event.stopPropagation()">x</button>
         </li>
     </ul>
 

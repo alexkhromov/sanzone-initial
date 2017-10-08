@@ -9,6 +9,7 @@ import { Antenna } from './antenna';
 @Injectable()
     export class AntennaService {
 
+    private headers = new Headers({'Content-Type': 'application/json'});
     private antennasUrl = 'api/antennas';
 
     constructor(private http: Http) { }
@@ -29,12 +30,21 @@ import { Antenna } from './antenna';
             .catch(this.handleError);
     }
 
-    private handleError(error: any): Promise<any> {
-        console.error('An error occurred', error); // for demo purposes only
-        return Promise.reject(error.message || error);
+    delete(id: number): Promise<void> {
+        const url = `${this.antennasUrl}/${id}`;
+        return this.http.delete(url, {headers: this.headers})
+            .toPromise()
+            .then(() => null)
+            .catch(this.handleError);
     }
 
-    private headers = new Headers({'Content-Type': 'application/json'});
+    create(name: string): Promise<Antenna> {
+        return this.http
+            .post(this.antennasUrl, JSON.stringify({name: name}), {headers: this.headers})
+            .toPromise()
+            .then(res => res.json().data as Antenna)
+            .catch(this.handleError);
+    }
 
     update(antenna: Antenna): Promise<Antenna> {
         const url = `${this.antennasUrl}/${antenna.id}`;
@@ -43,6 +53,11 @@ import { Antenna } from './antenna';
             .toPromise()
             .then(() => antenna)
             .catch(this.handleError);
+    }
+
+    private handleError(error: any): Promise<any> {
+        console.error('An error occurred', error); // for demo purposes only
+        return Promise.reject(error.message || error);
     }
 
     }
