@@ -55,7 +55,8 @@ import {Component} from '@angular/core';
                                         </ul>
                                 </li>
                                 <button type="button" class="btn btn-primary navbar-btn">Sign in</button>-->
-                                <button routerLink="/antennas" type="button" class="btn btn-warning navbar-btn">Пробный расчет</button>
+                                <button routerLink="/antennas" type="button" class="btn btn-warning navbar-btn"  (click)="show = !show">{{show ? 'Пробный расчет' : 'Вернуться обратно'}}</button>
+
                             </ul>
                         </div>
                         
@@ -75,4 +76,8 @@ import {Component} from '@angular/core';
             ]
           } )
 
-export class NavbarComponent { }
+export class NavbarComponent {
+
+    show: boolean = true;
+
+}
