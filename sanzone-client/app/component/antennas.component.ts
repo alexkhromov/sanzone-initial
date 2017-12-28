@@ -16,7 +16,7 @@ import { AntennaService } from './antenna.service';
     } )
 
 export class AntennasComponent implements OnInit {
-    title = 'Список антенн';
+    title = 'Параметры антенн';
     antennas: Antenna[];
     selectedAntenna: Antenna;
 

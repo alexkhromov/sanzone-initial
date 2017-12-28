@@ -1,17 +1,74 @@
-<div *ngIf="antenna">
+<div *ngIf="antenna" class="container">
 
-    <h2>{{antenna.name}} details!</h2>
-
-    <div>
-        <label>id: </label>{{antenna.id}}
-    </div>
+    <h3>Cектор: <label> {{antenna.sector}}</label>, антенна: <label> {{antenna.name}}</label>, диапазон: <label> {{antenna.range}}</label>, <label>{{antenna.operator}} </label> </h3>
 
     <div>
-        <label>name: </label>
-        <input [(ngModel)]="antenna.name" placeholder="name"/>
-        <label>latitude: </label>
-        <input [(ngModel)]="antenna.latitude" placeholder="latitude"/>
+        <div class="row">
+            <div class="col-md-1"><label>sector: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.sector" placeholder="sector"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>name: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.name" placeholder="name"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>latitude: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.latitude" placeholder="latitude"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>longitude: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.longitude" placeholder="longitude"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>azimuth: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.azimuth" placeholder="azimuth"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>downTilt: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.downTilt" placeholder="downTilt"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>height: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.height" placeholder="height"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>power: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.power" placeholder="power"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>gain: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.gain" placeholder="gain"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>tractLost: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.tractLost" placeholder="tractLost"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>earthFactor: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.earthFactor" placeholder="earthFactor"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>diagramWidthHalfPowerH: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.diagramWidthHalfPowerH" placeholder="diagramWidthHalfPowerH"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>diagWidthHalfPowerV: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.diagramWidthHalfPowerV" placeholder="diagramWidthHalfPowerV"/></div>
+        </div>
+        <div class="row">
+            <div class="col-md-1"><label>operator: </label></div>
+            <div class="col-md-1"><input [(ngModel)]="antenna.operator" placeholder="operator"/></div>
+        </div>
     </div>
+
+
+    <li *ngFor="let antenna of antennas"
+        [class.selected]="antenna === selectedAntenna"
+        (click)="onSelect(antenna)">
+        <span class="label label-default">{{antenna.id}}</span> {{antenna.name}}
+        <button class="delete"
+                (click)="delete(antenna); $event.stopPropagation()">x</button>
+    </li>
     <button (click)="goBack()">Back</button>
     <button (click)="save()">Save</button>
 </div>

@@ -1,29 +1,46 @@
 <div class="container">
-    <a routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
-    <a routerLink="/antennas" routerLinkActive="active">Антенны</a>
-    <h1>{{title}}</h1>
+    <a routerLink="/dashboard" routerLinkActive="active" class="btn btn-default">Параметры сектора</a>
+    <a routerLink="/antennas" routerLinkActive="active" class="btn btn-default">Параметры антенн</a>
+    <h3>{{title}}</h3>
 
     <div>
-        <label>Antenna name:</label> <input #antennaName />
+        <label>Добавить антенну:</label> <input #antennaName />
         <button (click)="add(antennaName.value); antennaName.value=''">
-            Add
+            +
         </button>
     </div>
+    <table class="table table-striped">
+        <tr>
+            <th>№</th>
+            <th>Сектор</th>
+            <th>Тип антенны</th>
+            <th>Диапазон</th>
+            <th>Оператор связи</th>
+            <th></th>
 
-    <ul class="antennas">
-        <li *ngFor="let antenna of antennas"
+        </tr>
+
+        <tr *ngFor="let antenna of antennas"
             [class.selected]="antenna === selectedAntenna"
             (click)="onSelect(antenna)">
-            <span class="badge">{{antenna.id}}</span> {{antenna.name}}
-            <button class="delete"
-                    (click)="delete(antenna); $event.stopPropagation()">x</button>
-        </li>
-    </ul>
+            <td>{{antenna.id}}</td>
+            <td>{{antenna.sector}}</td>
+            <td>{{antenna.name}}</td>
+            <td>{{antenna.range}}</td>
+            <td>{{antenna.operator}}</td>
+            <td><button class="delete" (click)="delete(antenna); $event.stopPropagation()">x</button> </td>
+        </tr>
+    <!--</ul>-->
 
+    </table>
     <div *ngIf="selectedAntenna">
         <h2>
             {{selectedAntenna.name | uppercase}} is my antenna
         </h2>
         <button (click)="gotoDetail()">View Details</button>
     </div>
+    <div class="mat-app-background basic-container">
+        <table-basic-example>loading</table-basic-example>
+    </div>
+    <span class="version-info">Current build: 5.0.0</span>
 </div>
