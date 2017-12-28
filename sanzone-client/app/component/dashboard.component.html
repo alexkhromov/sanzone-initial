@@ -1,7 +1,9 @@
-<h3>Активные антенны</h3>
-<a *ngFor="let antenna of antennas"  [routerLink]="['/detail', antenna.id]">
-    <div>
-        <h4>{{antenna.name}}</h4>
-    </div>
+<div class="container">
+    <h3>Параметры сектора</h3>
+        <a *ngFor="let antenna of antennas"  [routerLink]="['/detail', antenna.id]">
+            <div>
+                <h4>{{antenna.name}}</h4>
+            </div>
 
-</a>
+        </a>
+</div>
