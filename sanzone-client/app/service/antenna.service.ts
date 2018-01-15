@@ -3,7 +3,7 @@ import { Headers, Http } from '@angular/http';
 
 import 'rxjs/add/operator/toPromise';
 
-import { Antenna } from './antenna';
+import { Antenna } from '../model/antenna';
 
 
 @Injectable()

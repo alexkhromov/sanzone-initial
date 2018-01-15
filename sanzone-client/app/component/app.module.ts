@@ -11,19 +11,19 @@ import {AppComponent}    from "./app.component";
 import {DashboardComponent} from "./dashboard.component";
 import {AntennaDetailComponent} from './antenna-detail.component';
 import {AntennasComponent}      from './antennas.component';
-import {AntennaService}         from './antenna.service';
+import {AntennaService}         from '../service/antenna.service';
 
 import { AppRoutingModule }     from './app-routing.module';
 
 // Imports for loading & configuring the in-memory web api
 import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService }  from './in-memory-data.service';
+import { InMemoryDataService }  from '../service/in-memory-data.service';
 
 import {NavbarComponent} from "./navbar.component";
 import {PostComponent}   from "./post.component";
 import {TwitComponent}   from "./twit.component";
 import {PostService}     from "../service/post.service";
-
+import {AntennaServiceMock}     from "../service/antenna.service.mock";
 
 
 
@@ -50,7 +50,8 @@ import {PostService}     from "../service/post.service";
 
     providers: [
         PostService,
-        AntennaService
+        AntennaService,
+        AntennaServiceMock
     ],
 
     bootstrap: [

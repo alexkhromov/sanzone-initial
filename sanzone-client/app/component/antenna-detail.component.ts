@@ -3,8 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { Location }                 from '@angular/common';
 
-import { Antenna } from './antenna';
-import { AntennaService } from './antenna.service';
+import { Antenna } from '../model/antenna';
+import { AntennaService } from '../service/antenna.service';
 
 
 @Component( {

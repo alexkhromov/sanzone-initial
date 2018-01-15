@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Antenna } from './antenna';
-import { AntennaService } from './antenna.service';
+import { Antenna } from '../model/antenna';
+import { AntennaService } from '../service/antenna.service';
 
 
 @Component({
