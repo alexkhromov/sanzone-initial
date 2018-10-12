@@ -1,0 +1,65 @@
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+        [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
+        <mat-toolbar color="primary">Menu</mat-toolbar>
+        <mat-nav-list>
+            <a mat-list-item href="#">Link 1</a>
+            <a mat-list-item href="#">Link 2</a>
+            <a mat-list-item href="#">Link 3</a>
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <mat-toolbar color="primary">
+            <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()" *ngIf="isHandset$ | async">
+                <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+            </button>
+            <img src="http://res.cloudinary.com/emfs/image/upload/v1491570457/logo-emfs_h4hrpj.svg" width=60 height=60
+                alt="Responsive image">
+            <span style="padding-left: 5px">
+                sanzone-client</span>
+        </mat-toolbar>
+        <!-- <span >{{content}}</span>
+        <span [textContent]="'Привет, '+name"></span> -->
+        <router-outlet></router-outlet>
+        <app-dashboardcontent></app-dashboardcontent>
+    </mat-sidenav-content>
+</mat-sidenav-container>
+<footer>
+    <p class="pull-right"><a href="#">Вернуться к началу</a></p>
+    <p>&copy; 2017 EMFs. &middot; <a href="#">Конфиденциально</a>
+</footer>
+
+<!-- <nav class="navbar navbar-inverse navbar-static-top">
+
+    <div class="container">
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a routerLink="/main" class="navbar-brand" href="#">
+                <img src="http://res.cloudinary.com/emfs/image/upload/v1491570457/logo-emfs_h4hrpj.svg" class="img-responsive"
+                    alt="Responsive image">
+            </a>
+
+
+            
+       </div>
+
+        <div id="navbar" class="navbar-collapse collapse">
+
+            <ul class="nav navbar-nav navbar-right">
+                <button type="button" class="btn btn-primary navbar-btn">Sign in</button>
+                <button routerLink="/antennas" type="button" class="btn btn-warning navbar-btn" (click)="show = !show">{{show
+                    ? 'Пробный расчет' : 'Вернуться обратно'}}</button>
+
+            </ul>
+        </div>
+
+    </div>
+
+</nav>  -->
