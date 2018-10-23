@@ -1,0 +1,16 @@
+<mat-grid-list cols="4" rowHeight="100px">
+  <mat-grid-tile
+      *ngFor="let tile of tiles"
+      [colspan]="tile.cols"
+      [rowspan]="tile.rows"
+      [style.background]="tile.color">
+      <!-- <img mat-card-image src="http://res.cloudinary.com/sanzone/image/upload/v1498126296/1_kexgrw.jpg"> -->
+
+    {{tile.text}}
+  </mat-grid-tile>
+</mat-grid-list>
+
+
+<!-- Copyright 2018 Google Inc. All Rights Reserved.
+    Use of this source code is governed by an MIT-style license that
+    can be found in the LICENSE file at http://angular.io/license -->

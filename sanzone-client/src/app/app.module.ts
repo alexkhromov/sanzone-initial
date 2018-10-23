@@ -3,7 +3,7 @@
  */
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { CommonModule } from '@angular/common';
 
@@ -30,19 +30,28 @@ import {
     MatButtonModule,
     MatSidenavModule,
     MatIconModule,
-    MatListModule, MatGridListModule, MatCardModule,
+    MatListModule,
+    MatGridListModule,
+    MatCardModule,
+    MatInputModule,
+
 } from '@angular/material';
+import { MatStepperModule } from '@angular/material/stepper';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HeaderComponent } from './component/header/header.component';
 import { LayoutModule } from '@angular/cdk/layout';
 import { DashboardcontentComponent } from './component/dashboardcontent/dashboardcontent.component';
+import { GridListComponent } from './component/grid-list/grid-list.component';
+import { StepperComponent } from './component/stepper/stepper.component';
 
 
 
 @NgModule({
 
-    imports: [BrowserModule,
+    imports: [
+        BrowserModule,
         FormsModule,
+        ReactiveFormsModule,
         AppRoutingModule,
         HttpModule,
         InMemoryWebApiModule.forRoot(InMemoryDataService),
@@ -57,7 +66,9 @@ import { DashboardcontentComponent } from './component/dashboardcontent/dashboar
         MatIconModule,
         MatListModule,
         MatGridListModule,
-        MatCardModule
+        MatCardModule,
+        MatInputModule,
+        MatStepperModule
     ],
 
     declarations: [
@@ -69,6 +80,8 @@ import { DashboardcontentComponent } from './component/dashboardcontent/dashboar
         PostComponent,
         HeaderComponent,
         DashboardcontentComponent,
+        GridListComponent,
+        StepperComponent,
 
     ],
 
