@@ -27,9 +27,9 @@ export class AntennaDetailComponent implements OnInit{
 
 
     ngOnInit(): void {
-        this.route.paramMap
-            .switchMap((params: ParamMap) => this.antennaService.getAntenna(+params.get('id')))
-            .subscribe(antenna => this.antenna = antenna);
+        // this.route.paramMap
+        //     .switchMap((params: ParamMap) => this.antennaService.getAntenna(+params.get('id')))
+        //     .subscribe(antenna => this.antenna = antenna);
     }
 
 

@@ -4,19 +4,20 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-header',
-  templateUrl: './header.component.html',
-  styleUrls: ['./header.component.css']
+  selector: 'app-sidenav',
+  templateUrl: './sidenav.component.html',
+  styleUrls: ['./sidenav.component.css']
 })
-export class HeaderComponent {
+
+export class SidenavComponent {
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches)
     );
-    
-  constructor(private breakpointObserver: BreakpointObserver) {}
-  
-  public content:string="<router-outlet></router-outlet>";
-  public name:string="dada";
-  }
+
+  constructor(private breakpointObserver: BreakpointObserver) { }
+
+  public content: string = "<router-outlet></router-outlet>";
+  public name: string = "dada";
+}

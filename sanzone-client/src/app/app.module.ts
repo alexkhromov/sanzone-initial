@@ -38,11 +38,12 @@ import {
 } from '@angular/material';
 import { MatStepperModule } from '@angular/material/stepper';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HeaderComponent } from './component/header/header.component';
+import { SidenavComponent } from './component/sidenav/sidenav.component';
 import { LayoutModule } from '@angular/cdk/layout';
 import { DashboardcontentComponent } from './component/dashboardcontent/dashboardcontent.component';
 import { GridListComponent } from './component/grid-list/grid-list.component';
 import { StepperComponent } from './component/stepper/stepper.component';
+import { ContactsComponent } from './component/contacts/contacts.component';
 
 
 
@@ -78,10 +79,11 @@ import { StepperComponent } from './component/stepper/stepper.component';
         AntennasComponent,
         TwitComponent,
         PostComponent,
-        HeaderComponent,
+        SidenavComponent,
         DashboardcontentComponent,
         GridListComponent,
         StepperComponent,
+        ContactsComponent,
 
     ],
 
