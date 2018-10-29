@@ -4,8 +4,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { DashboardComponent } from "../dashboard.component";
-import { AntennasComponent } from '../antennas.component';
+import { DashboardComponent } from "../dashboard/dashboard.component";
+import { AntennasComponent } from '../antennas/antennas.component';
 import { AntennaDetailComponent } from '../antenna-detail.component';
 import { TwitComponent } from "../twitcomponent/twit.component";
 import { StepperComponent } from "../stepper/stepper.component";

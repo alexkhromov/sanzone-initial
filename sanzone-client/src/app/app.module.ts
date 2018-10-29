@@ -8,9 +8,9 @@ import { HttpModule } from '@angular/http';
 import { CommonModule } from '@angular/common';
 
 import { AppComponent } from "./app.component";
-import { DashboardComponent } from "./component/dashboard.component";
+import { DashboardComponent } from "./component/dashboard/dashboard.component";
 import { AntennaDetailComponent } from './component/antenna-detail.component';
-import { AntennasComponent } from './component/antennas.component';
+import { AntennasComponent } from './component/antennas/antennas.component';
 import { AntennaService } from './service/antenna.service';
 
 import { AppRoutingModule } from './component/routing/app-routing.module';

@@ -1,5 +1,46 @@
-<mat-list role="list">
-    <mat-list-item role="listitem"><mat-icon>local_phone</mat-icon>+375 29 705 22 57</mat-list-item>
-    <mat-list-item role="listitem"><mat-icon>email</mat-icon>sanzone@gmail.com</mat-list-item>
+<div class="contacts-container">
+  <div class="contacts-container">
+    <mat-grid-list cols="2">
+      <mat-grid-tile [colspan]="2" [rowspan]="1">
 
-  </mat-list>
+        <mat-card class="contacts-card">
+
+          <mat-card-header>
+            <div mat-card-avatar>
+              <mat-icon>contacts</mat-icon>
+            </div>
+
+            <mat-card-title>
+              Наши контакты
+            </mat-card-title>
+            <mat-card-subtitle>
+
+            </mat-card-subtitle>
+          </mat-card-header>
+
+
+          <mat-card-content class="contacts-card-content">
+
+            <mat-list role="list">
+              <mat-list-item role="listitem">
+                <mat-icon>local_phone</mat-icon>+375 29 705 22 57
+              </mat-list-item>
+              <mat-list-item role="listitem">
+                <mat-icon>email</mat-icon>sanzone@gmail.com
+              </mat-list-item>
+
+            </mat-list>
+
+
+          </mat-card-content>
+          <mat-card-footer>
+
+
+
+          </mat-card-footer>
+        </mat-card>
+
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+</div>

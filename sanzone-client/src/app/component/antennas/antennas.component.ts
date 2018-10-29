@@ -1,18 +1,15 @@
-/**
- * Created by DEV on 13.03.2017.
- */
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Antenna } from '../model/antenna';
-import { AntennaService } from '../service/antenna.service';
+import { Antenna } from '../../model/antenna';
+import { AntennaService } from '../../service/antenna.service';
 
 
-@Component( {
+@Component({
     selector: 'my-antennas',
     templateUrl: './antennas.component.html',
-    styles: [`  `]
-    } )
+    styleUrls: ['./antennas.component.css']
+})
 
 export class AntennasComponent implements OnInit {
     title = 'Параметры антенн';
@@ -20,7 +17,7 @@ export class AntennasComponent implements OnInit {
     selectedAntenna: Antenna;
 
     constructor(private antennaService: AntennaService,
-                private router: Router) { }
+        private router: Router) { }
 
     getAntennas(): void {
         this.antennaService

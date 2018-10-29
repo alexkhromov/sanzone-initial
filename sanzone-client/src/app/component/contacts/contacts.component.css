@@ -1,0 +1,19 @@
+.contacts-container {
+    margin: 5px;
+  }
+  
+  .contacts-card {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+    background-color: rgb(225, 240, 245);
+  }
+  
+  
+  .contacts-card-content {
+    text-align: center;
+    background-size: cover;
+  }
+  
