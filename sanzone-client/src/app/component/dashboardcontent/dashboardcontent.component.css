@@ -1,20 +1,15 @@
 .grid-container {
-  margin: 20px;
+  margin: 5px;
 }
 
 .dashboard-card {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  right: 15px;
-  bottom: 15px;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
 }
 
-.more-button {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-}
 
 .dashboard-card-content {
   /* text-align: center; */

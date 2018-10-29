@@ -1,5 +1,8 @@
+<!--Главный первоначальный контейнер-->
+
 <mat-sidenav-container class="sidenav-container">
 
+    <!-------------------------------------------------------------------------------------------------------------------->
     <mat-sidenav #drawer class="sidenav" fixedInViewport="true" [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
         [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="!(isHandset$ | async)">
         <mat-toolbar color="primary">
@@ -9,21 +12,24 @@
             </a>
         </mat-toolbar>
         <mat-nav-list>
-            <a mat-list-item routerLink="/main">
+            <a mat-list-item routerLink="/main" routerLinkActive="active-list-item">
                 <mat-icon>home</mat-icon>
                 <span style="margin-right: 5px"></span>
                 Главная
             </a>
-            <a mat-list-item routerLink="/antennas">
-            <mat-icon>computer</mat-icon>
-            <span style="margin-right: 5px"></span>
-            Пробный расчет</a>
-            <a mat-list-item routerLink="/contacts">
-                    <mat-icon>contacts</mat-icon>
-                    <span style="margin-right: 5px"></span>
-                Контакты</a>
+            <a mat-list-item routerLink="/antennas" routerLinkActive="active-list-item">
+                <mat-icon>computer</mat-icon>
+                <span style="margin-right: 5px"></span>
+                Пробный расчет
+            </a>
+            <a mat-list-item routerLink="/contacts" routerLinkActive="active-list-item">
+                <mat-icon>contact_phone</mat-icon>
+                <span style="margin-right: 5px"></span>
+                Контакты
+            </a>
         </mat-nav-list>
     </mat-sidenav>
+    <!-------------------------------------------------------------------------------------------------------------------->
 
     <mat-sidenav-content>
         <mat-toolbar color="primary">
@@ -31,10 +37,10 @@
             <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()" *ngIf="isHandset$ | async">
                 <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
             </button>
-            <span class="example-fill-remaining-space"></span>
+            <span class="fill-remaining-space"></span>
             <mat-icon>search</mat-icon>
 
-            <mat-form-field class="example-form-field" style="margin-right: 5px">
+            <mat-form-field style="margin-right: 5px">
                 <input matInput type="text" placeholder="Поиск" [(ngModel)]="value">
                 <button mat-button color="accent" *ngIf="value" matSuffix mat-icon-button aria-label="Clear" (click)="value=''">
                     <mat-icon>close</mat-icon>
@@ -54,8 +60,3 @@
     </mat-sidenav-content>
 
 </mat-sidenav-container>
-
-<footer>
-    <p class="pull-right"><a href="#">Вернуться к началу</a></p>
-    <p>&copy; 2017 EMFs. &middot; <a href="#">Конфиденциально</a>
-</footer>
