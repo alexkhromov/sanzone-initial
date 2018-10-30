@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-
 import { Antenna } from '../../model/antenna';
 import { AntennaService } from '../../service/antenna.service';
 
@@ -22,26 +21,22 @@ export class AntennasComponent implements OnInit {
     getAntennas(): void {
         this.antennaService
             .getAntennas()
-            .then(antennas => this.antennas = antennas);
+            .subscribe(antennas => this.antennas = antennas);
     }
 
     add(name: string): void {
         name = name.trim();
         if (!name) { return; }
-        this.antennaService.create(name)
-            .then(antenna => {
+        this.antennaService.addAntenna({ name } as Antenna)
+            .subscribe(antenna => {
                 this.antennas.push(antenna);
                 this.selectedAntenna = null;
             });
     }
 
     delete(antenna: Antenna): void {
-        this.antennaService
-            .delete(antenna.id)
-            .then(() => {
-                this.antennas = this.antennas.filter(h => h !== antenna);
-                if (this.selectedAntenna === antenna) { this.selectedAntenna = null; }
-            });
+      this.antennas = this.antennas.filter(h => h !== antenna);
+      this.antennaService.deleteAntenna(antenna).subscribe();
     }
 
     ngOnInit(): void {
