@@ -15,9 +15,17 @@ export class AntennasComponent implements OnInit {
     title = 'Параметры антенн';
     antennas: Antenna[];
     selectedAntenna: Antenna;
-user: any;
+  private rooms:Array<{num:number,beds:number}>=[];
+
+  private slogan:string='';
+
+  user: any;
+
     constructor(private antennaService: AntennaService,
-        private router: Router, private http: HttpClient) { }
+                private router: Router,
+                private http: HttpClient,
+                private http1:HttpClient,
+                private http2:HttpClient) { }
 
     getAntennas(): void {
         this.antennaService
@@ -41,7 +49,22 @@ user: any;
     }
 
     ngOnInit(): void {
-       // this.getAntennas();
+      this.http1
+        .get('http://fe.it-academy.by/Examples/Hotel/rooms.json')
+        .subscribe( (data)=>{
+          console.log(data);
+          this.rooms
+            =<Array<{num:number,beds:number}>>data;
+        } )
+      ;
+      this.http2
+        .get('http://fe.it-academy.by/Examples/Hotel/slogan.txt',
+          {responseType: 'text'})
+        .subscribe( (data)=>{
+          console.log(data);
+          this.slogan=data;
+        } )
+      ;
     }
 
     onSelect(antenna: Antenna): void {
