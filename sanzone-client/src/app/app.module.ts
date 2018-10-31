@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpModule } from '@angular/http';
+import { HttpClientModule }    from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 import { AppComponent } from "./app.component";
 import { DashboardComponent } from "./component/dashboard/dashboard.component";
-import { AntennaDetailComponent } from './component/antenna-detail.component';
+import { AntennaDetailComponent } from './component/antenna-detail/antenna-detail.component';
 import { AntennasComponent } from './component/antennas/antennas.component';
 import { AntennaService } from './service/antenna.service';
 
@@ -21,16 +21,16 @@ import { TwitComponent } from "./component/twitcomponent/twit.component";
 import { PostService } from "./service/post.service";
 import { AntennaServiceMock } from "./service/antenna.service.mock";
 import {
-    MatCheckboxModule,
-    MatMenuModule,
-    MatToolbarModule,
-    MatButtonModule,
-    MatSidenavModule,
-    MatIconModule,
-    MatListModule,
-    MatGridListModule,
-    MatCardModule,
-    MatInputModule,
+  MatCheckboxModule,
+  MatMenuModule,
+  MatToolbarModule,
+  MatButtonModule,
+  MatSidenavModule,
+  MatIconModule,
+  MatListModule,
+  MatGridListModule,
+  MatCardModule,
+  MatInputModule,
 
 } from '@angular/material';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -45,52 +45,52 @@ import { ContactsComponent } from './component/contacts/contacts.component';
 
 @NgModule({
 
-    imports: [
-        BrowserModule,
-        FormsModule,
-        ReactiveFormsModule,
-        AppRoutingModule,
-        HttpModule,
-        InMemoryWebApiModule.forRoot(InMemoryDataService),
-        CommonModule,
-        MatCheckboxModule,
-        MatMenuModule,
-        BrowserAnimationsModule,
-        LayoutModule,
-        MatToolbarModule,
-        MatButtonModule,
-        MatSidenavModule,
-        MatIconModule,
-        MatListModule,
-        MatGridListModule,
-        MatCardModule,
-        MatInputModule,
-        MatStepperModule
-    ],
+  imports: [
+    BrowserModule,
+    FormsModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    HttpClientModule,
+    InMemoryWebApiModule.forRoot(InMemoryDataService),
+    CommonModule,
+    MatCheckboxModule,
+    MatMenuModule,
+    BrowserAnimationsModule,
+    LayoutModule,
+    MatToolbarModule,
+    MatButtonModule,
+    MatSidenavModule,
+    MatIconModule,
+    MatListModule,
+    MatGridListModule,
+    MatCardModule,
+    MatInputModule,
+    MatStepperModule
+  ],
 
-    declarations: [
-        AppComponent,
-        DashboardComponent,
-        AntennaDetailComponent,
-        AntennasComponent,
-        TwitComponent,
-        PostComponent,
-        SidenavComponent,
-        DashboardcontentComponent,
-        StepperComponent,
-        ContactsComponent,
+  declarations: [
+    AppComponent,
+    DashboardComponent,
+    AntennaDetailComponent,
+    AntennasComponent,
+    TwitComponent,
+    PostComponent,
+    SidenavComponent,
+    DashboardcontentComponent,
+    StepperComponent,
+    ContactsComponent,
 
-    ],
+  ],
 
-    providers: [
-        PostService,
-        AntennaService,
-        AntennaServiceMock
-    ],
+  providers: [
+    PostService,
+    AntennaService,
+    AntennaServiceMock
+  ],
 
-    bootstrap: [
-        AppComponent
-    ]
+  bootstrap: [
+    AppComponent
+  ]
 })
 
 export class AppModule { }
