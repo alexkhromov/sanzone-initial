@@ -62,13 +62,13 @@
     </div>
 
 
-    <li *ngFor="let antenna of antennas"
+   <!-- <li *ngFor="let antenna of antennas"
         [class.selected]="antenna === selectedAntenna"
         (click)="onSelect(antenna)">
         <span class="label label-default">{{antenna.id}}</span> {{antenna.name}}
         <button class="delete"
                 (click)="delete(antenna); $event.stopPropagation()">x</button>
-    </li>
+    </li>-->
     <button (click)="goBack()">Back</button>
     <button (click)="save()">Save</button>
 </div>

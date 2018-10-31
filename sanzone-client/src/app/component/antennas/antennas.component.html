@@ -1,6 +1,5 @@
-<div><h3>{{title}}</h3>
-</div>
-<!--<div class="antennas-container">
+
+<div class="antennas-container">
     <a routerLink="/dashboard" routerLinkActive="active" class="btn btn-default">Параметры сектора</a>
     <a routerLink="/antennas" routerLinkActive="active" class="btn btn-default">Параметры антенн</a>
     <h3>{{title}}</h3>
@@ -31,13 +30,16 @@
            <td>{{antenna.operator}}</td>
            <td><button class="delete" (click)="delete(antenna); $event.stopPropagation()">x</button> </td>
        </tr>
-       </ul
+
 
     </table>
+  <button (click)="getAntennas()">getAntennas</button>
+  <button (click)="getData()">getData</button>
+
     <div *ngIf="selectedAntenna">
         <h2>
             {{selectedAntenna.name | uppercase}} is my antenna
         </h2>
         <button (click)="gotoDetail()">View Details</button>
     </div>
-</div>-->
+</div>

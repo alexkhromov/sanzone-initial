@@ -1,8 +1,9 @@
+
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Antenna } from '../../model/antenna';
 import { AntennaService } from '../../service/antenna.service';
-
+import { HttpClient } from '@angular/common/http';
 
 @Component({
     selector: 'my-antennas',
@@ -14,9 +15,9 @@ export class AntennasComponent implements OnInit {
     title = 'Параметры антенн';
     antennas: Antenna[];
     selectedAntenna: Antenna;
-
+user: any;
     constructor(private antennaService: AntennaService,
-        private router: Router) { }
+        private router: Router, private http: HttpClient) { }
 
     getAntennas(): void {
         this.antennaService
@@ -40,7 +41,7 @@ export class AntennasComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.getAntennas();
+       // this.getAntennas();
     }
 
     onSelect(antenna: Antenna): void {
@@ -52,6 +53,7 @@ export class AntennasComponent implements OnInit {
     }
 
 
-
+  getData() {
+    return  this.http.get('http://localhost:8081/v1/test').subscribe((data:any) => this.user=data);  }
 }
 

@@ -17,6 +17,6 @@ export class DashboardComponent implements OnInit {
 
     ngOnInit(): void {
         this.antennaService.getAntennas()
-            .then(antennas => this.antennas = antennas.slice(0, 10));
+            .subscribe(antennas => this.antennas = antennas.slice(0, 10));
     }
 }
