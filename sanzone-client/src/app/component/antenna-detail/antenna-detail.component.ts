@@ -25,21 +25,21 @@ export class AntennaDetailComponent implements OnInit{
 
 
     ngOnInit(): void {
-      this.getAntenna();
+     // this.getAntenna();
     }
 
-  getAntenna(): void {
-    const id = +this.route.snapshot.paramMap.get('id');
-    this.antennaService.getAntenna(id)
-      .subscribe(antenna => this.antenna = antenna);
-  }
+  // getAntenna(): void {
+  //   const id = +this.route.snapshot.paramMap.get('id');
+  //   this.antennaService.getConfig(id)
+  //     .subscribe(antenna => this.antenna = antenna);
+  // }
 
   goBack(): void {
     this.location.back();
   }
 
-  save(): void {
-    this.antennaService.updateAntenna(this.antenna)
-      .subscribe(() => this.goBack());
-  }
+  // save(): void {
+  //   this.antennaService.updateAntenna(this.antenna)
+  //     .subscribe(() => this.goBack());
+  // }
 }

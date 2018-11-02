@@ -33,13 +33,13 @@
 
 
     </table>
-  <button (click)="getAntennas()">getAntennas</button>
-  <button (click)="getData()">getData</button>
+    <button (click)="showConfig()">showConfig</button>
+    <button (click)="showConfigResponse()">showConfigResponse</button>
 
     <div *ngIf="selectedAntenna">
         <h2>
             {{selectedAntenna.name | uppercase}} is my antenna
         </h2>
-        <button (click)="gotoDetail()">View Details</button>
+
     </div>
 </div>

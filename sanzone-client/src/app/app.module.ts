@@ -12,10 +12,6 @@ import { AntennaService } from './service/antenna.service';
 
 import { AppRoutingModule } from './component/routing/app-routing.module';
 
-// Imports for loading & configuring the in-memory web api
-import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService } from './service/in-memory-data.service';
-
 import { PostComponent } from "./component/post.component";
 import { TwitComponent } from "./component/twitcomponent/twit.component";
 import { PostService } from "./service/post.service";
@@ -51,7 +47,6 @@ import { ContactsComponent } from './component/contacts/contacts.component';
     ReactiveFormsModule,
     AppRoutingModule,
     HttpClientModule,
-    InMemoryWebApiModule.forRoot(InMemoryDataService),
     CommonModule,
     MatCheckboxModule,
     MatMenuModule,
