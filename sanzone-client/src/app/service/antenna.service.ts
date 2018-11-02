@@ -8,7 +8,7 @@ import { Antenna } from '../model/antenna';
 })
 export class AntennaService {
 
-  configUrl = 'http://fe.it-academy.by/Examples/Hotel/rooms.json';
+  configUrl = 'http://localhost:8081/v1/test';
 
   constructor(private http: HttpClient) { }
 
