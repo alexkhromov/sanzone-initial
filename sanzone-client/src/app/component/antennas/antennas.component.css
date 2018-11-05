@@ -1,4 +1,18 @@
 .antennas-container {
-    margin: 5px;
+    margin: 15px;
+  }
+  
+  table {
+    width: 100%;
+  }
+  
+  .example-form {
+    min-width: 150px;
+    max-width: 300px;
+    width: 100%;
+  }
+  
+  .example-full-width {
+    width: 100%;
   }
   

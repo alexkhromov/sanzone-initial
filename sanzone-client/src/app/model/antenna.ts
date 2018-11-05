@@ -1,4 +1,5 @@
- export class Antenna {
-   data:Object;
- }
+export interface Antenna {
+  status: string;
+  data: object;
+}
 
