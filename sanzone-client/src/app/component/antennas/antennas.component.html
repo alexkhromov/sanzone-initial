@@ -1,26 +1,30 @@
-<div class="antennas-container" *ngIf="status==true; else spinner">
-    <!-- <mat-tab-group>
-                <mat-tab label="First"> <a routerLink="/dashboard" routerLinkActive="active" class="btn btn-default">Параметры сектора</a></mat-tab>
-                <mat-tab label="Second"> <a routerLink="/antennas" routerLinkActive="active" class="btn btn-default">Параметры антенн</a> </mat-tab>
-    
-    
-    </mat-tab-group>
-    <h3>{{title}}</h3>
+<mat-toolbar>
+    <mat-toolbar-row>
+        <span>Пробный расчет</span>
+    </mat-toolbar-row>
+</mat-toolbar>
 
-    <div>
+
+<div class="antennas-container" *ngIf="status==true; else spinner">
+
+    <!-- <mat-tab-group>
+        <mat-tab label="First">
+            <a routerLink="/dashboard" routerLinkActive="active" class="btn btn-default">Параметры сектора</a>
+        </mat-tab>
+        <mat-tab label="Second">
+            <a routerLink="/antennas" routerLinkActive="active" class="btn btn-default">Параметры антенн</a>
+        </mat-tab>
+    </mat-tab-group>
+
+    <form>
         <label>Добавить антенну:</label>
         <input #antennaName />
         <button (click)="add(antennaName.value); antennaName.value='' ">
             +
         </button>
-    </div>
+    </form>
 
 
-        {{getAntenna()}}
-    <button (click)="getAntenna()">getAntenna</button>
-
-   <button (click)="showConfig()">showConfig</button>
-    <button (click)="showConfigResponse()">showConfigResponse</button>
 
     <div *ngIf="selectedAntenna">
         <h2>
@@ -28,20 +32,10 @@
         </h2>
 
     </div>
-</div>
-    <button (click)="showConfig()">showConfig</button>
-    <button (click)="showConfigResponse()">showConfigResponse</button>
-
-     <div *ngIf="selectedAntenna">
-        <h2>
-            {{selectedAntenna.name | uppercase}} is my antenna
-        </h2>
-    
-    </div>-->
+-->
 
 
-
-    <form class="example-form">
+    <div class="example-form">
         <mat-form-field class="example-full-width">
             <input matInput placeholder="Высота антенн" value={{heightM}}>
         </mat-form-field>
@@ -49,8 +43,9 @@
         <mat-form-field class="example-full-width">
             <input matInput placeholder="Азимут сектора" value={{azimuthM}}>
         </mat-form-field>
-    </form>
+    </div>
 
+    <mat-divider></mat-divider>
 
     <table mat-table [dataSource]="sector" class="mat-elevation-z8">
 
@@ -110,46 +105,14 @@
             </td>
         </ng-container>
 
-
-
-
-        <!-- 
-        <ng-container matColumnDef="gain">
-            <th mat-header-cell *matHeaderCellDef> gain </th>
-            <td mat-cell *matCellDef="let element"> {{element.gain}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="tractlost">
-            <th mat-header-cell *matHeaderCellDef> tractlost </th>
-            <td mat-cell *matCellDef="let element"> {{element.tractlost}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="earthfactor">
-            <th mat-header-cell *matHeaderCellDef> earthfactor </th>
-            <td mat-cell *matCellDef="let element"> {{element.earthfactor} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="diagramwidthwalfpowerH">
-            <th mat-header-cell *matHeaderCellDef> diagramwidthwalfpowerH </th>
-            <td mat-cell *matCellDef="let element"> {{element.diagramwidthwalfpowerH} </td>
-        </ng-container>
-
-        
-        <ng-container matColumnDef="diagramWwdthhalfpowerV">
-            <th mat-header-cell *matHeaderCellDef> diagramWwdthhalfpowerV </th>
-            <td mat-cell *matCellDef="let element"> {{element.diagramWwdthhalfpowerV} </td>
-        </ng-container> -->
-
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-
-
+    <mat-divider></mat-divider>
+    <button mat-raised-button color="primary" (click)="addAntenna()">addAntenna</button>
 </div>
 
-<ng-template #spinner >
+<ng-template #spinner>
     <mat-spinner style=" margin-left: auto;
     margin-right: auto;"></mat-spinner>
 </ng-template>
-
-<!--<a *ngFor="let ant of antenna" ></a>-->

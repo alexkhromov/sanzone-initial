@@ -1,5 +1,5 @@
 export interface Antenna {
   status: string;
-  data: object;
+  data: Array<any>;
 }
 

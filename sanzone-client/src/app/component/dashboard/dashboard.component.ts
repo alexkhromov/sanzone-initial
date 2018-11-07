@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-
 import { Antenna } from '../../model/antenna';
 import { AntennaService } from '../../service/antenna.service';
 
@@ -7,6 +6,7 @@ import { AntennaService } from '../../service/antenna.service';
 @Component({
     selector: 'my-dashboard',
     templateUrl: './dashboard.component.html',
+    styleUrls: [ './dashboard.component.css' ]
 })
 
 export class DashboardComponent implements OnInit {

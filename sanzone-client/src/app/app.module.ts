@@ -30,7 +30,9 @@ import {
   MatTableModule,
   MatTabsModule,
   MatExpansionModule,
-  MatProgressSpinnerModule
+  MatProgressSpinnerModule,
+  MatDividerModule,
+  MatFormFieldModule
 
 } from '@angular/material';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -68,7 +70,9 @@ import { ContactsComponent } from './component/contacts/contacts.component';
     MatTableModule,
     MatTabsModule,
     MatExpansionModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDividerModule,
+    MatFormFieldModule
   ],
 
   declarations: [
