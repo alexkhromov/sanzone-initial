@@ -1,6 +1,6 @@
 <mat-toolbar>
     <mat-toolbar-row>
-        <span>Пробный расчет</span>
+        <span class="antennas-container">Пробный расчет</span>
     </mat-toolbar-row>
 </mat-toolbar>
 
@@ -32,18 +32,18 @@
         </h2>
 
     </div>
--->
+
 
 
     <div class="example-form">
         <mat-form-field class="example-full-width">
-            <input matInput placeholder="Высота антенн" value={{heightM}}>
+            <input matInput placeholder="Высота антенн" [(ngModel)]="heightM">
         </mat-form-field>
 
         <mat-form-field class="example-full-width">
-            <input matInput placeholder="Азимут сектора" value={{azimuthM}}>
+            <input matInput placeholder="Азимут сектора" [(ngModel)]="azimuthM">
         </mat-form-field>
-    </div>
+    </div>-->
 
     <mat-divider></mat-divider>
 
@@ -51,32 +51,52 @@
 
         <ng-container matColumnDef="latitude">
             <th mat-header-cell *matHeaderCellDef> latitude </th>
-            <td mat-cell *matCellDef="let element"> {{element.latitude}} </td>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="latitude" [(ngModel)]="element.latitude">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="longitude">
             <th mat-header-cell *matHeaderCellDef> longitude </th>
-            <td mat-cell *matCellDef="let element"> {{element.longitude}} </td>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="longitude" [(ngModel)]="element.longitude">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="azimuth">
             <th mat-header-cell *matHeaderCellDef> azimuth </th>
-            <td mat-cell *matCellDef="let element"> {{element.azimuth}} </td>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="azimuth" [(ngModel)]="element.azimuth">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="downTilt">
             <th mat-header-cell *matHeaderCellDef> downTilt </th>
-            <td mat-cell *matCellDef="let element"> {{element.downTilt}} </td>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="downTilt" [(ngModel)]="element.downTilt">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="height">
             <th mat-header-cell *matHeaderCellDef> height </th>
-            <td mat-cell *matCellDef="let element"> {{element.height}} </td>
+            <td mat-cell *matCellDef="let element">
+                <mat-form-field class="example-full-width">
+                    <input matInput placeholder="height" [(ngModel)]="element.height">
+                </mat-form-field>
+            </td>
         </ng-container>
 
         <ng-container matColumnDef="antenna">
             <th mat-header-cell *matHeaderCellDef> antenna </th>
-            <td mat-cell *matCellDef="let element" style="width: 300px;">
+            <td mat-cell *matCellDef="let element" style="width: 400px;">
                 <mat-accordion>
                     <mat-expansion-panel>
                         <mat-expansion-panel-header>
@@ -84,20 +104,50 @@
                                 Antenna
                             </mat-panel-title>
                             <mat-panel-description>
-                                Description antenna
+                                Description
                             </mat-panel-description>
                         </mat-expansion-panel-header>
                         <mat-list role="list">
-                            <mat-list-item role="listitem">diagramWidthHalfPowerH={{element.antenna.diagramWidthHalfPowerH}}</mat-list-item>
-                            <mat-list-item role="listitem">diagramWidthHalfPowerV={{element.antenna.diagramWidthHalfPowerV}}</mat-list-item>
-                            <mat-list-item role="listitem">earthFactor={{element.antenna.earthFactor}}</mat-list-item>
-                            <mat-list-item role="listitem">g={{element.antenna.g}}</mat-list-item>
-                            <mat-list-item role="listitem">p={{element.antenna.p}}</mat-list-item>
-                            <mat-list-item role="listitem">power={{element.antenna.power}}</mat-list-item>
-                            <mat-list-item role="listitem">q05H={{element.antenna.q05H}}</mat-list-item>
-                            <mat-list-item role="listitem">q05V={{element.antenna.q05V}}</mat-list-item>
-                            <mat-list-item role="listitem">tl={{element.antenna.tl}}</mat-list-item>
-                            <mat-list-item role="listitem">tractLost={{element.antenna.tractLost}}</mat-list-item>
+                            <mat-list-item role="listitem">
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="diagramWidthHalfPowerH" [(ngModel)]="element.antenna.diagramWidthHalfPowerH">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="diagramWidthHalfPowerV" [(ngModel)]="element.antenna.diagramWidthHalfPowerV">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="q05H" [(ngModel)]="element.antenna.q05H">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="q05V" [(ngModel)]="element.antenna.q05V">
+                                </mat-form-field>
+                            </mat-list-item>
+
+                            <mat-list-item role="listitem">
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="g" [(ngModel)]="element.antenna.g">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="p" [(ngModel)]="element.antenna.p">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="power" [(ngModel)]="element.antenna.power">
+                                </mat-form-field>
+                            </mat-list-item>
+
+
+
+                            <mat-list-item role="listitem">
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="earthFactor" [(ngModel)]="element.antenna.earthFactor">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="tl" [(ngModel)]="element.antenna.tl">
+                                </mat-form-field>
+                                <mat-form-field class="example-full-width">
+                                    <input matInput placeholder="tractLost" [(ngModel)]="element.antenna.tractLost">
+                                </mat-form-field>
+                            </mat-list-item>
                         </mat-list>
                     </mat-expansion-panel>
                 </mat-accordion>
@@ -108,8 +158,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-    <mat-divider></mat-divider>
-    <button mat-raised-button color="primary" (click)="addAntenna()">addAntenna</button>
+
+    <button style="margin-top: 10px" mat-raised-button color="primary" (click)="addAntenna()">Расчет</button>
 </div>
 
 <ng-template #spinner>

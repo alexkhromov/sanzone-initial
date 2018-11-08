@@ -46,6 +46,7 @@ export class AntennasComponent implements OnInit {
     }
 
     showConfigResponse() {
+
         this.configService.getConfigResponse()
             // resp is of type `HttpResponse<Config>`
             .subscribe(resp => {
@@ -60,8 +61,14 @@ export class AntennasComponent implements OnInit {
     }
 
     addAntenna() {
+        console.log(this.heightM);
         this.configService.addAntenna({ 'heightM': this.heightM, 'azimuthM': this.azimuthM, 'sectors': this.sector })
-            .subscribe(antenn => this.antenna);
+            .subscribe(response => console.log(response));
     }
+
+
+
+
+    
 }
 
