@@ -8,10 +8,8 @@ import {Component} from '@angular/core';
     selector: 'my-app',
 
     template: `<navbarComponent></navbarComponent>
-               <my-demo></my-demo>
-               <twit></twit>
-
+               <router-outlet></router-outlet>
               `
-            } )
+          } )
 
 export class AppComponent { }

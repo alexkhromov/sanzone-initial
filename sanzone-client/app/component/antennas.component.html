@@ -1,0 +1,42 @@
+<div class="container">
+    <a routerLink="/dashboard" routerLinkActive="active" class="btn btn-default">Параметры сектора</a>
+    <a routerLink="/antennas" routerLinkActive="active" class="btn btn-default">Параметры антенн</a>
+    <h3>{{title}}</h3>
+
+    <div>
+        <label>Добавить антенну:</label> <input #antennaName />
+        <button (click)="add(antennaName.value); antennaName.value=''">
+            +
+        </button>
+    </div>
+    <table class="table table-striped">
+        <tr>
+            <th>№</th>
+            <th>Сектор</th>
+            <th>Тип антенны</th>
+            <th>Диапазон</th>
+            <th>Оператор связи</th>
+            <th></th>
+
+        </tr>
+
+        <tr *ngFor="let antenna of antennas"
+            [class.selected]="antenna === selectedAntenna"
+            (click)="onSelect(antenna)">
+            <td>{{antenna.id}}</td>
+            <td>{{antenna.sector}}</td>
+            <td>{{antenna.name}}</td>
+            <td>{{antenna.range}}</td>
+            <td>{{antenna.operator}}</td>
+            <td><button class="delete" (click)="delete(antenna); $event.stopPropagation()">x</button> </td>
+        </tr>
+    <!--</ul>-->
+
+    </table>
+    <div *ngIf="selectedAntenna">
+        <h2>
+            {{selectedAntenna.name | uppercase}} is my antenna
+        </h2>
+        <button (click)="gotoDetail()">View Details</button>
+    </div>
+</div>

@@ -1,27 +1,45 @@
-import { Component, Input } from '@angular/core';
-import { Antenna } from './antenna';
+import 'rxjs/add/operator/switchMap';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { Location }                 from '@angular/common';
+
+import { Antenna } from '../model/antenna';
+import { AntennaService } from '../service/antenna.service';
+
 
 @Component( {
 
     selector: 'antenna-detail',
 
-    template:
-        `<div *ngIf="antenna">
-            
-            <h2>{{antenna.name}} details!</h2>
-            
-            <div>
-                <label>id: </label>{{antenna.id}}
-            </div>
-            
-            <div>
-                <label>name: </label>
-                <input [(ngModel)]="antenna.name" placeholder="name"/>
-            </div>
-        </div>`
+    templateUrl: 'component/antenna-detail.component.html',
+
+
 } )
 
-export class AntennaDetailComponent {
+export class AntennaDetailComponent implements OnInit{
 
-    @Input() antenna: Antenna;
+    antenna: Antenna;
+
+    constructor(
+        private antennaService: AntennaService,
+        private route: ActivatedRoute,
+        private location: Location
+    ) {}
+
+
+    ngOnInit(): void {
+        this.route.paramMap
+            .switchMap((params: ParamMap) => this.antennaService.getAntenna(+params.get('id')))
+            .subscribe(antenna => this.antenna = antenna);
+    }
+
+
+    goBack(): void {
+        this.location.back();
+    }
+
+    save(): void {
+        this.antennaService.update(this.antenna)
+            .then(() => this.goBack());
+    }
 }
