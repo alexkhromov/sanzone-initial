@@ -1,6 +1,6 @@
 package khrom.test.sanzone.service;
 
-import javafx.geometry.Point2D;
+import khrom.test.sanzone.common.util.Point2D;
 import khrom.test.sanzone.config.SessionSettings;
 import khrom.test.sanzone.model.dto.create.CreateSanzoneRequest;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;

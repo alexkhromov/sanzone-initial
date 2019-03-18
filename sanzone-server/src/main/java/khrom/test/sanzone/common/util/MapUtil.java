@@ -1,7 +1,6 @@
 package khrom.test.sanzone.common.util;
 
 import com.google.maps.model.LatLng;
-import javafx.geometry.Point2D;
 import khrom.test.sanzone.common.util.enums.DistanceUnit;
 import khrom.test.sanzone.model.dto.create.CreateSectorDTO;
 
